@@ -32,14 +32,6 @@ class OpCode
     const CM_NEWCHR         = 101;
     const CM_DELCHR         = 102;
     const CM_SELCHR         = 103;
-    const SM_QUERYCHR       = 520;
-    const SM_NEWCHR_SUCCESS = 521;
-    const SM_NEWCHR_FAIL    = 522;
-    const SM_DELCHR_SUCCESS = 523;
-    const SM_DELCHR_FAIL    = 524;
-    const SM_STARTPLAY      = 525;
-    const SM_STARTFAIL      = 526;
-    const SM_QUERYCHR_FAIL  = 527;
 
     public static $OpCodeMap;
 
@@ -47,7 +39,7 @@ class OpCode
     public static function LoadOpCode()
     {
         //获取类的所有常量
-        $objClass = new \ReflectionClass(new OpCode());
+        $objClass = new \ReflectionClass(new self);
         $arrConst = $objClass->getConstants();
 
         $OpCodeList = [];

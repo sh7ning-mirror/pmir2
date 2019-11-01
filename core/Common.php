@@ -4,6 +4,7 @@ use core\Config;
 use core\filter\Filter;
 use core\lib\Cookie;
 use core\lib\Session;
+use app\Common\Math_BigInteger;
 
 if (!function_exists('config')) {
     /**
@@ -505,6 +506,11 @@ function hextostr($hex)
     return $data;
 }
 
+function randomNumber($Bytes_length = 6)
+{
+    return (new Math_BigInteger())->_random_number_helper($Bytes_length)->toHex();
+}
+
 function multidimensional_search($parents, $searched)
 {
     if (empty($searched) || empty($parents)) {
@@ -566,4 +572,14 @@ function cut_str($str, $start = '', $end = '')
     }
     $end && $str = stristr($str, $end, true);
     return $str;
+}
+
+function gbktoutf8($str)
+{
+    return  mb_convert_encoding($str, 'utf8', 'gb2312');
+}
+
+function utf8togbk($str)
+{
+    return  mb_convert_encoding($str, 'gb2312', 'utf8');
 }

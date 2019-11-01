@@ -23,7 +23,7 @@ class PacketHandler
         $packetIndex = substr($packet, 1, 1);
         echolog('PacketIndex:' . $packetIndex, 'info');
 
-        $packet      = substr($packet, 2, strlen($packet) - 1);
+        $packet      = substr($packet, 2, strlen($packet) - 3);
         $decodeFrame = self::Decode6BitBytes(GetBytes($packet));
 
         $packet = [];
@@ -56,6 +56,20 @@ class PacketHandler
     public static function Params($packet)
     {
         return explode(self::$CONTENT_SEPARATOR, $packet);
+    }
+
+    //获取有效值
+    public static function GetValidStr3($Str, &$Dest, $DividerAry = '/')
+    {
+        $array = explode($DividerAry, $Str);
+        $param = [];
+        foreach ($array as $k => $v) {
+            if(isset($Dest[$k]))
+            {
+                $param[$Dest[$k]] = $v;
+            }
+        }
+        $Dest = $param;
     }
 
     //加密
@@ -156,8 +170,7 @@ class PacketHandler
             $nMadeBit += 8 - $nBitPos;
         }
 
-        $pbuf[$nBufPos] = 0;
-
+        // $pbuf[$nBufPos] = 0;
         return $pbuf;
     }
 }

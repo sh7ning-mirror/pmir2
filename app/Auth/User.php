@@ -108,7 +108,7 @@ class User
                 } elseif ($info['belock'] == 1) {
                     $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_PASSWD_FAIL, ServerState::BeLock, 0, 0, 0);
                 } else {
-                    Server::$clientparam[$fd]['UserInfo'] = $info; //保存数据
+                    Server::$clientparam[$info['username']]['UserInfo'] = $info; //保存数据
 
                     $UserInfo = [
                         'online'    => 1,
@@ -215,8 +215,21 @@ class User
             'name' => $params,
         ];
 
-        if ($info = DB::table('server_infos')->where($where)->find()) {
-            $body = $info['game_server_ip'] . '/' . $info['game_server_port'];
+        if ($info = DB::table('server_infos')->where($where)->find() && !empty(Server::$clientparam[$fd]['UserInfo'])) {
+            //保存随机证书
+            $id   = Server::$clientparam[$fd]['UserInfo']['id'];
+            $cert = randomNumber(20);
+            go(function () use ($id, $cert) {
+                $where = [
+                    'id' => $id,
+                ];
+                $UserInfo = [
+                    'cert' => $cert,
+                ];
+                DB::table('users')->where($where)->update($UserInfo);
+            });
+
+            $body = $info['game_server_ip'] . '/' . $info['game_server_port'] . '/' . $cert;
 
             $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_SELECTSERVER_OK, 0, 0, 0, 0);
 

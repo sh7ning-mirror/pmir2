@@ -14,6 +14,17 @@ class ServerState
     const NoPay          = -4;
     const BeLock         = -5;
 
+    //角色信息状态
+    const IdNotFound   = 2;
+    const CertError    = 3;
+    const RoleNotFound = 4;
+
+    //创建角色状态
+    const WrongName  = 0;
+    const NameExist  = 2;
+    const MaxPlayers = 3;
+    const SystemErr  = 4;
+
     // 全局(服务器和客户端通用)消息,数据结构,函数等
     const MAXPATHLEN           = 255;
     const DIRPATHLEN           = 80;
