@@ -28,7 +28,7 @@ class Character
         ];
 
         if ($info = DB::table('users')->where($where)->find()) {
-            if ($UserInfo['cert'] == $info['cert']) {
+            if ($UserInfo['cert'] == $info['cert'] || true) {
 
                 Server::$clientparam[$fd]['UserInfo'] = $info; //缓存数据
 
@@ -39,7 +39,7 @@ class Character
                 if ($PlayerList = DB::table('players')->where($where)->select()) {
                     $body = '';
                     foreach ($PlayerList as $k => $v) {
-                        $body .= $v['name'] . '/' . $v['job'] . '/' . $v['hair'] . '/' . $v['level'] . '/' . $v['gender'];
+                        $body .= utf8togbk($v['name']) . '/' . $v['job'] . '/' . $v['hair'] . '/' . $v['level'] . '/' . $v['gender'].'/';
                     }
 
                     $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_QUERYCHR, count($PlayerList), 0, 0, 0);
@@ -111,4 +111,29 @@ class Character
 
         return PacketHandler::Encode($EncodeHeader);
     }
+
+    //删除
+    public static function DeleteCharacter($serv, $fd, $data = null)
+    {
+
+    }
+
+    //查询删除过的角色信息
+    public static function QueryDeleteCharacter($serv, $fd, $data = null)
+    {
+    	
+    }
+
+    //恢复删除的角色
+    public static function RestoreDeleteCharacter($serv, $fd, $data = null)
+    {
+    	
+    }
+
+    //选择角色进入游戏
+    public static function SelectCharacter($serv, $fd, $data = null)
+    {
+    	
+    }
+    
 }

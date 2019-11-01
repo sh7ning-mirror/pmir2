@@ -6,32 +6,26 @@ namespace app\Packet;
  */
 class OpCode
 {
-    // For User login Process
+    // 账户登录相关
     const CM_PROTOCOL        = 2000;
     const CM_IDPASSWORD      = 2001; //登录 客户端向服务器发送ID和密码
     const CM_IDPASSWORD_2    = 22001;
     const CM_ADDNEWUSER      = 2002; //注册
     const CM_CHANGEPASSWORD  = 2003; //修改密码
     const CM_UPDATEUSER      = 2004; // 更新注册资料
+    const CM_RANDOMCODE      = 2006; // 取验证码 20080612
     const CM_GETBACKPASSWORD = 2010; // 密码找回
 
     const Unknown5001 = 5001; //未知
 
-    const CM_SELECTSERVER        = 104;
-    const SM_CERTIFICATION_FAIL  = 501; //登录世界认证失败
-    const SM_ID_NOTFOUND         = 502; //账户未找到
-    const SM_PASSWD_FAIL         = 503; //验证失败,"服务器验证失败,需要重新登录"
-    const SM_NEWID_SUCCESS       = 504; //创建用户成功
-    const SM_NEWID_FAIL          = 505; //创建账户失败重名
-    const SM_CHGPASSWD_SUCCESS   = 506; //密码修改成功
-    const SM_PASSOK_SELECTSERVER = 529; //码验证完成且密码正确,开始选服
-    const SM_SELECTSERVER_OK     = 530; //选服成功
-
-    // For Select Player Process;
-    const CM_QUERYCHR       = 100;
-    const CM_NEWCHR         = 101;
-    const CM_DELCHR         = 102;
-    const CM_SELCHR         = 103;
+    // 角色相关
+    const CM_QUERYCHR     = 100; //查询角色
+    const CM_NEWCHR       = 101; //新增角色
+    const CM_DELCHR       = 102; //删除角色
+    const CM_SELCHR       = 103; //选择角色进入游戏
+    const CM_SELECTSERVER = 104; //选择服务器
+    const CM_QUERYDELCHR  = 105; // 查询删除过的角色信息 20080706
+    const CM_RESDELCHR    = 106; // 恢复删除的角色 20080706
 
     public static $OpCodeMap;
 

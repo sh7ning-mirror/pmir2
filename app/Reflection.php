@@ -17,6 +17,10 @@ class Reflection
         //角色相关
         'CM_QUERYCHR'        => ['app\Auth\Character', 'QueryCharacter'],
         'CM_NEWCHR'          => ['app\Auth\Character', 'NewCharacter'],
+        'CM_DELCHR'          => ['app\Auth\Character', 'DeleteCharacter'],
+        'CM_QUERYDELCHR'     => ['app\Auth\Character', 'QueryDeleteCharacter'],
+        'CM_RESDELCHR'       => ['app\Auth\Character', 'RestoreDeleteCharacter'],
+        'CM_SELCHR'          => ['app\Auth\Character', 'SelectCharacter'],
 
     ];
 
