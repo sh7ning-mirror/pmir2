@@ -219,7 +219,7 @@ class User
 
             //保存随机证书
             $id   = Server::$clientparam[$fd]['UserInfo']['id'];
-            $cert = randomNumber(20);
+            $cert = rand(100,1000);
             go(function () use ($id, $cert) {
                 $where = [
                     'id' => $id,

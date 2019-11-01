@@ -28,7 +28,7 @@ class Character
         ];
 
         if ($info = DB::table('users')->where($where)->find()) {
-            if ($UserInfo['cert'] == $info['cert'] || true) {
+            if ($UserInfo['cert'] == $info['cert']) {
 
                 Server::$clientparam[$fd]['UserInfo'] = $info; //缓存数据
 
