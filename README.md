@@ -141,6 +141,9 @@ Linux:
 
 ## Demonstration 演示
 
+![image](https://doutuquan.oss-cn-hangzhou.aliyuncs.com/1.png)
+
+![image](https://doutuquan.oss-cn-hangzhou.aliyuncs.com/2.png)
 
 
 
