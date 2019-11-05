@@ -34,6 +34,7 @@ class Character
 
                 $where = [
                     'user_id' => $info['id'],
+                    'isdel' => 1
                 ];
 
                 if ($PlayerList = DB::table('players')->where($where)->select()) {
@@ -45,7 +46,7 @@ class Character
                     $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_QUERYCHR, count($PlayerList), 0, 0, 0);
                     return array_merge(PacketHandler::Encode($EncodeHeader), PacketHandler::Encode($body));
                 } else {
-                    $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_QUERYCHR_FAIL, ServerState::RoleNotFound, 0, 0, 0);
+                    $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_QUERYCHR, ServerState::RoleNotFound, 0, 0, 0);
                 }
             } else {
                 $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_QUERYCHR_FAIL, ServerState::CertError, 0, 0, 0);
@@ -115,13 +116,52 @@ class Character
     //删除
     public static function DeleteCharacter($serv, $fd, $data = null)
     {
+        $param = ToStr($data);
+        $param = gbktoutf8($param);
 
+        $where = [
+            'user_id' => Server::$clientparam[$fd]['UserInfo']['id'],
+            'name' => $param
+        ];
+
+        $CharacterInfo = [
+            'isdel' => 2
+        ];
+
+        if(DB::table('players')->where($where)->update($CharacterInfo) !== false)
+        {
+            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_DELCHR_SUCCESS, 0, 0, 0, 0);
+        }else{
+            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_DELCHR_FAIL, 0, 0, 0, 0);
+        }
+
+        return PacketHandler::Encode($EncodeHeader);
     }
 
     //查询删除过的角色信息
     public static function QueryDeleteCharacter($serv, $fd, $data = null)
     {
-    	
+    	$param = ToStr($data);
+        $param = gbktoutf8($param);
+
+        $where = [
+            'user_id' => Server::$clientparam[$fd]['UserInfo']['id'],
+            'isdel' => 2
+        ];
+
+        if($PlayerList = DB::table('players')->where($where)->select())
+        {
+            $body = '';
+            foreach ($PlayerList as $k => $v) {
+                $body .= utf8togbk($v['name']) . '' . $v['job'] . '' . $v['hair'] . '' . $v['level'] . '' . $v['gender'].'';
+            }
+
+            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_QUERYDELCHR, count($PlayerList), 0, 0, 0);
+            return array_merge(PacketHandler::Encode($EncodeHeader), PacketHandler::Encode($body));
+        }else{
+            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_QUERYDELCHR_FAIL, 0, 0, 0, 0);
+            return PacketHandler::Encode($EncodeHeader);
+        }
     }
 
     //恢复删除的角色
@@ -133,7 +173,34 @@ class Character
     //选择角色进入游戏
     public static function SelectCharacter($serv, $fd, $data = null)
     {
-    	
+    	$param = ToStr($data);
+        $param = gbktoutf8($param);
+
+        $CharacterInfo = [
+            'username',
+            'name'
+        ];
+
+        PacketHandler::GetValidStr3($param, $CharacterInfo, '/');
+
+        $where = [
+            'user_id' => Server::$clientparam[$fd]['UserInfo']['id'],
+            'name' => $CharacterInfo['name'],
+            'isdel' => 1,
+        ];
+
+        if(DB::table('players')->where($where)->find())
+        {
+            $info = DB::table('server_infos')->find();
+
+            $body = $info['game_server_ip'] . '/' . $info['game_server_port'];
+
+            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_STARTPLAY, 0, 0, 0, 0);
+            return array_merge(PacketHandler::Encode($EncodeHeader), PacketHandler::Encode($body));
+        }else{
+            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_STARTFAIL, 2, 0, 0, 0);
+            return PacketHandler::Encode($EncodeHeader);
+        }
     }
     
 }

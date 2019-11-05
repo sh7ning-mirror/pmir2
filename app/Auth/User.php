@@ -16,14 +16,9 @@ class User
     {
         $params = [];
         $num    = 0;
-        $maxnum = 20; //mmp,各种版本字段排序都不一样
 
         //解密
         for ($i = 0; $i < count($data); $i++) {
-            if ($num >= $maxnum) {
-                break;
-            }
-
             if ($data[$i] > 0) {
                 $param    = ToStr(array_slice($data, $i + 1, $data[$i]));
                 $param    = gbktoutf8($param);
@@ -33,10 +28,30 @@ class User
             }
         }
 
-        //检查用户重复
-        if (DB::table('users')->where(['username' => $params[0]])->find()) {
-            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_NEWID_FAIL, 0, 0, 0, 0);
-        } else {
+        $UserInfo = [
+            'username'  => $params[0],
+            'password'  => sha1($params[0] . ':' . $params[1]),
+            'name'      => $params[2],
+            'cert'      => $params[3],
+        ];
+
+        if(count($params) == 12 && isset($params[10]) && count(explode('/', $params[10])) == 3 )
+        {
+            $UserInfo['question1'] = $params[5];
+            $UserInfo['answer1'] = $params[6];
+            $UserInfo['email'] = $params[7];
+            $UserInfo['question2'] = $params[8];
+            $UserInfo['answer2'] = $params[9];
+            $UserInfo['birthday'] = $params[10];
+        }elseif(count($params) == 9 && isset($params[8]) && count(explode('/', $params[8])) == 3)
+        {
+            $UserInfo['question1'] = $params[4];
+            $UserInfo['answer1'] = $params[5];
+            $UserInfo['email'] = '';
+            $UserInfo['question2'] = $params[6];
+            $UserInfo['answer2'] = $params[7];
+            $UserInfo['birthday'] = $params[8];
+
             $UserInfo = [
                 'username'  => $params[0],
                 'password'  => sha1($params[0] . ':' . $params[1]),
@@ -44,16 +59,64 @@ class User
                 'cert'      => $params[3],
                 'question1' => $params[4],
                 'answer1'   => $params[5],
-                'email'     => $params[6],
-                'question2' => $params[7],
-                'answer2'   => $params[8],
-                'birthday'  => $params[9],
+                'email'     => '',
+                'question2' => $params[6],
+                'answer2'   => $params[7],
+                'birthday'  => $params[8],
             ];
+        }elseif(count($params) == 10 && isset($params[8]) && count(explode('/', $params[8])) == 3)
+        {
+            $UserInfo['question1'] = $params[4];
+            $UserInfo['answer1'] = $params[5];
+            $UserInfo['email'] = '';
+            $UserInfo['question2'] = $params[6];
+            $UserInfo['answer2'] = $params[7];
+            $UserInfo['birthday'] = $params[8];
+        }elseif(count($params) == 10 && isset($params[6]) && count(explode('@', $params[6])) == 2)
+        {
+            $UserInfo['question1'] = $params[4];
+            $UserInfo['answer1'] = $params[5];
+            $UserInfo['email'] = $params[6];
+            $UserInfo['question2'] = $params[7];
+            $UserInfo['answer2'] = $params[8];
+            $UserInfo['birthday'] = $params[9];
+        }elseif(count($params) == 10 && isset($params[9]) && count(explode('/', $params[9])) == 3)
+        {
+            $UserInfo['question1'] = $params[5];
+            $UserInfo['answer1'] = $params[6];
+            $UserInfo['email'] = '';
+            $UserInfo['question2'] = $params[7];
+            $UserInfo['answer2'] = $params[8];
+            $UserInfo['birthday'] = $params[9];
+        }
 
-            if (DB::table('users')->insert($UserInfo)) {
-                $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_NEWID_SUCCESS, 0, 0, 0, 0);
-            } else {
+        if(empty($UserInfo['email']))
+        {
+            WORLD_LOG('邮箱没有填写','error');
+            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_NEWID_FAIL, -1, 0, 0, 0);
+        }else{
+            //检查用户重复
+            if (DB::table('users')->where(['username' => $params[0]])->find()) {
                 $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_NEWID_FAIL, 0, 0, 0, 0);
+            } else {
+                $UserInfo = [
+                    'username'  => $params[0],
+                    'password'  => sha1($params[0] . ':' . $params[1]),
+                    'name'      => $params[2],
+                    'cert'      => $params[3],
+                    'question1' => $params[4],
+                    'answer1'   => $params[5],
+                    'email'     => $params[6],
+                    'question2' => $params[7],
+                    'answer2'   => $params[8],
+                    'birthday'  => $params[9],
+                ];
+
+                if (DB::table('users')->insert($UserInfo)) {
+                    $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_NEWID_SUCCESS, 0, 0, 0, 0);
+                } else {
+                    $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_NEWID_FAIL, 0, 0, 0, 0);
+                }
             }
         }
 
@@ -178,19 +241,18 @@ class User
     public static function GetBackPassWord($serv, $fd, $data = null)
     {
         $params = explode("\t", ToStr($data));
-
         $where = [
             'username'  => $params[0],
             'question1' => $params[1],
-            'answer1'   => $params[3],
-            'question2' => $params[4],
-            'answer2'   => $params[5],
-            'birthday'  => $params[6],
+            'answer1'   => $params[2],
+            'question2' => $params[3],
+            'answer2'   => $params[4],
+            'birthday'  => $params[5],
         ];
 
         if (DB::table('users')->where($where)->find()) {
             $UserInfo = [
-                'password' => sha1(123456 . ':' . 123456), //重置密码为123456
+                'password' => sha1($params[0] . ':' . 123456), //重置密码为123456
             ];
 
             if (DB::table('users')->where($where)->update($UserInfo) !== false) {

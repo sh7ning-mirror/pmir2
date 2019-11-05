@@ -25,7 +25,7 @@ class OpCode
     const CM_SELCHR       = 103; //选择角色进入游戏
     const CM_SELECTSERVER = 104; //选择服务器
     const CM_QUERYDELCHR  = 105; // 查询删除过的角色信息 20080706
-    const CM_RESDELCHR    = 106; // 恢复删除的角色 20080706
+    const CM_RESDELCHR    = 3006; // 恢复删除的角色
 
     public static $OpCodeMap;
 
