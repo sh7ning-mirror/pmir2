@@ -14,193 +14,190 @@ class Character
     //查询角色
     public static function QueryCharacter($serv, $fd, $data = null)
     {
-        $param = gbktoutf8(ToStr($data));
-
         $UserInfo = [
-            'username',
+            'account',
             'cert',
         ];
 
-        PacketHandler::GetValidStr3($param, $UserInfo, '/');
+        PacketHandler::GetValidStr3($data, $UserInfo, '/');
 
         $where = [
-            'username' => $UserInfo['username'],
+            'account' => $UserInfo['account'],
         ];
 
-        if ($info = DB::table('users')->where($where)->find()) {
+        if ($info = DB::table('account')->where($where)->find()) {
             if ($UserInfo['cert'] == $info['cert']) {
 
                 Server::$clientparam[$fd]['UserInfo'] = $info; //缓存数据
 
                 $where = [
-                    'user_id' => $info['id'],
-                    'isdel' => 1
+                    'account_id' => $info['id'],
+                    'isdel'      => 1,
                 ];
 
-                if ($PlayerList = DB::table('players')->where($where)->select()) {
+                if ($PlayerList = DB::table('human')->where($where)->select()) {
                     $body = '';
                     foreach ($PlayerList as $k => $v) {
-                        $body .= utf8togbk($v['name']) . '/' . $v['job'] . '/' . $v['hair'] . '/' . $v['level'] . '/' . $v['gender'].'/';
+                        $body .= $v['human_name'] . '/' . $v['job'] . '/' . $v['wuxing'] . '/' . $v['level'] . '/' . $v['sex'] . '/';
                     }
 
-                    $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_QUERYCHR, count($PlayerList), 0, 0, 0);
-                    return array_merge(PacketHandler::Encode($EncodeHeader), PacketHandler::Encode($body));
+                    $sMsg = makeDefaultMsg(ServerState::SM_QUERYCHR, 0, 0, 0, 0, $body);
                 } else {
-                    $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_QUERYCHR, ServerState::RoleNotFound, 0, 0, 0);
+                    $sMsg = makeDefaultMsg(ServerState::SM_QUERYCHR, 0, 0, 0, 0);
                 }
             } else {
-                $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_QUERYCHR_FAIL, ServerState::CertError, 0, 0, 0);
+                $sMsg = makeDefaultMsg(ServerState::SM_QUERYCHR_FAIL, 0, 0, 0, 0);
             }
         } else {
-            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_QUERYCHR_FAIL, ServerState::IdNotFound, 0, 0, 0);
+            $sMsg = makeDefaultMsg(ServerState::SM_QUERYCHR_FAIL, 0, 0, 0, 0);
         }
 
-        return PacketHandler::Encode($EncodeHeader);
+        return $sMsg;
     }
 
     //创建
     public static function NewCharacter($serv, $fd, $data = null)
     {
-        //男战士 test/超人/2/0/0
-        //女战士 test/超人/3/0/1
-        //男法师 test/超人/2/1/0
-        //女法师 test/超人/3/1/1
-        //男道士 test/超人/2/2/0
-        //女道士 test/超人/3/2/1
-
-        $param = ToStr($data);
-        $param = gbktoutf8($param);
-
         $CharacterInfo = [
-            'username',
-            'name',
+            'account',
+            'human_name',
             'hair',
             'job',
-            'gender',
+            'sex',
         ];
 
-        PacketHandler::GetValidStr3($param, $CharacterInfo, '/');
+        PacketHandler::GetValidStr3($data, $CharacterInfo, '/');
 
-        unset($CharacterInfo['username']);
+        unset($CharacterInfo['account']);
 
         if (empty(Server::$clientparam[$fd]['UserInfo']['id'])) {
-            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_NEWCHR_FAIL, ServerState::SystemErr, 0, 0, 0);
-            return PacketHandler::Encode($EncodeHeader);
+            return makeDefaultMsg(ServerState::SM_NEWCHR_FAIL, -2, 0, 0, 0);
         }
 
-        $CharacterInfo['user_id'] = Server::$clientparam[$fd]['UserInfo']['id'];
-        $CharacterInfo['level']   = 1;
+        $CharacterInfo['account_id'] = Server::$clientparam[$fd]['UserInfo']['id'];
+        $CharacterInfo['level']      = env('InitialLevel', 1);
+        $CharacterInfo['hair']       = 1;
+        $CharacterInfo['wuxing']     = 1;
 
-        if (!$CharacterInfo['name']) {
-            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_NEWCHR_FAIL, ServerState::WrongName, 0, 0, 0);
-            return PacketHandler::Encode($EncodeHeader);
+        if (!$CharacterInfo['human_name']) {
+            return makeDefaultMsg(ServerState::SM_NEWCHR_FAIL, 4, 0, 0, 0);
         }
 
         $where = [
-            'name' => $CharacterInfo['name'],
+            'human_name' => $CharacterInfo['human_name'],
         ];
 
-        if (DB::table('players')->where($where)->find()) {
-            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_NEWCHR_FAIL, ServerState::NameExist, 0, 0, 0);
+        if (DB::table('human')->where($where)->find()) {
+            $sMsg = makeDefaultMsg(ServerState::SM_NEWCHR_FAIL, 1, 0, 0, 0);
         } else {
-            if (DB::table('players')->insert($CharacterInfo)) {
-                $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_NEWCHR_SUCCESS, 0, 0, 0, 0);
+            if (DB::table('human')->insert($CharacterInfo)) {
+                $sMsg = makeDefaultMsg(ServerState::SM_NEWCHR_SUCCESS, 0, 0, 0, 0);
             } else {
-                $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_NEWCHR_FAIL, ServerState::SystemErr, 0, 0, 0);
+                $sMsg = makeDefaultMsg(ServerState::SM_NEWCHR_FAIL, -2, 0, 0, 0);
             }
         }
 
-        return PacketHandler::Encode($EncodeHeader);
+        return $sMsg;
     }
 
     //删除
     public static function DeleteCharacter($serv, $fd, $data = null)
     {
-        $param = ToStr($data);
-        $param = gbktoutf8($param);
-
         $where = [
-            'user_id' => Server::$clientparam[$fd]['UserInfo']['id'],
-            'name' => $param
+            'account_id' => Server::$clientparam[$fd]['UserInfo']['id'],
+            'human_name' => $data,
         ];
 
         $CharacterInfo = [
-            'isdel' => 2
+            'isdel' => 2,
         ];
 
-        if(DB::table('players')->where($where)->update($CharacterInfo) !== false)
-        {
-            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_DELCHR_SUCCESS, 0, 0, 0, 0);
-        }else{
-            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_DELCHR_FAIL, 0, 0, 0, 0);
+        if (DB::table('human')->where($where)->update($CharacterInfo) !== false) {
+            $sMsg = makeDefaultMsg(ServerState::SM_DELCHR_SUCCESS, 0, 0, 0, 0);
+        } else {
+            $sMsg = makeDefaultMsg(ServerState::SM_DELCHR_FAIL, 0, 0, 0, 0);
         }
 
-        return PacketHandler::Encode($EncodeHeader);
+        return $sMsg;
     }
 
     //查询删除过的角色信息
     public static function QueryDeleteCharacter($serv, $fd, $data = null)
     {
-    	$param = ToStr($data);
-        $param = gbktoutf8($param);
-
         $where = [
-            'user_id' => Server::$clientparam[$fd]['UserInfo']['id'],
-            'isdel' => 2
+            'account_id' => Server::$clientparam[$fd]['UserInfo']['id'],
+            'isdel'      => 2,
         ];
 
-        if($PlayerList = DB::table('players')->where($where)->select())
-        {
+        if ($PlayerList = DB::table('human')->where($where)->select()) {
             $body = '';
             foreach ($PlayerList as $k => $v) {
-                $body .= utf8togbk($v['name']) . '' . $v['job'] . '' . $v['hair'] . '' . $v['level'] . '' . $v['gender'].'';
+                $body .= $v['human_name'] . '/' . $v['job'] . '/' . $v['level'] . '/' . $v['sex'] . '/' . $v['wuxing'] . '/';
             }
 
-            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_QUERYDELCHR, count($PlayerList), 0, 0, 0);
-            return array_merge(PacketHandler::Encode($EncodeHeader), PacketHandler::Encode($body));
-        }else{
-            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_QUERYDELCHR_FAIL, 0, 0, 0, 0);
-            return PacketHandler::Encode($EncodeHeader);
+            $sMsg = makeDefaultMsg(ServerState::SM_DELHUM, count($PlayerList), 0, 0, 0, $body);
+        } else {
+            $sMsg = makeDefaultMsg(ServerState::SM_QUERYDELCHR_FAIL, 0, 0, 0, 0);
         }
+
+        return $sMsg;
     }
 
-    //恢复删除的角色
+    //恢复角色
     public static function RestoreDeleteCharacter($serv, $fd, $data = null)
     {
-    	
+        $where = [
+            'account_id' => Server::$clientparam[$fd]['UserInfo']['id'],
+            'isdel'      => 2,
+            'human_name' => $data,
+        ];
+
+        if ($PlayerList = DB::table('human')->where($where)->find()) {
+            $CharacterInfo = [
+                'isdel' => 1,
+            ];
+
+            if (DB::table('human')->where($where)->update($CharacterInfo) !== false) {
+                WORLD_LOG('[超速操作] 恢复人物 ' . $data, 'success');
+
+                $sMsg = makeDefaultMsg(ServerState::SM_RENEWHUM, 1, 0, 0, 0);
+            } else {
+                $sMsg = makeDefaultMsg(ServerState::SM_RENEWHUM, 0, 0, 0, 0);
+            }
+        } else {
+            $sMsg = makeDefaultMsg(ServerState::SM_RENEWHUM, 0, 0, 0, 0);
+        }
+
+        return $sMsg;
     }
 
     //选择角色进入游戏
     public static function SelectCharacter($serv, $fd, $data = null)
     {
-    	$param = ToStr($data);
-        $param = gbktoutf8($param);
-
         $CharacterInfo = [
-            'username',
-            'name'
+            'account',
+            'human_name',
         ];
 
-        PacketHandler::GetValidStr3($param, $CharacterInfo, '/');
+        PacketHandler::GetValidStr3($data, $CharacterInfo, '/');
 
         $where = [
-            'user_id' => Server::$clientparam[$fd]['UserInfo']['id'],
-            'name' => $CharacterInfo['name'],
-            'isdel' => 1,
+            'account_id' => Server::$clientparam[$fd]['UserInfo']['id'],
+            'human_name' => $CharacterInfo['human_name'],
+            'isdel'      => 1,
         ];
 
-        if(DB::table('players')->where($where)->find())
-        {
+        if (DB::table('human')->where($where)->find()) {
             $info = DB::table('server_infos')->find();
 
-            $body = $info['game_server_ip'] . '/' . $info['game_server_port'];
+            $nMapIndex = 0;
+            $body      = $info['game_server_ip'] . '/' . $info['game_server_port'];
 
-            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_STARTPLAY, 0, 0, 0, 0);
-            return array_merge(PacketHandler::Encode($EncodeHeader), PacketHandler::Encode($body));
-        }else{
-            $EncodeHeader = PacketHandler::PacketHeader(ServerState::SM_STARTFAIL, 2, 0, 0, 0);
-            return PacketHandler::Encode($EncodeHeader);
+            $sMsg = makeDefaultMsg(ServerState::SM_STARTPLAY, 0, 0, 0, 0, $body);
+        } else {
+            $sMsg = makeDefaultMsg(ServerState::SM_STARTFAIL, 2, 0, 0, 0);
         }
+
+        return $sMsg;
     }
-    
 }

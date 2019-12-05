@@ -19,6 +19,10 @@ class Message
             foreach ($packArray as $k => $v) {
                 $pack = $v . '!';
 
+                if (in_array($pack, ['*', '#+!', '*#+!'])) {
+                    return;
+                }
+
                 $decodePacket = PacketHandler::Decode($pack);
 
                 if (env('MSG_DEBUG', false)) {
@@ -34,7 +38,7 @@ class Message
     //根据当前ClientState处理传入的数据包
     public function handlePacket($serv, $fd, $data, $state)
     {
-        Reflection::LoadClass(OpCode::GetOpCode($data['Header']['Protocol'], $fd), $serv, $fd, $data['Data']);
+        Reflection::LoadClass(OpCode::GetOpCode($data['Header']['Ident'], $fd), $serv, $fd, $data['Data'], $data['rawData']);
     }
 
 }

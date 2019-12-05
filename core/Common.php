@@ -1,10 +1,11 @@
 <?php
+use app\Common\Math_BigInteger;
 use app\Common\Srp6;
+use app\Packet\PacketHandler;
 use core\Config;
 use core\filter\Filter;
 use core\lib\Cookie;
 use core\lib\Session;
-use app\Common\Math_BigInteger;
 
 if (!function_exists('config')) {
     /**
@@ -576,10 +577,41 @@ function cut_str($str, $start = '', $end = '')
 
 function gbktoutf8($str)
 {
-    return  mb_convert_encoding($str, 'utf8', 'gb2312');
+    return mb_convert_encoding($str, 'utf8', 'gb2312');
 }
 
 function utf8togbk($str)
 {
-    return  mb_convert_encoding($str, 'gb2312', 'utf8');
+    return mb_convert_encoding($str, 'gb2312', 'utf8');
+}
+
+function array_filter_plus($data,$filter = null)
+{
+    if($filter)
+    {
+        $new_data = [];
+
+        foreach ($data as $k => $v) 
+        {
+            if(!in_array($v, $filter))
+            {
+                $new_data[] = $v;
+            }
+        }
+    }else{
+        $new_data = array_filter($data);
+    }
+
+    return $new_data;
+}
+
+function makeDefaultMsg($Ident, $Recog, $Param, $Tag, $Series, $body = null)
+{
+    $Header = PacketHandler::PacketHeader($Ident, $Recog, $Param, $Tag, $Series);
+    $sMsg   = PacketHandler::Encode($Header);
+    if ($body) {
+        $sMsg = array_merge($sMsg, PacketHandler::Encode(utf8togbk($body)));
+    }
+
+    return $sMsg;
 }

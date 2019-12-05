@@ -3,6 +3,7 @@ return [
 
     'maxlogintimes' => 200,//最大密码错误次数
 
+    'NOTICE' => env('NOTICE','公告'),
 
     //缓存配置
     'cache'       => [

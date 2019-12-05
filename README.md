@@ -23,9 +23,9 @@ Mir2传奇模拟游戏服务器,项目采用PHP开发,Tcp基于swoole
         
 [2019-10-31 00:00:01]: Server version 1.0.1
 [2019-10-31 00:00:01]: author by.fan <fan3750060@163.com>
-[2019-10-31 00:00:01]: Gameversion: 1.75
+[2019-10-31 00:00:01]: Gameversion: 1.76
 [2019-10-31 00:00:01]: bind login server port:127.0.0.1 7000
-[2019-10-31 00:00:01]: bind world server port:127.0.0.1 7400
+[2019-10-31 00:00:01]: bind world server port:127.0.0.1 7200
 [2019-10-31 00:00:01]: Start
 [2019-10-31 00:00:01]: onWorkerStart
 [2019-10-31 00:00:01]: onWorkerStart
@@ -52,7 +52,7 @@ The game client should be downloaded in the group (only for research, no busines
 ## 介绍
 这是用PHP编写的网络游戏模拟器。
 
-游戏客户端基于GEEM2。
+游戏客户端基于网上流传代码。
 
 可以正常进入游戏
 
@@ -112,7 +112,7 @@ Linux:
     ./stop.sh 
 
 
-注: 测试账户(test user) test 密码 admin  (数据库密码哈希值加密为: sha1("test:admin") )
+注: 测试账户(test user) admin001 密码 admin  (数据库密码哈希值加密为: sha1("admin001:admin") )
 
   数据库配置文件是.env
   请将.env.example复制到.env并更改配置。
@@ -138,6 +138,18 @@ Linux:
 * [Swoole](https://www.swoole.com/)
 
 感谢mir2,传奇等开源游戏框架
+
+
+## 更新进度
+  1.修复登录器
+  2.修复账户注册
+  3.修复密码修改
+  4.修复密码找回
+  5.修复角色查询
+  6.修复创建角色
+  7.修复删除角色
+  8.修复删除角色找回列表
+  9.修复删除后恢复角色
 
 ## Demonstration 演示
 

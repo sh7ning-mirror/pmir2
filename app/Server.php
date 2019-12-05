@@ -9,6 +9,7 @@ use app\Packet\OpCode;
 use app\Reflection;
 use app\Socket\SwooleTcp;
 use core\lib\Cache;
+use app\World\GameTimer;
 
 /**
  * service
@@ -35,7 +36,7 @@ class Server
 
         $GetServerInfos = DbService::Execution('GetServerInfos');
 
-        User::Offline(); //全部下线
+        
 
         self::$ServerConfig = $GetServerInfos[0];
 
@@ -64,6 +65,9 @@ class Server
         // 初始状态
         $this->active = true;
 
+        // 将在线连建池清空
+        Connection::delOnline();
+
         $this->runAuthServer();
     }
 
@@ -89,8 +93,6 @@ class Server
             ];
 
             $this->serv = SwooleTcp::Listen('0.0.0.0', self::$ServerConfig['login_server_port'], new self(), $other);
-
-            Cache::drive('redis')->delete('checkconnector');
         } else {
             WORLD_LOG('Error: Did not start the service according to the process...');
         }
@@ -129,7 +131,7 @@ class Server
 
         Connection::saveCheckConnector($fd); //保存连接到待检池
 
-        $serv->send($fd, 'fvpvTbKVC\WnpqQvh_xdY\\'); //不发登录不了(验证什么的吧)
+        $serv->send($fd, '*'); //不发登录不了(验证什么的吧)
     }
 
     /**
@@ -172,6 +174,7 @@ class Server
 
         // 将连接从连接池中移除
         Connection::removeConnector($fd);
+
         WORLD_LOG("Client {$fd} close connection\n");
     }
 
@@ -187,25 +190,39 @@ class Server
 
         if ($worker_id == 0) {
             if (!$serv->taskworker) {
-                $serv->tick(5000, function ($id) use ($serv) {
-                    $this->tickerEvent($serv);
+
+                //清理非法连接
+                $serv->tick(1000*10, function ($id) use ($serv) {
+                    Connection::clearInvalidConnection($serv);
                 });
+
+                //在线公告
+                $serv->tick(1000*60*3 - 60*3, function ($id) use ($serv) {
+                    GameTimer::SendGroupMessage($serv);
+                });
+
+                //离线后更新数据库为下线
+                $serv->tick(1000*60*3, function ($id) use ($serv) {
+                    GameTimer::OfflineProcessingStatus($serv);
+                });
+
             } else {
                 $serv->addtimer(5000);
             }
 
             WORLD_LOG("start timer finished");
-        }
-    }
 
-    /**
-     * 定时任务
-     *
-     * @param swoole_server $serv
-     */
-    public function tickerEvent($serv)
-    {
-        Connection::clearInvalidConnection($serv);
+            User::Offline(); //全部下线
+
+            // //投递公告任务
+            // $param = [
+            //     'opcode' => 'SendGroupMessage', 'callback' => null, 'data' => ['fd' => 0],
+            // ];
+
+            // $serv->task($param);
+            
+            Cache::drive('redis')->delete('checkconnector');
+        }
     }
 
     //清空redis

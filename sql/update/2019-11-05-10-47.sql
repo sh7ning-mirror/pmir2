@@ -1,1 +1,0 @@
-ALTER TABLE `players` ADD COLUMN `isdel`  tinyint(2) UNSIGNED NULL DEFAULT 1 COMMENT '是否删除 1:未删除 2:已删除' AFTER `gender`,ADD INDEX `isdel` (`isdel`);

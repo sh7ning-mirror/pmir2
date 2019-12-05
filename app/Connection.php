@@ -18,6 +18,50 @@ class Connection
     }
 
     /**
+     * 获取游戏在线连接池
+     * @param int $fd
+     * @param int
+     * @param int $userId
+     */
+    public static function getOnline()
+    {
+        return Cache::drive('redis')->get('Online');
+    }
+
+    /**
+     * 保存当前连接到游戏在线连接池
+     * @param int $fd
+     * @param int
+     * @param int $userId
+     */
+    public static function saveOnline($fd)
+    {
+        $onlineList = self::getOnline();
+
+        if($onlineList && !in_array($fd, $onlineList))
+        {
+            $onlineList[] = $fd;
+        }else{
+            $onlineList = [$fd];
+        }
+
+        Cache::drive('redis')->set('Online', json_encode($onlineList), 0);
+    }
+
+    /**
+     * 关闭服务器删除在线连接池
+     * @param int $fd
+     * @param int
+     * @param int $userId
+     */
+    public static function delOnline()
+    {
+        Cache::drive('redis')->delete('Online');
+
+        WORLD_LOG("Delete Online");
+    }
+
+    /**
      * 保存当前连接到连接池
      * @param int $fd
      * @param int
@@ -101,7 +145,7 @@ class Connection
 
                 $createTime = $v["createTime"];
 
-                if ($createTime < strtotime("-30 seconds")) {
+                if ($createTime < strtotime("-300 seconds")) {
 
                     WORLD_LOG("Expired! Remove and close : " . $v['fd']);
 

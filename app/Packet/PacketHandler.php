@@ -7,9 +7,11 @@ namespace app\Packet;
 class PacketHandler
 {
 
-    private static $decode6BitMask      = [0xfc, 0xf8, 0xf0, 0xe0, 0xc0];
-    private static $DEFAULT_PACKET_SIZE = 12;
-    private static $CONTENT_SEPARATOR   = '/';
+    private static $decode6BitMask    = [0xFC, 0xF8, 0xF0, 0xE0, 0xC0];
+    private static $DEFBLOCKSIZE      = 16;
+    private static $CONTENT_SEPARATOR = '/';
+    private static $BITMASKS          = 0xAA;
+    private static $ENDECODEMODE      = true; //加密类型 true代表新加密  false代表老加密
 
     //加密
     public static function Encode($packet = '')
@@ -23,33 +25,50 @@ class PacketHandler
         $packetIndex = substr($packet, 1, 1);
         echolog('PacketIndex:' . $packetIndex, 'info');
 
-        $packet      = substr($packet, 2, strlen($packet) - 3);
-        $decodeFrame = self::Decode6BitBytes(GetBytes($packet));
+        $sCode  = substr($packet, 2, strlen($packet) - 3);
+        $sPos1  = substr($sCode, 0, self::$DEFBLOCKSIZE);
+        $sPos2  = substr($sCode, self::$DEFBLOCKSIZE, strlen($sCode) - self::$DEFBLOCKSIZE);
+        $DefMsg = self::Decode6BitBytes(GetBytes($sPos1));
 
-        $packet = [];
-        if (count($decodeFrame) > 2 && $decodeFrame[0] == GetBytes('*') && $decodeFrame[1] == GetBytes('*')) {
-            $packet['Header']['Protocol'] = 65001;
-            $data                         = array_slice($decodeFrame, 2);
-            $packet['Data']               = $data;
+        $login = ToStr($DefMsg);
+        if (strlen($login) > 2 && substr($login, 0, 1) == '*' && substr($login, 1, 1) == '*') {
+            $DefMsg = self::Decode6BitBytes(GetBytes($sCode));
+
+            $packet = [
+                'Header'  => [
+                    'Ident'  => 65001,
+                    'Recog'  => 0,
+                    'Param'  => 0,
+                    'Tag'    => 0,
+                    'Series' => 0,
+                ],
+                'Data'    => gbktoutf8(ToStr($DefMsg)),
+                'rawData' => $sCode,
+            ];
         } else {
-            $packet['Header'] = self::UnPacketHeader(array_slice($decodeFrame, 0, self::$DEFAULT_PACKET_SIZE));
-            $data             = array_slice($decodeFrame, self::$DEFAULT_PACKET_SIZE);
-            $packet['Data']   = $data;
+            $Header = self::UnPacketHeader($DefMsg);
+            $sData  = self::Decode6BitBytes(GetBytes($sPos2));
+
+            $packet = [
+                'Header'  => $Header,
+                'Data'    => gbktoutf8(ToStr($sData)),
+                'rawData' => $sPos2,
+            ];
         }
 
         return $packet;
     }
 
     //加密包头
-    public static function PacketHeader($Protocol, $nRecog, $wParam, $wTag, $wSeries)
+    public static function PacketHeader($Ident, $Recog, $Param, $Tag, $Series)
     {
-        return pack('ls4', $nRecog, $Protocol, $wParam, $wTag, $wSeries);
+        return pack('ls4', $Recog, $Ident, $Param, $Tag, $Series);
     }
 
     //解包头
     public static function UnPacketHeader($packet)
     {
-        return unpack('lRecog/sProtocol/sP1/sP2/sP3', ToStr($packet));
+        return unpack('lRecog/sIdent/sParam/sTag/sSeries', ToStr($packet));
     }
 
     //解析参数
@@ -64,8 +83,7 @@ class PacketHandler
         $array = explode($DividerAry, $Str);
         $param = [];
         foreach ($array as $k => $v) {
-            if(isset($Dest[$k]))
-            {
+            if (isset($Dest[$k])) {
                 $param[$Dest[$k]] = $v;
             }
         }
@@ -78,18 +96,23 @@ class PacketHandler
         $nRestCount = 0;
         $btRest     = 0;
         $nDestPos   = 0;
-
-        $pDest = [];
-
-        $size     = count($pSrc);
-        $nDestLen = ($size / 3) * 4 + 10;
+        $pDest      = [];
+        $size       = count($pSrc);
+        $nDestLen   = ($size / 3) * 4 + 10;
 
         for ($i = 0; $i < $size; $i++) {
             if ($nDestPos >= $nDestLen) {
                 break;
             }
 
-            $btCh   = $pSrc[$i];
+            $btCh = $pSrc[$i];
+
+            if (self::$ENDECODEMODE) {
+                $btXor = self::$BITMASKS;
+                $btXor += $i;
+                $btCh = $btCh ^ $btXor;
+            }
+
             $btMade = ($btRest | ($btCh >> (2 + $nRestCount))) & 0x3F;
             $btRest = ($btCh << (8 - (2 + $nRestCount)) >> 2) & 0x3F;
             $nRestCount += 2;
@@ -120,18 +143,16 @@ class PacketHandler
         return $pDest;
     }
 
-    //解密
-    public static function Decode6BitBytes($sSource)
+    public static function Decode6BitBytes($sSource, $nBufLen = 1024)
     {
-        $Masks    = [0xFC, 0xF8, 0xF0, 0xE0, 0xC0];
+        $Masks    = self::$decode6BitMask;
+        $btCh     = 0;
+        $nSrcLen  = count($sSource);
         $nBitPos  = 2;
         $nMadeBit = 0;
         $nBufPos  = 0;
-        $btCh     = 0;
         $btTmp    = 0;
-        $btByte   = 0;
-
-        $nSrcLen = count($sSource);
+        $pbuf     = [];
 
         $nBufLen = [];
         for ($i = 0; $i < ($nSrcLen * 3 / 4); $i++) {
@@ -139,7 +160,6 @@ class PacketHandler
         }
 
         for ($i = 0; $i < $nSrcLen; $i++) {
-
             if ($sSource[$i] - 0x3C >= 0) {
                 $btCh = $sSource[$i] - 0x3C;
             } else {
@@ -147,12 +167,19 @@ class PacketHandler
                 break;
             }
 
-            if ($nBufPos >= count($nBufLen)) {
+            if ($nBufPos >= $nBufLen) {
                 break;
             }
 
             if ($nMadeBit + 6 >= 8) {
-                $btByte         = $btTmp | ($btCh & 0x3F) >> (6 - $nBitPos);
+                $btByte = $btTmp | (($btCh & 0x3F) >> (6 - $nBitPos));
+
+                if (self::$ENDECODEMODE) {
+                    $btXor = self::$BITMASKS;
+                    $btXor += $nBufPos;
+                    $btByte = $btByte ^ $btXor;
+                }
+
                 $pbuf[$nBufPos] = $btByte;
                 $nBufPos++;
                 $nMadeBit = 0;
@@ -166,11 +193,10 @@ class PacketHandler
             }
 
             $btTmp = ($btCh << $nBitPos) & $Masks[$nBitPos - 2];
-
-            $nMadeBit += 8 - $nBitPos;
+            $nMadeBit += (8 - $nBitPos);
         }
 
-        // $pbuf[$nBufPos] = 0;
+        // $pbuf[$nBufPos-1] = 0;
         return $pbuf;
     }
 }
