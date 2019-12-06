@@ -10,7 +10,7 @@ $db = MyPDO::getInstance('localhost', 'root', '123456', 'test', 'utf8');
 
 $db->destruct();
  */
-class MyPDO
+class Mypdo
 {
     protected static $_instance      = null;
     protected static $instance_token = array();
@@ -28,7 +28,7 @@ class MyPDO
     /**
      * 构造
      *
-     * @return MyPDO
+     * @return Mypdo
      */
     private function __construct($dbHost, $port, $dbUser, $dbPasswd, $dbName, $dbCharset)
     {

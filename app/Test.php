@@ -4,10 +4,16 @@ namespace app;
 use app\Packet\PacketHandler;
 use app\Common\Srp6;
 use app\Packet\ServerState;
+use core\lib\Cache;
+
 class Test
 {
     public function run()
     {
+
+        $a = Cache::drive('redis')->get('Online');
+        var_dump($a);die;
+
         $data = '#6\DCInXKBsdB>^ehHN<uB<@NP^tzF`KSnyKOl{KSpu{`!';
         $decodePacket = PacketHandler::Decode($data);
         var_dump(json_encode($decodePacket));

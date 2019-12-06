@@ -10,6 +10,8 @@ use app\Reflection;
 use app\Socket\SwooleTcp;
 use core\lib\Cache;
 use app\World\GameTimer;
+use core\pool\MysqlPool;
+use core\pool\RedisPool;
 
 /**
  * service
@@ -35,8 +37,6 @@ class Server
         Checksystem::check();
 
         $GetServerInfos = DbService::Execution('GetServerInfos');
-
-        
 
         self::$ServerConfig = $GetServerInfos[0];
 
@@ -64,9 +64,6 @@ class Server
 
         // 初始状态
         $this->active = true;
-
-        // 将在线连建池清空
-        Connection::delOnline();
 
         $this->runAuthServer();
     }
@@ -108,6 +105,19 @@ class Server
         // 设置进程名称
         @cli_set_process_title("wow_mir2_master");
         WORLD_LOG("Start");
+    }
+
+    /**
+     * Server在workerExit释放连接池资源
+     *
+     * @param unknown $serv
+     */
+    public function onWorkerExit($serv)
+    {
+        MysqlPool::getInstance()->destruct();
+        RedisPool::getInstance()->destruct();
+
+        echolog('WorkerExit Release connection pool');
     }
 
     /**
@@ -196,8 +206,20 @@ class Server
                     Connection::clearInvalidConnection($serv);
                 });
 
+                //监控mysql连接池
+                $serv->tick(1000*30, function ($id) use ($serv) {
+                    $size = MysqlPool::getInstance()->getPoolSize();
+                    echolog('Current number of mysql connection pools:'.$size,'info');
+                });
+
+                //监控redis连接池
+                $serv->tick(1000*30, function ($id) use ($serv) {
+                    $size = RedisPool::getInstance()->getPoolSize();
+                    echolog('Current number of redis connection pools:'.$size,'info');
+                });
+
                 //在线公告
-                $serv->tick(1000*60*3 - 60*3, function ($id) use ($serv) {
+                $serv->tick(1000*60*3, function ($id) use ($serv) {
                     GameTimer::SendGroupMessage($serv);
                 });
 
@@ -212,14 +234,10 @@ class Server
 
             WORLD_LOG("start timer finished");
 
+            // 将在线连建池清空
+            Connection::delOnline();
+
             User::Offline(); //全部下线
-
-            // //投递公告任务
-            // $param = [
-            //     'opcode' => 'SendGroupMessage', 'callback' => null, 'data' => ['fd' => 0],
-            // ];
-
-            // $serv->task($param);
             
             Cache::drive('redis')->delete('checkconnector');
         }

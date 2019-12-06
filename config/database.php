@@ -2,34 +2,37 @@
 
 return [
     /**************** 数据库配置 ****************/
-    'database'   => [
+    'database' => [
+        // 连接池大小
+        'pool_size'        => 20,
+
         // 数据库类型
-        'type'     => env('DB_CONNECTION', 'mysql'),
+        'type'             => env('DB_CONNECTION', 'mysql'),
 
         // 服务器地址
-        'hostname_write' => env('DB_HOST_WRITE', '127.0.0.1'),
-        
-        'hostname_read' => env('DB_HOST_READ', '127.0.0.1'),
+        'hostname_write'   => env('DB_HOST_WRITE', '127.0.0.1'),
+
+        'hostname_read'    => env('DB_HOST_READ', '127.0.0.1'),
 
         //数据库名称
-        'dbname'   => env('DB_DATABASE', 'test'),
+        'dbname'           => env('DB_DATABASE', 'test'),
 
         //用户名
-        'username' => env('DB_USERNAME', 'root'),
+        'username'         => env('DB_USERNAME', 'root'),
 
         //密码
-        'password' => env('DB_PASSWORD', ''),
+        'password'         => env('DB_PASSWORD', ''),
 
         //端口
-        'hostport' => env('DB_PORT', '3306'),
+        'hostport'         => env('DB_PORT', '3306'),
 
         //字符编码
-        'charset'  => env('DB_CHARSET', 'UTF8'),
+        'charset'          => env('DB_CHARSET', 'UTF8'),
 
     ],
 
     /**************** memcache配置 ****************/
-    'memcache'   => [
+    'memcache' => [
         // 连接地址
         'hostname'    => '127.0.0.1',
 
@@ -47,42 +50,46 @@ return [
     ],
 
     /**************** redis配置 ****************/
-    'redis'      => [
+    'redis'    => [
+
+        // 连接池大小
+        'pool_size'        => 20,
+
         // 连接地址
-        'hostname'   => env('REDIS_HOST', '127.0.0.1'),
+        'hostname'         => env('REDIS_HOST', '127.0.0.1'),
 
         //端口
-        'hostport'   => env('REDIS_PORT', 6379),
+        'hostport'         => env('REDIS_PORT', 6379),
 
         //密码
-        'password'   => env('REDIS_PASSWORD', null),
+        'password'         => env('REDIS_PASSWORD', null),
 
         //数据库索引号
-        'select'     => env('REDIS_DB', 0),
+        'select'           => env('REDIS_DB', 0),
 
         //超时时间
-        'timeout'    => 0,
+        'timeout'          => 0,
 
         //有效时间
-        'expire'     => 0,
+        'expire'           => 0,
 
         //是否长连接 false=短连接
-        'persistent' => false,
+        'persistent'       => false,
 
         //前缀
-        'prefix'     => 'redis',
+        'prefix'           => 'redis',
     ],
 
     /**************** mongo配置 ****************/
-    'mongo'      => [
+    'mongo'    => [
         // 连接地址
         'hostname' => env('MOGODB_PRIMARY', 'localhost'),
 
         //端口
-        'hostport' => env('MOGODB_PORT',27017),
+        'hostport' => env('MOGODB_PORT', 27017),
 
         //库名称
-        'dbname'   => env('MOGODB_DATABASE','task_manager'),
+        'dbname'   => env('MOGODB_DATABASE', 'task_manager'),
 
         //用户
         'username' => env('MOGODB_USERNAME', 'forge'),

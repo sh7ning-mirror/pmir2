@@ -3,6 +3,7 @@ namespace core\lib;
 use core\db\FileCache;
 use core\db\Memcache;
 use core\db\Redis;
+use core\pool\RedisPool;
 
 /**
  * 缓存管理
@@ -91,7 +92,7 @@ class Cache{
 			return $result ? true : false;
 		}elseif(self::$drivename == 'redis')
 		{
-			return Redis::getInstance(self::$redis_config)->has($key);
+			return RedisPool::getInstance(self::$redis_config)->get()->has($key);
 		}
 	}
 
@@ -118,7 +119,7 @@ class Cache{
 			return Memcache::getInstance(self::$mem_config)->set($key,$value,$time);
 		}elseif(self::$drivename == 'redis')
 		{
-			return Redis::getInstance(self::$redis_config)->set($key,$value,$time);
+			return RedisPool::getInstance(self::$redis_config)->get()->set($key,$value,$time);
 		}
 	}
 
@@ -144,7 +145,7 @@ class Cache{
 			return Memcache::getInstance(self::$mem_config)->get($key);
 		}elseif(self::$drivename == 'redis')
 		{
-			return Redis::getInstance(self::$redis_config)->get($key);
+			return RedisPool::getInstance(self::$redis_config)->get()->get($key);
 		}
 	}
 
@@ -170,7 +171,7 @@ class Cache{
 			return Memcache::getInstance(self::$mem_config)->del($key);
 		}elseif(self::$drivename == 'redis')
 		{
-			return Redis::getInstance(self::$redis_config)->rm($key);
+			return RedisPool::getInstance(self::$redis_config)->get()->rm($key);
 		}
 	}
 }

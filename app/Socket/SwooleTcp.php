@@ -34,6 +34,8 @@ class SwooleTcp
 
             $serv->on('Start', [$object, 'onStart']);
 
+            $serv->on('workerExit', [$object, 'onWorkerExit']);
+
             $serv->on('Connect', [$object, 'onConnect']);
 
             $serv->on('Receive', [$object, 'onReceive']);

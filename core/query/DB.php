@@ -1,6 +1,7 @@
 <?php
 namespace core\query;
 use core\db\Mypdo;
+use core\pool\MysqlPool;
 
 /**
 * 
@@ -64,9 +65,14 @@ class DB
 	{
 		if($this->database['type'] == 'mysql')
 		{
-			self::$Dbquery = MyPDO::getInstance($this->database['hostname_write'],$this->database['hostport'], $this->database['username'], $this->database['password'],$this->database['dbname'], $this->database['charset']);
+			// self::$Dbquery = MyPDO::getInstance($this->database['hostname_write'],$this->database['hostport'], $this->database['username'], $this->database['password'],$this->database['dbname'], $this->database['charset']);
 
-			self::$Dbquery_read = MyPDO::getInstance($this->database['hostname_read'],$this->database['hostport'], $this->database['username'], $this->database['password'],$this->database['dbname'], $this->database['charset']);
+			// self::$Dbquery_read = MyPDO::getInstance($this->database['hostname_read'],$this->database['hostport'], $this->database['username'], $this->database['password'],$this->database['dbname'], $this->database['charset']);
+
+
+			self::$Dbquery = MysqlPool::getInstance([$this->database['hostname_write'],$this->database['hostport'], $this->database['username'], $this->database['password'],$this->database['dbname'], $this->database['charset'],$this->database['pool_size']])->get();
+
+			self::$Dbquery_read = MysqlPool::getInstance([$this->database['hostname_read'],$this->database['hostport'], $this->database['username'], $this->database['password'],$this->database['dbname'], $this->database['charset'],$this->database['pool_size']])->get();
 
 			return self::$Dbquery;
 		}
