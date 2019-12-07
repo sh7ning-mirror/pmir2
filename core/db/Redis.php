@@ -1,7 +1,7 @@
 <?php
 namespace core\db;
 
-/** 
+/**
  * redis操作类
  */
 class Redis
@@ -18,12 +18,13 @@ class Redis
     ];
 
     protected $tag;
-    protected static $_instance = null;
-    protected $handler = null;
+    protected static $_instance      = null;
+    protected static $instance_token = array();
+    protected $handler               = null;
 
     /**
      * 构造函数
-     * @param array $options 缓存参数 
+     * @param array $options 缓存参数
      * @access public
      */
     private function __construct($options = [])
@@ -34,9 +35,20 @@ class Redis
         if (!empty($options)) {
             $this->options = array_merge($this->options, $options);
         }
+        
+        // #swoole异步协程连接容易报错
+        // $func          = $this->options['persistent'] ? 'pconnect' : 'connect';
+        // $this->handler = new \Swoole\Coroutine\Redis();
+        // $res           = $this->handler->$func($this->options['hostname'], $this->options['hostport'], $this->options['timeout']);
+
         $func          = $this->options['persistent'] ? 'pconnect' : 'connect';
         $this->handler = new \Redis;
-        $this->handler->$func($this->options['hostname'], $this->options['hostport'], $this->options['timeout']);
+        $res           = $this->handler->$func($this->options['hostname'], $this->options['hostport'], $this->options['timeout']);
+
+        if ($res === false) {
+            throw new \RuntimeException("Failed to connect redis server");
+            // echolog('Failed to connect redis serverr', 'error');
+        }
 
         if ('' != $this->options['password']) {
             $this->handler->auth($this->options['password']);
@@ -57,15 +69,23 @@ class Redis
      * @param   [type]          $path [description]
      * @return  [type]                [description]
      */
-    public static function getInstance($param=array())
+    public static function getInstance($param = [], $number = -1)
     {
-        if (self::$_instance === null) 
-        {
-            self::$_instance = new self($param);
+        $token = serialize($param) . $number;
+
+        if (array_key_exists($token, self::$instance_token)) {
+            if (false == (self::$instance_token[$token] instanceof self)) {
+                self::$_instance = new self($param);
+            } else {
+                self::$_instance = self::$instance_token[$token];
+            }
+        } else {
+            self::$_instance              = new self($param);
+            self::$instance_token[$token] = self::$_instance;
         }
 
         return self::$_instance;
-    }  
+    }
 
     /**
      * 获取实际的缓存标识
@@ -107,7 +127,6 @@ class Redis
         return (null === $jsonData) ? $value : $jsonData;
     }
 
-
     /**
      * 写入缓存
      * @access public
@@ -129,7 +148,7 @@ class Redis
             $first = true;
         }
         $key = $this->getCacheKey($name);
-        //对数组/对象数据进行缓存处理，保证数据完整性 
+        //对数组/对象数据进行缓存处理，保证数据完整性
         $value = (is_object($value) || is_array($value)) ? json_encode($value) : $value;
         if (is_int($expire) && $expire) {
             $result = $this->handler->setex($key, $expire, $value);
@@ -198,21 +217,19 @@ class Redis
     }
 
     //list
-    public function rpush($listname='',$value='')
+    public function rpush($listname = '', $value = '')
     {
-        if(!$listname || !$value)
-        {
+        if (!$listname || !$value) {
             return false;
         }
 
-        return $this->handler->rpush($listname,$value);
+        return $this->handler->rpush($listname, $value);
     }
 
     //out end
-    public function lpop($listname='')
+    public function lpop($listname = '')
     {
-        if(!$listname)
-        {
+        if (!$listname) {
             return false;
         }
 

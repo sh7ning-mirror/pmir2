@@ -2,6 +2,7 @@
 namespace core\query;
 use core\db\Mypdo;
 use core\pool\MysqlPool;
+use app\Server;
 
 /**
 * 
@@ -65,15 +66,16 @@ class DB
 	{
 		if($this->database['type'] == 'mysql')
 		{
-			// self::$Dbquery = MyPDO::getInstance($this->database['hostname_write'],$this->database['hostport'], $this->database['username'], $this->database['password'],$this->database['dbname'], $this->database['charset']);
+			// if(isset(Server::$serv) && Server::$serv)
+			// {
+				// self::$Dbquery = MysqlPool::getInstance([$this->database['hostname_write'],$this->database['hostport'], $this->database['username'], $this->database['password'],$this->database['dbname'], $this->database['charset'],$this->database['pool_size']])->get();
 
-			// self::$Dbquery_read = MyPDO::getInstance($this->database['hostname_read'],$this->database['hostport'], $this->database['username'], $this->database['password'],$this->database['dbname'], $this->database['charset']);
+				// self::$Dbquery_read = MysqlPool::getInstance([$this->database['hostname_read'],$this->database['hostport'], $this->database['username'], $this->database['password'],$this->database['dbname'], $this->database['charset'],$this->database['pool_size']])->get();
+			// }else{
+				self::$Dbquery = Mypdo::getInstance($this->database['hostname_write'],$this->database['hostport'], $this->database['username'], $this->database['password'],$this->database['dbname'], $this->database['charset']);
 
-
-			self::$Dbquery = MysqlPool::getInstance([$this->database['hostname_write'],$this->database['hostport'], $this->database['username'], $this->database['password'],$this->database['dbname'], $this->database['charset'],$this->database['pool_size']])->get();
-
-			self::$Dbquery_read = MysqlPool::getInstance([$this->database['hostname_read'],$this->database['hostport'], $this->database['username'], $this->database['password'],$this->database['dbname'], $this->database['charset'],$this->database['pool_size']])->get();
-
+				self::$Dbquery_read = Mypdo::getInstance($this->database['hostname_read'],$this->database['hostport'], $this->database['username'], $this->database['password'],$this->database['dbname'], $this->database['charset']);
+			// }
 			return self::$Dbquery;
 		}
 	}
@@ -898,6 +900,7 @@ class DB
 	public function PrimaryKey()
 	{
 		$sql = 'SELECT TABLE_SCHEMA,TABLE_NAME,COLUMN_NAME FROM INFORMATION_SCHEMA. COLUMNS WHERE TABLE_SCHEMA = "'.self::$update['dbname'].'" AND TABLE_NAME = "'.self::$update['table'].'" AND COLUMN_KEY = "PRI"';
+
 		return self::$Dbquery_read->query($sql,'Row');
 	}
 

@@ -2,13 +2,15 @@
 namespace core\pool;
 
 use core\db\Mypdo;
+use app\Server;
 
 class MysqlPool
 {
     private static $instance;
     protected $available = true;
-    protected $pool;
+    public $pool;
     private $config;
+    public static $server;
 
     public function __construct($config)
     {
@@ -17,10 +19,9 @@ class MysqlPool
             $this->pool   = new \SplQueue;
 
             for ($i = 0; $i < $config[6]; $i++) {
-                $res = Mypdo::getInstance($config[0], $config[1], $config[2], $config[3], $config[4], $config[5]);
+                $res = Mypdo::getInstance($config[0], $config[1], $config[2], $config[3], $config[4], $config[5],$i);
                 if ($res === false) {
-                    // throw new \RuntimeException("Failed to connect mysql server");
-                    echolog('Failed to connect mysql server', 'error');
+                    throw new \RuntimeException("Failed to connect mysql server");
                 } else {
                     $this->put($res);
                 }
@@ -38,15 +39,15 @@ class MysqlPool
     {
         if (empty(self::$instance)) {
             if (empty($config)) {
-                $database     = config('database');
-                $config = [
+                $database = config('database');
+                $config   = [
                     $database['hostname_write'],
                     $database['hostport'],
                     $database['username'],
                     $database['password'],
                     $database['dbname'],
                     $database['charset'],
-                    $database['pool_size']
+                    $database['pool_size'],
                 ];
             }
             self::$instance = new static($config);
@@ -60,18 +61,31 @@ class MysqlPool
         $this->pool->push($server);
     }
 
+    //回收连接
+    public function recycle($server)
+    {
+        $this->pool->push($server);
+    }
+
     //获取连接池
     public function get()
     {
         //有空闲连接且连接池处于可用状态
         if ($this->available && count($this->pool) > 0) {
-            return $this->pool->pop();
+            self::$server = $this->pool->pop();
+            
+            // 释放
+            defer(function () {
+                $this->recycle(self::$server);
+            });
+
+            return self::$server;
         }
 
         self::$instance = null;
 
         //无空闲连接，创建新连接
-        $res = Mypdo::getInstance($this->config[0], $this->config[1], $this->config[2], $this->config[3], $this->config[4], $this->config[5]);
+        $res = Mypdo::getInstance($this->config[0], $this->config[1], $this->config[2], $this->config[3], $this->config[4], $this->config[5],rand(1000,2000));
         if ($res == false) {
             return false;
         } else {

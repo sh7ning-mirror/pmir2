@@ -4,7 +4,9 @@ return [
     /**************** 数据库配置 ****************/
     'database' => [
         // 连接池大小
-        'pool_size'        => 20,
+        'pool_size'        => 10,
+
+        'pool_get_timeout' => 0.5,
 
         // 数据库类型
         'type'             => env('DB_CONNECTION', 'mysql'),
@@ -53,7 +55,9 @@ return [
     'redis'    => [
 
         // 连接池大小
-        'pool_size'        => 20,
+        'pool_size'        => 10,
+
+        'pool_get_timeout' => 0.5,
 
         // 连接地址
         'hostname'         => env('REDIS_HOST', '127.0.0.1'),

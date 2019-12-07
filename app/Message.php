@@ -4,6 +4,7 @@ namespace app;
 use app\Packet\OpCode;
 use app\Packet\PacketHandler;
 use app\Reflection;
+use core\lib\Cache;
 
 class Message
 {
@@ -29,6 +30,17 @@ class Message
                     AUTH_LOG('Receive:' . $pack, 'info');
                     AUTH_LOG("Receive: " . json_encode($decodePacket, JSON_UNESCAPED_UNICODE), 'info');
                 }
+
+                // if($num = Cache::drive('redis')->get('key'))
+                // {
+                //     $num+=1;
+                //     Cache::drive('redis')->set('key',$num,10);
+                // }else{
+                //     $num = 1;
+                //     Cache::drive('redis')->set('key',1,10);
+                // }
+
+                // WORLD_LOG("返回 " . $num.' 次', 'success');
 
                 $this->handlePacket($serv, $fd, $decodePacket, Server::$clientparam[$fd]['state']);
             }

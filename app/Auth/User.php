@@ -116,10 +116,8 @@ class User
                         'login_ip'   => $serv->getClientInfo($fd)['remote_ip'],
                     ];
 
-                    go(function () use ($where, $UserInfo) {
-                        //更新
-                        DB::table('account')->where($where)->update($UserInfo);
-                    });
+                    //更新
+                    DB::table('account')->where($where)->update($UserInfo);
 
                     //获取服务器列表
                     $ServerInfoList = DB::table('server_infos')->find();
@@ -127,26 +125,22 @@ class User
                     //保存随机证书
                     $id   = $info['id'];
                     $cert = rand(100, 1000);
-                    go(function () use ($id, $cert) {
-                        $where = [
-                            'id' => $id,
-                        ];
-                        $UserInfo = [
-                            'cert' => $cert,
-                        ];
-                        DB::table('account')->where($where)->update($UserInfo);
-                    });
+                    $where = [
+                        'id' => $id,
+                    ];
+                    $UserInfo = [
+                        'cert' => $cert,
+                    ];
+                    DB::table('account')->where($where)->update($UserInfo);
 
                     $body = $ServerInfoList['game_server_ip'] . '/' . $ServerInfoList['game_server_port'] . '/' . $cert;
 
                     $sMsg = makeDefaultMsg(ServerState::SM_SELECTSERVER_OK, 0, 0, 0, 0, $body);
                 }
             } else {
-                go(function () use ($account) {
-                    //记录密码错误次数
-                    $sql = 'update account set pas_err_num = pas_err_num + 1 where account="' . $account . '"';
-                    DB::table('account')->query($sql);
-                });
+                //记录密码错误次数
+                $sql = 'update account set pas_err_num = pas_err_num + 1 where account="' . $account . '"';
+                DB::table('account')->query($sql);
 
                 $sMsg = makeDefaultMsg(ServerState::SM_PASSWD_FAIL, -1, 0, 0, 0);
             }
@@ -169,14 +163,10 @@ class User
                 'online' => 1,
             ];
 
-            go(function () use ($where, $UserInfo) {
-                DB::table('account')->where($where)->update($UserInfo);
-            });
+            DB::table('account')->where($where)->update($UserInfo);
         } else {
-            go(function () {
-                $sql = 'update account set online = 1';
-                DB::table('account')->query($sql);
-            });
+            $sql = 'update account set online = 1';
+            DB::table('account')->query($sql);
         }
     }
 
@@ -226,15 +216,13 @@ class User
             //保存随机证书
             $id   = Server::$clientparam[$fd]['UserInfo']['id'];
             $cert = rand(100, 1000);
-            go(function () use ($id, $cert) {
-                $where = [
-                    'id' => $id,
-                ];
-                $UserInfo = [
-                    'cert' => $cert,
-                ];
-                DB::table('account')->where($where)->update($UserInfo);
-            });
+            $where = [
+                'id' => $id,
+            ];
+            $UserInfo = [
+                'cert' => $cert,
+            ];
+            DB::table('account')->where($where)->update($UserInfo);
 
             $body = $info['game_server_ip'] . '/' . $info['game_server_port'] . '/' . $cert;
 

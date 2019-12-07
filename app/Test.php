@@ -5,14 +5,14 @@ use app\Packet\PacketHandler;
 use app\Common\Srp6;
 use app\Packet\ServerState;
 use core\lib\Cache;
-
+use core\pool\MysqlPool;
 class Test
 {
     public function run()
     {
-
-        $a = Cache::drive('redis')->get('Online');
-        var_dump($a);die;
+        // var_dump(MysqlPool::getInstance()->getPoolSize());die;
+        // $a = Cache::drive('redis')->get('Online');
+        // var_dump($a);die;
 
         $data = '#6\DCInXKBsdB>^ehHN<uB<@NP^tzF`KSnyKOl{KSpu{`!';
         $decodePacket = PacketHandler::Decode($data);

@@ -1,4 +1,5 @@
 <?php
+
 namespace core\db;
 
 /**
@@ -14,7 +15,7 @@ class Mypdo
 {
     protected static $_instance      = null;
     protected static $instance_token = array();
-    
+
     protected $dbh;
     public static $dbHost;
     public static $port;
@@ -47,7 +48,7 @@ class Mypdo
      * @return Boolean
      */
     public static function reconnection($_instance)
-    { 
+    {
         echolog("MySQL Reconnecting...", 'warning');
         $token                        = self::$dbHost . self::$port . self::$dbUser . self::$dbPasswd . self::$dbName . self::$dbCharset;
         self::$_instance              = new self(self::$dbHost, self::$port, self::$dbUser, self::$dbPasswd, self::$dbName, self::$dbCharset);
@@ -56,14 +57,14 @@ class Mypdo
         return self::$_instance;
     }
 
-    public function pdo_ping(){
-        try{
+    public function pdo_ping()
+    {
+        try {
             return @$this->dbh->getAttribute(\PDO::ATTR_SERVER_INFO);
         } catch (\PDOException $e) {
             return $this->outputError($e->getMessage());
         }
     }
-
 
     /**
      * 防止克隆
@@ -77,16 +78,16 @@ class Mypdo
      *
      * @return Object
      */
-    public static function getInstance($dbHost, $port, $dbUser, $dbPasswd, $dbName, $dbCharset)
+    public static function getInstance($dbHost, $port, $dbUser, $dbPasswd, $dbName, $dbCharset, $number = -1)
     {
-        self::$dbHost = $dbHost;
-        self::$port = $port;
-        self::$dbUser = $dbUser;
-        self::$dbPasswd = $dbPasswd;
-        self::$dbName = $dbName;
+        self::$dbHost    = $dbHost;
+        self::$port      = $port;
+        self::$dbUser    = $dbUser;
+        self::$dbPasswd  = $dbPasswd;
+        self::$dbName    = $dbName;
         self::$dbCharset = $dbCharset;
 
-        $token = $dbHost . $port . $dbUser . $dbPasswd . $dbName . $dbCharset;
+        $token = serialize($dbHost . $port . $dbUser . $dbPasswd . $dbName . $dbCharset . $number);
 
         if (array_key_exists($token, self::$instance_token)) {
             if (false == (self::$instance_token[$token] instanceof self)) {
@@ -225,7 +226,6 @@ class Mypdo
             if ($debug === true) {
                 $this->debug($strSql);
             }
-
             $result = $this->dbh->exec($strSql);
             $this->getPDOError();
             return $result;
@@ -244,6 +244,7 @@ class Mypdo
         if ($debug === true) {
             $this->debug($strSql);
         }
+
 
         $result = $this->dbh->exec($strSql);
         $this->getPDOError();

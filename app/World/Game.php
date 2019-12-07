@@ -5,6 +5,7 @@ use app\Connection;
 use app\Packet\PacketHandler;
 use app\Packet\ServerState;
 use core\query\DB;
+use app\Reflection;
 
 /**
  *
@@ -63,7 +64,7 @@ class Game
 
     	PacketHandler::GetValidStr3($data, $info, "\t");
 
-    	//TODO暂时没搞懂干啥的
+    	//TODO 暂时没搞懂干啥的
     	$g_nMakeMagicDataLen = '';
     	$g_nMissionDataLen = 0;
 
@@ -114,9 +115,7 @@ class Game
     public static function LoginNoticeOk($serv, $fd, $data = null)
     {
         //加入游戏在线池(同步数据用)
-        go(function () use ($fd) {
-            Connection::saveOnline($fd);
-        });
+        Connection::saveOnline($fd);
     }
 
     //登录游戏

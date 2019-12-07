@@ -175,6 +175,8 @@ class OpCode
         WORLD_LOG('Load Opcode Success , The total number: ' . count($OpCodeList), 'success');
 
         self::$OpCodeMap = $OpCodeList;
+
+        return self::$OpCodeMap;
     }
 
     //获取操作码

@@ -1,5 +1,6 @@
 <?php
 namespace app;
+use core\lib\Cache;
 
 /**
  * opcode映射
@@ -105,6 +106,17 @@ class Reflection
         if (env('MSG_DEBUG', false)) {
             WORLD_LOG("Send: " . $packdata, 'info');
         }
+
+        // if($num = Cache::drive('redis')->get('key'))
+        // {
+        //     $num+=1;
+        //     Cache::drive('redis')->set('key',$num,10);
+        // }else{
+        //     $num = 1;
+        //     Cache::drive('redis')->set('key',1,10);
+        // }
+
+        // WORLD_LOG("返回 " . $num.' 次', 'success');
 
         $serv->send($fd, $packdata);
     }

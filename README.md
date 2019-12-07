@@ -86,11 +86,11 @@ https://github.com/fan3750060/pmir2
 
 git clone https://github.com/fan3750060/pmir2.git
 
-    Php version >= 7.0
+    Php version >= 7.2.3
 
-    Swoole version >= 2.0
+    Swoole version >= 4.4.12
 
-    redis version >= 2.2
+    redis version >= 3.2.0
 
 ## 运行 Run
 Linux:

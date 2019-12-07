@@ -145,7 +145,7 @@ class Connection
 
                 $createTime = $v["createTime"];
 
-                if ($createTime < strtotime("-300 seconds")) {
+                if ($createTime < strtotime("-240 seconds")) {
 
                     WORLD_LOG("Expired! Remove and close : " . $v['fd']);
 

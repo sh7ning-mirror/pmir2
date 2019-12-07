@@ -4,12 +4,11 @@ namespace app;
 use app\Auth\User;
 use app\Common\Checksystem;
 use app\Common\DbService;
-use app\Message;
 use app\Packet\OpCode;
 use app\Reflection;
 use app\Socket\SwooleTcp;
-use core\lib\Cache;
 use app\World\GameTimer;
+use core\lib\Cache;
 use core\pool\MysqlPool;
 use core\pool\RedisPool;
 
@@ -20,8 +19,11 @@ class Server
 {
     public static $clientparam = [];
     public static $ServerConfig;
+    public static $serv;
 
     public $active;
+
+    public static $DBSERVER;
 
     /**
      * [start 开始]
@@ -89,7 +91,7 @@ class Server
                 ],
             ];
 
-            $this->serv = SwooleTcp::Listen('0.0.0.0', self::$ServerConfig['login_server_port'], new self(), $other);
+            self::$serv = SwooleTcp::Listen('0.0.0.0', self::$ServerConfig['login_server_port'], new self(), $other);
         } else {
             WORLD_LOG('Error: Did not start the service according to the process...');
         }
@@ -103,12 +105,100 @@ class Server
     public function onStart($serv)
     {
         // 设置进程名称
-        @cli_set_process_title("wow_mir2_master");
+        cli_set_process_title("swoole_mir2_master");
         WORLD_LOG("Start");
     }
 
+    public function onShutdown()
+    {
+        WORLD_LOG("onShutdown");
+    }
+
+    //管理进程启动回调
+    public function onManagerStart($serv) {
+        WORLD_LOG("onManagerStart");
+        swoole_set_process_name("swoole_mir2_manager");
+
+        $OpCodeMap = OpCode::LoadOpCode(); //载入操作码
+
+        for ($i=1; $i <= $serv->setting['worker_num']; $i++) {
+            $serv->sendMessage($OpCodeMap,$i);
+        }
+    }
+
+    //管理进程关闭回调
+    public function onManagerStop($serv) {
+        WORLD_LOG("onManagerStop");
+        $serv->shutdown();
+    }
+
+    public function onpipeMessage($serv, $src_worker_id, $data)
+    {
+        OpCode::$OpCodeMap = $data;
+    }
+
     /**
-     * Server在workerExit释放连接池资源
+     * 此事件在worker进程/task进程启动时发生
+     *
+     * @param swoole_server $serv
+     * @param int $worker_id
+     */
+    public function onWorkerStart($serv, $worker_id)
+    {
+        WORLD_LOG("onWorkerStart");
+
+        swoole_set_process_name("swoole_mir2_work_".$worker_id);
+
+        // if(!OpCode::$OpCodeMap)
+        // {
+        //     OpCode::LoadOpCode();
+        // }
+
+        if (!$serv->taskworker) {
+            // //监控mysql连接池
+            // $serv->tick(1000 * 60, function ($id) use ($serv,$worker_id) {
+            //     $size = MysqlPool::getInstance()->getPoolSize();
+            //     echolog(' work: '.$worker_id.' mysql connection pools: ' . $size, 'info');
+            // });
+
+            //监控redis连接池
+            $serv->tick(1000 * 60, function ($id) use ($serv,$worker_id) {
+                $size = RedisPool::getInstance()->getPoolSize();
+                echolog(' work: '.$worker_id.' redis connection pools: ' . $size, 'info');
+            });
+        }
+        
+        if ($worker_id == 0) {
+            if (!$serv->taskworker) {
+
+                //清理非法连接
+                $serv->tick(1000 * 60, function ($id) use ($serv) {
+                    Connection::clearInvalidConnection($serv);
+                });
+
+                //在线公告
+                $serv->tick(1000 * 60 * 3, function ($id) use ($serv) {
+                    GameTimer::SendGroupMessage($serv);
+                });
+
+                //离线后更新数据库为下线
+                $serv->tick(1000 * 60 * 3, function ($id) use ($serv) {
+                    GameTimer::OfflineProcessingStatus($serv);
+                });
+
+                Connection::delOnline();
+
+                User::Offline(); //全部下线
+
+                Cache::drive('redis')->delete('checkconnector');
+            }
+
+            WORLD_LOG("start timer finished");
+        }
+    }
+
+    /**
+     * Server在workerExit 退出
      *
      * @param unknown $serv
      */
@@ -116,8 +206,17 @@ class Server
     {
         MysqlPool::getInstance()->destruct();
         RedisPool::getInstance()->destruct();
+        echolog('Exit Worker');
+    }
 
-        echolog('WorkerExit Release connection pool');
+    /**
+     * Server worker结束
+     *
+     * @param unknown $serv
+     */
+    public function onWorkerStop($serv)
+    {
+         WORLD_LOG("Stop Worker");
     }
 
     /**
@@ -129,10 +228,6 @@ class Server
      */
     public function onConnect($serv, $fd, $from_id)
     {
-        if (!OpCode::$OpCodeMap) {
-            OpCode::LoadOpCode(); //载入操作码
-        }
-
         $this->clearcache($fd);
 
         WORLD_LOG("Client {$fd} connect");
@@ -160,14 +255,16 @@ class Server
 
         $info = $serv->connection_info($fd, $from_id);
 
-        if ($info['server_port'] == self::$ServerConfig['login_server_port']) {
-            (new Message())->serverreceive($serv, $fd, $data);
+        go(function () use ($serv, $fd, $data, $info) {
+            if ($info['server_port'] == self::$ServerConfig['login_server_port']) {
+                (new Message())->serverreceive($serv, $fd, $data);
 
-        } elseif ($info['server_port'] == self::$ServerConfig['game_server_port']) {
-            (new Message())->serverreceive($serv, $fd, $data);
-        }
+            } elseif ($info['server_port'] == self::$ServerConfig['game_server_port']) {
+                (new Message())->serverreceive($serv, $fd, $data);
+            }
+        });
 
-        WORLD_LOG("Continue Handle Worker");
+        WORLD_LOG("Continue Handle Worker ".$from_id);
     }
 
     /**
@@ -186,61 +283,6 @@ class Server
         Connection::removeConnector($fd);
 
         WORLD_LOG("Client {$fd} close connection\n");
-    }
-
-    /**
-     * 此事件在worker进程/task进程启动时发生
-     *
-     * @param swoole_server $serv
-     * @param int $worker_id
-     */
-    public function onWorkerStart($serv, $worker_id)
-    {
-        WORLD_LOG("onWorkerStart");
-
-        if ($worker_id == 0) {
-            if (!$serv->taskworker) {
-
-                //清理非法连接
-                $serv->tick(1000*10, function ($id) use ($serv) {
-                    Connection::clearInvalidConnection($serv);
-                });
-
-                //监控mysql连接池
-                $serv->tick(1000*30, function ($id) use ($serv) {
-                    $size = MysqlPool::getInstance()->getPoolSize();
-                    echolog('Current number of mysql connection pools:'.$size,'info');
-                });
-
-                //监控redis连接池
-                $serv->tick(1000*30, function ($id) use ($serv) {
-                    $size = RedisPool::getInstance()->getPoolSize();
-                    echolog('Current number of redis connection pools:'.$size,'info');
-                });
-
-                //在线公告
-                $serv->tick(1000*60*3, function ($id) use ($serv) {
-                    GameTimer::SendGroupMessage($serv);
-                });
-
-                //离线后更新数据库为下线
-                $serv->tick(1000*60*3, function ($id) use ($serv) {
-                    GameTimer::OfflineProcessingStatus($serv);
-                });
-
-            } else {
-                $serv->addtimer(5000);
-            }
-
-            WORLD_LOG("start timer finished");
-
-            // 将在线连建池清空
-            Connection::delOnline();
-
-            User::Offline(); //全部下线
-            
-            Cache::drive('redis')->delete('checkconnector');
-        }
     }
 
     //清空redis
