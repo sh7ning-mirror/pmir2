@@ -33,6 +33,7 @@ class ObjectService
         'Settings'      => 'App\Controller\Game\Settings',
         'SendMsg'       => 'App\Controller\SendMsg',
         'MsgFactory'    => 'App\Controller\Game\MsgFactory',
+        'MapObject'     => 'App\Controller\Game\MapObject',
     ];
 
     public static function getObject($objectName = null)

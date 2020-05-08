@@ -75,16 +75,12 @@ class Map
             return false;
         }
 
-        // $c = $this->getCell($p['Map'],$p['CurrentLocation']);
-        // if(!empty($c))
-        // {
-
-        //     return fmt.Sprintf("pos: %s is not walkable\n", obj.GetPoint()), false
-        // }
-        // c.AddObject(obj)
-
         getObject('GameData')->setMapPlayers($p['Map']['Info']['id'], $p);
-        // getObject('GameData')->setMapPlayers($p['Map']['Info']['id'], $p);
+    }
+
+    public function deleteObject($p)
+    {
+        getObject('GameData')->delMapPlayers($p['Map']['Info']['id'], $p);
     }
 
     public function getCell($m, $point)
@@ -124,12 +120,16 @@ class Map
 
     public function broadcastP($currentPoint, $msg, $me)
     {
-        $players = getObject('GameData')->getMapPlayers($me['Map']['Info']['id']);
+        $GameData = getObject('GameData');
+        $objectPl = getObject('PlayerObject');
+
+        $players = $GameData->getMapPlayers($me['Map']['Info']['id']);
 
         $Point   = getObject('Point');
         $SendMsg = getObject('SendMsg');
 
-        foreach ($players as $k => $player) {
+        foreach ($players as $k => $v) {
+            $player = $objectPl->getPlayer($v['fd']);
             if ($Point->inRange($currentPoint, $player['CurrentLocation'], $this->DataRange)) {
                 if ($player['ID'] != $me['ID']) {
                     $SendMsg->send($player['fd'], $msg);
@@ -141,5 +141,58 @@ class Map
     public function rangeObject()
     {
         # code...
+    }
+
+    public function updateObject($object, $point, $type)
+    {
+        $Enum         = getObject('Enum');
+        $objectPlayer = getObject('PlayerObject');
+        $MsgFactory   = getObject('MsgFactory');
+        $Monster      = getObject('Monster');
+
+        switch ($type) {
+            case $Enum::ObjectTypePlayer:
+                $objectPlayer->broadcast($object, ['OBJECT_PLAYER',$MsgFactory->objectPlayer($object)]);
+                $objectPlayer->enqueueAreaObjects($object, $this->getCell($object['Map'], $object['CurrentLocation']), null);
+                break;
+
+            case $Enum::ObjectTypeMonster:
+                $Monster->broadcast($object, $MsgFactory->objectMonster($object));
+                break;
+        }
+
+        return true;
+    }
+
+    //检查是否开门
+    public function checkDoorOpen($map_id, $point)
+    {
+        $mapInfo = getObject('GameData')->getMap($map_id);
+
+        $objectDoor = getObject('Door');
+
+        $door = $objectDoor->get($mapInfo['doorsMap'], $point);
+        if (!$door) {
+            return true;
+        }
+
+        return $objectDoor->isOpen($door);
+    }
+
+    public function openDoor($map_id, $doorindex)
+    {
+        $mapInfo    = getObject('GameData')->getMap($map_id);
+        $objectDoor = getObject('Door');
+
+        $door = $mapInfo['doors'][$doorindex] ?: null;
+
+        if (!$door) {
+            EchoLog(sprintf('此区域没有门: %s', $doorindex), 'e');
+            return false;
+        }
+
+        $objectDoor->setOpen($map_id, $doorindex, true);
+
+        return true;
     }
 }

@@ -443,6 +443,7 @@ class Enum
     const BuffTypeWonderDrug      = 208;
     const BuffTypeKnapsack        = 209;
 
+    const Monster                   = 0;
     const MonsterGuard              = 0;
     const MonsterTaoistGuard        = 1;
     const MonsterGuard2             = 2;

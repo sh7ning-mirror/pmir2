@@ -39,7 +39,6 @@ class Door
 
     public function Set($m, $loc, $d)
     {
-
         if ($this->In($m, $loc)) {
 
             if (empty($m['doorsMap']['Grid'][$loc['X']])) {
@@ -50,5 +49,25 @@ class Door
 
             return $m['doorsMap'];
         }
+    }
+
+    public function get($doorsMap,$point)
+    {
+        if(empty($doorsMap['Grid'][$point['X']][$point['Y']]))
+        {
+            return null;
+        }
+
+        return $doorsMap['Grid'][$point['X']][$point['Y']];
+    }
+
+    public function isOpen($door)
+    {
+        return $door['State'] == 2;
+    }
+
+    public function setOpen($map_id, $doorindex, $open)
+    {
+        // TODO 需要做定时器关门,并同步给玩家
     }
 }

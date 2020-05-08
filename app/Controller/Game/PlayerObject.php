@@ -350,7 +350,7 @@ class PlayerObject
 
         $this->refreshStats($p);
 
-        $this->enqueueQuestInfo($p);//任务
+        $this->enqueueQuestInfo($p); //任务
 
         $SendMsg->send($p['fd'], ['MAP_INFORMATION', $p['Map']['Info']]);
 
@@ -378,7 +378,6 @@ class PlayerObject
         $Server->send($p['fd'], bytesToString([52, 0, 59, 0, 174, 168, 1, 0, 9, 231, 168, 187, 232, 141, 137, 228, 186, 186, 255, 255, 255, 255, 33, 1, 0, 0, 106, 2, 0, 0, 5, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
         $Server->send($p['fd'], bytesToString([48, 0, 77, 0, 170, 161, 1, 0, 16, 232, 190, 185, 229, 162, 131, 230, 157, 145, 95, 229, 145, 138, 231, 164, 186, 0, 255, 0, 255, 45, 0, 0, 0, 0, 0, 28, 1, 0, 0, 103, 2, 0, 0, 0, 0, 0, 0, 0]));
         $Server->send($p['fd'], bytesToString([46, 0, 59, 0, 122, 168, 1, 0, 3, 233, 185, 191, 255, 255, 255, 255, 28, 1, 0, 0, 105, 2, 0, 0, 4, 0, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
-        
 
         $this->setPlayer($p['fd'], $p);
     }
@@ -753,12 +752,106 @@ class PlayerObject
     public function enqueueAreaObjects($p, $oldCell, $newCell)
     {
         if ($oldCell == null) {
-            getObject('Map')->rangeObject($p['CurrentLocation'], 20);
+            // getObject('Map')->rangeObject($p['CurrentLocation'], 20);
         }
     }
 
     public function getCell($map, $CurrentLocation)
     {
         return getObject('Map')->getCell($map, $CurrentLocation);
+    }
+
+    //检查可以地图跳转
+    public function checkMovement($point, &$p)
+    {
+        $GameData = getObject('GameData');
+
+        $movementInfos = $GameData->getMovementInfos();
+
+        $maps = $GameData->getMap();
+
+        foreach ($movementInfos as $k => $v) {
+            if ($v['source_map'] == $p['Map']['Info']['id']) {
+                if ($point['X'] == $v['source_x'] && $point['Y'] == $v['source_y']) {
+                    $m = $maps[$v['destination_map']] ?: null;
+                    if (!$m) {
+                        EchoLog(sprintf('未知的地图ID: %s', $maps[$v['destination_map']]), 'e');
+                    }
+
+                    $this->teleport($p, $m, ['X' => $v['destination_x'], 'Y' => $v['destination_y']]);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function teleport(&$p, $m, $point)
+    {
+        $objectMap = getObject('Map');
+        $SendMsg   = getObject('SendMsg');
+        $oldMap    = $p['Map'];
+
+        if (!$objectMap->inMap($m, $point['X'], $point['Y'])) {
+            return false;
+        }
+
+        $objectMap->deleteObject($p);
+
+        $this->broadcast($p, ['OBJECT_TELEPORT_OUT', ['ObjectID' => $p['ID'], 'Type' => 0]]);
+        $this->broadcast($p, ['OBJECT_REMOVE', ['ObjectID' => $p['ID']]]);
+
+        $p['Map']             = $m;
+        $p['CurrentLocation'] = $point;
+
+        $objectMap->addObject($p);
+
+        $this->broadcastInfo($p); //广播人物
+
+        $this->broadcast($p, ['OBJECT_TELEPORT_OUT', ['ObjectID' => $p['ID'], 'Type' => 0]]);
+        $this->broadcast($p, ['OBJECT_TELEPORT_IN', ['ObjectID' => $p['ID'], 'Type' => 0]]);
+
+        $this->broadcastHealthChange($p);
+
+        $SendMsg->send($p['fd'], ['MAP_CHANGED', [
+            'FileName'     => $m['Info']['file_name'],
+            'Title'        => $m['Info']['title'],
+            'MiniMap'      => $m['Info']['mini_map'],
+            'BigMap'       => $m['Info']['big_map'],
+            'Lights'       => $m['Info']['light'],
+            'Location'     => $p['CurrentLocation'],
+            'Direction'    => $p['CurrentDirection'],
+            'MapDarkLight' => $m['Info']['map_dark_light'],
+            'Music'        => $m['Info']['music'],
+        ]]);
+
+        $this->enqueueAreaObjects($p, null, $this->getCell($p['Map'], $p['CurrentLocation']));
+
+        $SendMsg->send($p['fd'], ['OBJECT_TELEPORT_IN', ['ObjectID' => $p['ID'], 'Type' => 0]]);
+    }
+
+    public function broadcastInfo($p)
+    {
+        $this->broadcast($p, ['OBJECT_PLAYER', getObject('MsgFactory')->objectPlayer($p)]);
+    }
+
+    //广播血值状态
+    public function broadcastHealthChange($p)
+    {
+        $msg = getObject('MapObject')->iMapObject_BroadcastHealthChange($p, getObject('Enum')::ObjectTypePlayer);
+
+        $this->broadcast($p, ['OBJECT_HEALTH', $msg]);
+    }
+
+    //开门
+    public function openDoor($p, $doorIndex)
+    {
+        $SendMsg = getObject('SendMsg');
+
+        if (getObject('Map')->openDoor($p['Map']['Info']['id'], $doorIndex)) {
+            $SendMsg->send($p['fd'], ['OPENDOOR', ['DoorIndex' => $doorIndex,'Close'=>false]]);
+            $this->broadcast($p, ['OPENDOOR', ['DoorIndex' => $doorIndex,'Close'=>false]]);
+        }
     }
 }

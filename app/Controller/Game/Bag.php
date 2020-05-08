@@ -79,7 +79,7 @@ class Bag
                 'count' => $count,
             ];
 
-            getObject('CommonService')->upfuild('user_item', $where, $data);
+            getObject('CommonService')->upField('user_item', $where, $data);
 
             $Inventory['Items'][$i]['count'] = $count;
         }

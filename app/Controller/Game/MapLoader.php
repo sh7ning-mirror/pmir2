@@ -196,13 +196,13 @@ class MapLoader
 
         $CellAttributeWalk = getObject('Enum')::CellAttributeWalk;
 
-        for ($x = 0; $x < $width; $x++) {
-            // $star_memory = memory_get_usage();
-            // EchoLog(sprintf(PHP_EOL . '开始内存：%s', ($star_memory / 1024 / 1024)));
+        // $star_memory = memory_get_usage();
+        // EchoLog(sprintf(PHP_EOL . '开始内存：%s', ($star_memory / 1024 / 1024)));
 
+        for ($x = 0; $x < $width; $x++) {
             for ($y = 0; $y < $height; $y++) {
 
-                $cell = null;
+                // $cell = null;
                 // if ((uInt32(substr($fileBytes, $offset)) ^ 0xAA38AA38 & 0x20000000) != 0) {
                 //     $cell = $this->HighWallCell;
                 // }
@@ -212,23 +212,20 @@ class MapLoader
                 //     $cell = $this->LowWallCell;
                 // }
 
-                if ($cell == null) {
-                    $cell = [
-                        'Point'     => [],
-                        'Attribute' => $CellAttributeWalk,
-                        'objects'   => [],
-                    ];
-                }
+                // if ($cell == null) {
+                //     $cell = [
+                //         'Point'     => [],
+                //         'Attribute' => $CellAttributeWalk,
+                //         'objects'   => [],
+                //     ];
+                // }
 
-                $point = [
-                    'X' => $x,
-                    'Y' => $y,
-                ];
+                $point = ['X' => $x,'Y' => $y];
 
-                if ($cell['Attribute'] == $CellAttributeWalk) {
-                    $cell['Point'] = $point;
-                    // $m['cells'][$point['X'] + $point['Y'] * $m['Width']] = $cell;
-                }
+                // if ($cell['Attribute'] == $CellAttributeWalk) {
+                //     $cell['Point'] = $point;
+                //     $m['cells'][$point['X'] + $point['Y'] * $m['Width']] = $cell;
+                // }
 
                 $offset += 2;
                 $b = stringToBytes(substr($fileBytes, $offset, 1))[0];
@@ -239,30 +236,22 @@ class MapLoader
                 $offset += 5;
 
                 $offset += 1 + 1;
-            }
 
-            // $end_memory = memory_get_usage();
-            // EchoLog(sprintf(PHP_EOL . '运行后内存：%s', ($end_memory / 1024 / 1024)));
-            // EchoLog(sprintf(PHP_EOL . '差值：%s',(($end_memory - $star_memory) / 1024 / 1024)));
+                $point = null;
+                unset($point);
+            }
         }
+
+        // $end_memory = memory_get_usage();
+        // EchoLog(sprintf(PHP_EOL . '运行后内存：%s', ($end_memory / 1024 / 1024)));
+        // EchoLog(sprintf(PHP_EOL . '差值：%s',(($end_memory - $star_memory) / 1024 / 1024)));
 
         return $m;
     }
 
-    public function AddDoor($m, $doorindex, $loc)
+    public function AddDoor(&$m, $doorindex, $loc)
     {
-        if (!empty($m['doors'])) {
-            foreach ($m['doors'] as $d) {
-                if ($d['Index'] == $doorindex) {
-                    return $d;
-                }
-            }
-        } else {
-            $m['doors'] = [];
-        }
-
         $door = [
-            'Map'      => $m,
             'Index'    => $doorindex,
             'State'    => 0,
             'LastTick' => null,
@@ -271,29 +260,7 @@ class MapLoader
 
         $m['doors'][$doorindex] = $door;
 
-        $m['doorsMap'] = $this->Set($m, $loc, $door);
-
-        return $m;
-    }
-
-    public function In($m, $loc)
-    {
-        return $loc['X'] < $m['doorsMap']['W'] && $loc['Y'] < $m['doorsMap']['H'];
-    }
-
-    public function Set($m, $loc, $d)
-    {
-
-        if ($this->In($m, $loc)) {
-
-            if (empty($m['doorsMap']['Grid'][$loc['X']])) {
-                $m['doorsMap']['Grid'][$loc['X']] = [];
-            }
-
-            $m['doorsMap']['Grid'][$loc['X']][$loc['Y']] = $d;
-
-            return $m['doorsMap'];
-        }
+        $m['doorsMap'] = getObject('Door')->Set($m, $loc, $door);
     }
 
     public function GetMapV2($fileBytes)

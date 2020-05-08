@@ -442,7 +442,7 @@ class AuthHandler
         $user_magic = getObject('CommonService')->getList('user_magic', $where);
 
         getObject('SendMsg')->send($fd, ['SET_CONCENTRATION', ['ObjectID' => $PlayerObject['AccountID'], 'Enabled' => 0, 'Interrupted' => 0]]);
-        
+
         getObject('SendMsg')->send($fd, ['START_GAME', ['Result' => 4, 'Resolution' => $Enum::AllowedResolution]]);
 
         getObject('PlayerObject')->updatePlayerInfo($PlayerObject, $accountCharacter['data'], $user_magic['list']);

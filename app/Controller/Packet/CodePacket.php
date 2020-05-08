@@ -16,7 +16,7 @@ class CodePacket
             'Time' => 'int64',
         ],
         'NEW_ACCOUNT'      => [
-            'account'      => 'string',
+            'account'        => 'string',
             'Password'       => 'string',
             'DateTime'       => 'int64',
             'UserName'       => 'string',
@@ -25,7 +25,7 @@ class CodePacket
             'EMailAddress'   => 'string',
         ],
         'CHANGE_PASSWORD'  => [
-            'account'       => 'string',
+            'account'         => 'string',
             'CurrentPassword' => 'string',
             'NewPassword'     => 'string',
         ],
@@ -55,6 +55,13 @@ class CodePacket
         ],
         'LOG_OUT'          => [
 
+        ],
+        'CHAT'             => [
+            'Message' => 'string',
+            'Type'    => 'uint8',
+        ],
+        'OPENDOOR'         => [
+            'DoorIndex' => 'uint8',
         ],
     ];
 
@@ -220,8 +227,23 @@ class CodePacket
             'Message' => 'string',
             'Type'    => 'uint8',
         ],
-
         'OBJECT_WALK'              => [
+            'ObjectID'  => 'uint32',
+            'Location'  => [
+                'X' => 'uint32',
+                'Y' => 'uint32',
+            ],
+            'Direction' => 'uint8',
+        ],
+        'OBJECT_RUN'               => [
+            'ObjectID'  => 'uint32',
+            'Location'  => [
+                'X' => 'uint32',
+                'Y' => 'uint32',
+            ],
+            'Direction' => 'uint8',
+        ],
+        'OBJECT_TURN'              => [
             'ObjectID'  => 'uint32',
             'Location'  => [
                 'X' => 'uint32',
@@ -427,6 +449,102 @@ class CodePacket
         ],
         'OBJECT_REMOVE'            => [
             'ObjectID' => 'uint32',
+        ],
+
+        'OBJECT_TELEPORT_OUT'      => [
+            'ObjectID' => 'uint32',
+            'Type'     => 'uint8',
+        ],
+        'OBJECT_PLAYER'            => [
+            'ObjectID'         => 'uint32',
+            'Name'             => 'string',
+            'GuildName'        => 'string',
+            'GuildRankName'    => 'string',
+            'NameColor'        => 'int32',
+            'Class'            => 'uint8',
+            'Gender'           => 'uint8',
+            'Level'            => 'uint16',
+            'Location'         => [
+                'X' => 'uint32',
+                'Y' => 'uint32',
+            ],
+            'Direction'        => 'uint8',
+            'Hair'             => 'uint8',
+            'Light'            => 'uint8',
+            'Weapon'           => 'int16',
+            'WeaponEffect'     => 'int16',
+            'Armour'           => 'int16',
+            'Poison'           => 'uint16', //TODO
+            'Dead'             => 'bool',
+            'Hidden'           => 'bool',
+            'Effect'           => 'uint8',
+            'WingEffect'       => 'uint8',
+            'Extra'            => 'bool',
+            'MountType'        => 'int16',
+            'RidingMount'      => 'bool',
+            'Fishing'          => 'bool',
+            'TransformType'    => 'int16',
+            'ElementOrbEffect' => 'uint32',
+            'ElementOrbLvl'    => 'uint32',
+            'ElementOrbMax'    => 'uint32',
+            'Buffs'            => [
+                'BuffType' => 'uint8',
+            ],
+            'LevelEffects'     => 'uint8',
+        ],
+        'OBJECT_TELEPORT_IN'       => [
+            'ObjectID' => 'uint32',
+            'Type'     => 'uint8',
+        ],
+        'OBJECT_HEALTH'            => [
+            'ObjectID' => 'uint32',
+            'Percent'  => 'uint8',
+            'Expire'   => 'uint8',
+        ],
+        'MAP_CHANGED'              => [
+            'FileName'     => 'string',
+            'Title'        => 'string',
+            'MiniMap'      => 'uint16',
+            'BigMap'       => 'uint16',
+            'Lights'       => 'uint8',
+            'Location'     => [
+                'X' => 'uint32',
+                'Y' => 'uint32',
+            ],
+            'Direction'    => 'uint8',
+            'MapDarkLight' => 'uint8',
+            'Music'        => 'uint16',
+        ],
+        'OBJECT_MONSTER'           => [
+            'ObjectID'          => 'uint32',
+            'Name'              => 'string',
+            'NameColor'         => 'int32',
+            'Location'          => [
+                'X' => 'uint32',
+                'Y' => 'uint32',
+            ],
+            'Image'             => 'uint16',
+            'Direction'         => 'uint8',
+            'Effect'            => 'uint8',
+            'AI'                => 'uint8',
+            'Light'             => 'uint8',
+            'Dead'              => 'bool',
+            'Skeleton'          => 'bool',
+            'Poison'            => 'uint16',
+            'Hidden'            => 'bool',
+            'ShockTime'         => 'int64',
+            'BindingShotCenter' => 'bool',
+            'Extra'             => 'bool',
+            'ExtraByte'         => 'uint8',
+        ],
+        'OBJECT_CHAT'              => [
+            'ObjectID' => 'uint32',
+            'Text'     => 'string',
+            'Type'     => 'uint8',
+        ],
+        'OPENDOOR'                 => [
+            'DoorIndex' => 'uint8',
+            'Close'     => 'bool',
         ],
     ];
 

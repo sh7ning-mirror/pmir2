@@ -437,9 +437,14 @@ class GameData
         return $itemIDInfoMap[$ItemID] ?: null;
     }
 
-    public function getMap($mapId)
+    public function getMap($mapId = null)
     {
         $Maps = json_decode(getObject('Redis')->get('Maps'), true);
+
+        if ($mapId == null) {
+            return $Maps;
+        }
+
         return $Maps[$mapId] ?: null;
     }
 
@@ -511,19 +516,42 @@ class GameData
         return $output;
     }
 
+    //获取地图中人物
     public function getMapPlayers($map_id)
     {
         $key = 'map:players_' . $map_id;
         return json_decode(getObject('Redis')->get($key), true);
     }
 
+    //添加地图人物
     public function setMapPlayers($map_id, $p)
     {
         $key = 'map:players_' . $map_id;
 
-        $mapPlayers   = $this->getMapPlayers($map_id);
-        $mapPlayers[] = $p;
+        $mapPlayers           = $this->getMapPlayers($map_id) ?: [];
+        $mapPlayers[$p['ID']] = [
+            'fd'   => $p['fd'],
+            'ID'   => $p['ID'],
+            'Name' => $p['Name'],
+        ];
 
         getObject('Redis')->set($key, json_encode($mapPlayers, JSON_UNESCAPED_UNICODE));
+    }
+
+    //删除地图人物
+    public function delMapPlayers($map_id, $p)
+    {
+        $key        = 'map:players_' . $map_id;
+        $mapPlayers = $this->getMapPlayers($map_id);
+
+        $mapPlayers[$p['ID']] = null;
+        unset($mapPlayers[$p['ID']]);
+
+        getObject('Redis')->set($key, json_encode($mapPlayers, JSON_UNESCAPED_UNICODE));
+    }
+
+    public function getMovementInfos()
+    {
+        return json_decode(getObject('Redis')->get('movementInfos'), true);
     }
 }

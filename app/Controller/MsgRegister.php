@@ -22,5 +22,7 @@ class MsgRegister
         'RUN'              => ['\App\Controller\World\Handler', 'run'],
         'TURN'             => ['\App\Controller\World\Handler', 'turn'],
         'LOG_OUT'          => ['\App\Controller\World\Handler', 'logOut'],
+        'CHAT'             => ['\App\Controller\World\Handler', 'chat'],
+        'OPENDOOR'         => ['\App\Controller\World\Handler', 'openDoor'],
     ];
 }

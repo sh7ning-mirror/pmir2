@@ -64,34 +64,53 @@ class Server extends AbstractController
     public function onReceive($server, $fd, $reactorId, $data)
     {
         //处理黏包(这里只需要将黏在一起的同一批tcp消息进行处理,底层已经实现单次tcp的收发)
-        $strlen    = strlen($data);
-        $dataArray = [];
-        $i         = 0;
-        while ($i < $strlen) {
-            $size        = unpack('s', substr($data, $i))[1];
-            $dataArray[] = substr($data, $i, $size);
-            $i += $size;
+        // $strlen    = strlen($data);
+        // $dataArray = [];
+        // $i         = 0;
+        // while ($i < $strlen) {
+        //     $size        = unpack('s', substr($data, $i))[1];
+        //     $dataArray[] = substr($data, $i, $size);
+        //     $i += $size;
+        // }
+
+        // co(function () use ($dataArray, $fd) {
+        //     foreach ($dataArray as $k => $v) {
+        //         co(function () use ($fd, $v) {
+        //             $data = getObject('SendMsg')->unPacketData($v);
+
+        //             EchoLog(sprintf('Client: [%s] serverReceive: %s', $fd, json_encode($data, JSON_UNESCAPED_UNICODE)), 'i');
+
+        //             if ($data['cmdName']) {
+        //                 $this->handler($data['cmdName'], $fd, $data);
+        //             }
+        //         });
+        //     }
+        // });
+
+        //看了文档发现swoole有包头包体解析方式,为了性能弃用上面的方式(不过测试1秒1000次并发貌似和上面性能差不多~)
+        $data = getObject('SendMsg')->unPacketData($data);
+
+        EchoLog(sprintf('Client: [%s] serverReceive: %s', $fd, json_encode($data, JSON_UNESCAPED_UNICODE)), 'i');
+
+        if ($data['cmdName']) {
+            $this->handler($data['cmdName'], $fd, $data);
         }
-
-        co(function () use ($dataArray, $fd) {
-            foreach ($dataArray as $k => $v) {
-                co(function () use ($fd, $v) {
-                    $data = getObject('SendMsg')->unPacketData($v);
-
-                    EchoLog(sprintf('Client: [%s] serverReceive: %s', $fd, json_encode($data, JSON_UNESCAPED_UNICODE)), 'i');
-
-                    if ($data['cmdName']) {
-                        $this->handler($data['cmdName'], $fd, $data);
-                    }
-                });
-            }
-        });
     }
 
     public function onClose($server, $fd, $reactorId)
     {
         EchoLog(sprintf('Client: [%s] close IP: [%s]', $fd, $server->getClientInfo($fd)['remote_ip']), 'w');
-        $this->delClientInfo($fd);
+
+        $objectPL = getObject('PlayersList');
+
+        //保存玩家属性
+        $objectPL->saveData($fd);
+
+        //删除玩家
+        $objectPL->delPlayersList($fd);
+
+        //删除连接
+        $objectPL->delClientInfo($fd);
     }
 
     public function onShutdown()
@@ -110,13 +129,5 @@ class Server extends AbstractController
         $key = getClientId($fd);
 
         getObject('Redis')->set($key, json_encode($data, JSON_UNESCAPED_UNICODE));
-    }
-
-    public function delClientInfo(int $fd = null)
-    {
-        $key   = getClientId($fd);
-        $Redis = getObject('Redis');
-        $Redis->del($key);
-        $Redis->del('SessionIDPlayerMap_' . $key);
     }
 }
