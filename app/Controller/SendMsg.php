@@ -36,7 +36,14 @@ class SendMsg
             list($log['cmdName'], $log['res']) = $packetInfo;
         }
 
-        EchoLog(sprintf('Client: [%s] serverSend: %s', $fd, json_encode($log, JSON_UNESCAPED_UNICODE)), 's');
+        $filter = [
+            'KEEP_ALIVE'
+        ];
+        
+        if(!empty($log['cmdName']) && !in_array($log['cmdName'], $filter))
+        {
+            EchoLog(sprintf('Client: [%s] serverSend: %s', $fd, json_encode($log, JSON_UNESCAPED_UNICODE)), 's');
+        }
 
         getObject('Server')->send($fd, $data);
     }

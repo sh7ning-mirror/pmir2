@@ -6,20 +6,25 @@ namespace App\Controller\Game;
  */
 class GameData
 {
+    public $npcInfos;
+    public $respawnInfos;
+    public $safeZoneInfo;
+
     public function loadGameData()
     {
         getObject('Redis')->flushDB(); //清空当前库全部缓存
 
-        $gameShopItems = $this->gameShopItems();
-        $itemInfos     = $this->itemInfos();
-        $magicInfos    = $this->magicInfos();
-        $mapInfos      = $this->mapInfos();
-        $monsterInfos  = $this->monsterInfos();
-        $movementInfos = $this->movementInfos();
-        $npcInfos      = $this->npcInfos();
-        $questInfos    = $this->questInfos();
-        $respawnInfos  = $this->respawnInfos();
-        $safeZoneInfos = $this->safeZoneInfos();
+        $gameShopItems      = $this->gameShopItems();
+        $itemInfos          = $this->itemInfos();
+        $magicInfos         = $this->magicInfos();
+        $monsterInfos       = $this->monsterInfos();
+        $movementInfos      = $this->movementInfos();
+        $defaultNPC         = $this->defaultNPC();
+        $this->npcInfos     = $this->npcInfos();
+        $questInfos         = $this->questInfos();
+        $this->respawnInfos = $this->respawnInfos();
+        $this->safeZoneInfo = $this->safeZoneInfos();
+        $mapInfos           = $this->mapInfos();
 
         EchoLog(sprintf('数据初始化加载 商品:%s 物品:%s 技能:%s 地图:%s 怪物:%s 怪物巡逻:%s NPC:%s 任务:%s 重新生成:%s 安全区:%s',
             $gameShopItems['total'],
@@ -28,10 +33,10 @@ class GameData
             $mapInfos['total'],
             $monsterInfos['total'],
             $movementInfos['total'],
-            $npcInfos['total'],
+            $this->npcInfos['total'],
             $questInfos['total'],
-            $respawnInfos['total'],
-            $safeZoneInfos['total']
+            $this->respawnInfos['total'],
+            $this->safeZoneInfo['total']
         ), null, true);
 
         $this->loadMonsterDrop($monsterInfos['list']); //怪物掉落
@@ -149,6 +154,7 @@ class GameData
 
             $MapLoader = getObject('MapLoader');
             $Redis     = getObject('Redis');
+            $Map       = getObject('Map');
 
             foreach ($res['list'] as $k => $v) {
 
@@ -161,14 +167,16 @@ class GameData
 
                 $Maps[$v['id']] = $m;
 
+                $map_data = $Map->initAll($m, $this->npcInfos['list'], $this->respawnInfos['list'], $this->safeZoneInfo['list']);
+
                 //生成地图缓存
                 $players_key  = 'map:players_' . $v['id'];
                 $npcs_key     = 'map:npcs_' . $v['id'];
                 $monsters_key = 'map:monsters_' . $v['id'];
 
                 $Redis->set($players_key, json_encode([], JSON_UNESCAPED_UNICODE));
-                $Redis->set($npcs_key, json_encode([], JSON_UNESCAPED_UNICODE));
-                $Redis->set($monsters_key, json_encode([], JSON_UNESCAPED_UNICODE));
+                $Redis->set($npcs_key, json_encode($map_data['npc'], JSON_UNESCAPED_UNICODE));
+                $Redis->set($monsters_key, json_encode($map_data['monsters'], JSON_UNESCAPED_UNICODE));
             }
 
             $etime = microtime(true);
@@ -315,6 +323,8 @@ class GameData
                 continue;
             }
 
+            $content = removeBOM($content); //去除bom头
+
             $txt = preg_replace("/\s(?=\s)/", "\\1", $content);
 
             $content = explode(' ', $txt);
@@ -385,6 +395,8 @@ class GameData
                 continue;
             }
 
+            $txt = removeBOM($txt); //去除bom头
+
             $content = str_replace('Level', '', $txt);
             $content = explode('=', $content);
 
@@ -402,7 +414,7 @@ class GameData
 
             $num++;
         }
-
+        fclose($fp);
         getObject('Redis')->set('expList', json_encode($data, JSON_UNESCAPED_UNICODE));
     }
 
@@ -516,6 +528,13 @@ class GameData
         return $output;
     }
 
+    //获取地图所有npc
+    public function getMapNpc($map_id)
+    {
+        $key = 'map:npcs_' . $map_id;
+        return json_decode(getObject('Redis')->get($key), true);
+    }
+
     //获取地图中人物
     public function getMapPlayers($map_id)
     {
@@ -553,5 +572,37 @@ class GameData
     public function getMovementInfos()
     {
         return json_decode(getObject('Redis')->get('movementInfos'), true);
+    }
+
+    public function defaultNPC()
+    {
+        $defaultNPC = getObject('Npc')->newNpc(null, getObject('Atomic')->newObjectID(), [
+            'map_id'         => '',
+            'file_name'      => '00Default',
+            'name'           => 'DefaultNPC',
+            'chinese_name'   => '',
+            'location_x'     => '',
+            'location_y'     => '',
+            'rate'           => '',
+            'image'          => '',
+            'time_visible'   => '',
+            'hour_start'     => '',
+            'minute_start'   => '',
+            'hour_end'       => '',
+            'minute_end'     => '',
+            'min_lev'        => '',
+            'max_lev'        => '',
+            'day_of_week'    => '',
+            'class_required' => '',
+            'flag_needed'    => '',
+            'conquest'       => '',
+        ]);
+
+        getObject('Redis')->set('defaultNPC', json_encode($defaultNPC, JSON_UNESCAPED_UNICODE));
+    }
+
+    public function getItemInfoByName($name = '')
+    {
+        # code...
     }
 }

@@ -37,6 +37,7 @@ class MsgFactory
             'Credit'                    => 100, // TODO
             'HasExpandedStorage'        => false, // TODO
             'ExpandedStorageExpiryTime' => 0, // TODO
+            'test'                      => 0, // 未知
             'ClientMagics'              => [], // TODO,
         ];
 
@@ -72,7 +73,7 @@ class MsgFactory
             'Location'         => $p['CurrentLocation'],
             'Direction'        => $p['CurrentDirection'],
             'Hair'             => $p['Hair'],
-            'Light'            => $p['Light'],
+            'Light'            => $p['Light'] ?: 0,
             'Weapon'           => $p['LooksWeapon'],
             'WeaponEffect'     => $p['LooksWeaponEffect'],
             'Armour'           => $p['LooksArmour'],
@@ -89,7 +90,7 @@ class MsgFactory
             'ElementOrbEffect' => 0, //TODO
             'ElementOrbLvl'    => 0, //TODO
             'ElementOrbMax'    => 200, //TODO
-            'Buffs'            => [['BuffType' => 0], ['BuffType' => 0]], //TODO
+            'Buffs'            => [0, 0, 0, 0], //TODO
             'LevelEffects'     => $Enum::LevelEffectsNone, //TODO
         ];
 
@@ -152,6 +153,67 @@ class MsgFactory
             'ObjectID' => $p['ID'],
             'Text'     => $p['Name'] . ':' . $msg,
             'Type'     => $chatType,
+        ];
+    }
+
+    public function objectNPC($object)
+    {
+        return [
+            'ObjectID'  => $object['ID'],
+            'Name'      => $object['Name'],
+            'NameColor' => Int32(pack('c4', $object['NameColor']['R'], $object['NameColor']['G'], $object['NameColor']['B'], 255)),
+            'Image'     => $object['Image'],
+            'Color'     => 0,
+            'Location'  => $object['CurrentLocation'],
+            'Direction' => $object['Direction'],
+            'QuestIDs'  => [0],
+        ];
+    }
+
+    public function newUserItem($itemInfo, $ID)
+    {
+        return [
+            'ID'             => $ID,
+            'ItemID'         => $itemInfo['id'],
+            'CurrentDura'    => 100,
+            'MaxDura'        => 100,
+            'Count'          => 1,
+            'AC'             => $itemInfo['min_ac'],
+            'MAC'            => $itemInfo['max_ac'],
+            'DC'             => $itemInfo['min_dc'],
+            'MC'             => $itemInfo['min_mc'],
+            'SC'             => $itemInfo['min_sc'],
+            'Accuracy'       => $itemInfo['accuracy'],
+            'Agility'        => $itemInfo['agility'],
+            'HP'             => $itemInfo['hp'],
+            'MP'             => $itemInfo['mp'],
+            'AttackSpeed'    => $itemInfo['attack_speed'],
+            'Luck'           => $itemInfo['luck'],
+            'SoulBoundId'    => 0,
+            'Bools'          => 0,
+            'Strong'         => 0,
+            'MagicResist'    => 0,
+            'PoisonResist'   => 0,
+            'HealthRecovery' => 0,
+            'ManaRecovery'   => 0,
+            'PoisonRecovery' => 0,
+            'CriticalRate'   => 0,
+            'CriticalDamage' => 0,
+            'Freezing'       => 0,
+            'PoisonAttack'   => 0,
+            'Info'           => $itemInfo,
+        ];
+    }
+
+    public function playerUpdate($p)
+    {
+        return [
+            'ObjectID'     => $p['ID'],
+            'Light'        => $p['Light'],
+            'Weapon'       => $p['LooksWeapon'],
+            'WeaponEffect' => $p['LooksWeaponEffect'],
+            'Armour'       => $p['LooksArmour'],
+            'WingEffect'   => $p['LooksWings'],
         ];
     }
 }

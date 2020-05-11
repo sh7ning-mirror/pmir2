@@ -63,6 +63,22 @@ class CodePacket
         'OPENDOOR'         => [
             'DoorIndex' => 'uint8',
         ],
+        'REFINE_CANCEL'    => [],
+        'EQUIP_ITEM'       => [
+            'Grid'     => 'uint8',
+            'UniqueID' => 'uint64',
+            'To'       => 'int32',
+        ],
+        'REMOVE_ITEM'      => [
+            'Grid'     => 'uint8',
+            'UniqueID' => 'uint64',
+            'To'       => 'int32',
+        ],
+        'MOVE_ITEM'        => [
+            'Grid' => 'uint8',
+            'From' => 'int32',
+            'To'   => 'int32',
+        ],
     ];
 
     private $serverPacketStruct = [
@@ -401,8 +417,9 @@ class CodePacket
             ],
             'Gold'                      => 'uint32',
             'Credit'                    => 'uint32',
-            'HasExpandedStorage'        => 'uint8',
+            'HasExpandedStorage'        => 'bool',
             'ExpandedStorageExpiryTime' => 'int64',
+            'test'                      => 'uint32', //未知
             ////TODO
             // 'ClientMagics'              => [
             //     'name'       => 'string',
@@ -487,9 +504,7 @@ class CodePacket
             'ElementOrbEffect' => 'uint32',
             'ElementOrbLvl'    => 'uint32',
             'ElementOrbMax'    => 'uint32',
-            'Buffs'            => [
-                'BuffType' => 'uint8',
-            ],
+            'Buffs'            => '[]uint8',
             'LevelEffects'     => 'uint8',
         ],
         'OBJECT_TELEPORT_IN'       => [
@@ -545,6 +560,48 @@ class CodePacket
         'OPENDOOR'                 => [
             'DoorIndex' => 'uint8',
             'Close'     => 'bool',
+        ],
+        'OBJECT_NPC'               => [
+            'ObjectID'  => 'uint32',
+            'Name'      => 'string',
+            'NameColor' => 'int32',
+            'Image'     => 'uint16',
+            'Color'     => 'int32',
+            'Location'  => [
+                'X' => 'uint32',
+                'Y' => 'uint32',
+            ],
+            'Direction' => 'uint8',
+            'QuestIDs'  => '[]int32',
+        ],
+        'NPC_RESPONSE'             => [
+            'Page' => '[]uint8',
+        ],
+        'EQUIP_ITEM'               => [
+            'Grid'     => 'uint8',
+            'UniqueID' => 'uint64',
+            'To'       => 'int32',
+            'Success'  => 'bool',
+        ],
+        'REMOVE_ITEM'              => [
+            'Grid'     => 'uint8',
+            'UniqueID' => 'uint64',
+            'To'       => 'int32',
+            'Success'  => 'bool',
+        ],
+        'MOVE_ITEM'                => [
+            'Grid'    => 'uint8',
+            'From'    => 'int32',
+            'To'      => 'int32',
+            'Success' => 'bool',
+        ],
+        'PLAYER_UPDATE'            => [
+            'ObjectID'     => 'uint32',
+            'Light'        => 'uint8',
+            'Weapon'       => 'int16',
+            'WeaponEffect' => 'int16',
+            'Armour'       => 'int16',
+            'WingEffect'   => 'uint8',
         ],
     ];
 

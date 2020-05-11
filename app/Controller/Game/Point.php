@@ -51,10 +51,7 @@ class Point
                 break;
         }
 
-        return [
-            'X' => $x,
-            'Y' => $y,
-        ];
+        return $this->NewPoint($x, $y);
     }
 
     public function NewPoint($x, $y)
@@ -64,6 +61,8 @@ class Point
 
     public function inRange($currentPoint, $point, $dataRange)
     {
+        // var_dump('---------------'.$currentPoint['X'].'_'.$point['X'].'___________'.$currentPoint['Y'].'_'.$point['Y']);
+
         return AbsInt($currentPoint['X'] - intval($point['X'])) <= $dataRange && AbsInt(intval($currentPoint['Y']) - intval($point['Y'])) <= $dataRange;
     }
 }

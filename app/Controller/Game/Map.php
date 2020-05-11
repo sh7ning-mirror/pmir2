@@ -14,7 +14,7 @@ class Map
             'Width'          => $w,
             'Height'         => $h,
             'Version'        => $version,
-            'Info'           => [], //地图想去
+            'Info'           => [], //地图详情
             'SafeZoneInfos'  => [], //安全区
             'Respawns'       => [], //怪物刷新
             'cells'          => [], //地图格子
@@ -61,12 +61,29 @@ class Map
 
         $m['doorsMap'] = getObject('Door')->Set($m, $loc, $door);
 
-        // return $m;
     }
 
-    public function InitAll()
+    public function initAll($map, $npcInfos, $respawnInfos, $safeZoneInfo)
     {
-        # code...
+        $Atomic = getObject('Atomic');
+        $Npc    = getObject('Npc');
+
+        $npc = [];
+        foreach ($npcInfos as $npcInfo) {
+            if ($npcInfo['map_id'] == $map['Info']['id']) {
+                $n         = $Npc->newNpc($npcInfo['map_id'], $Atomic->newObjectID(), $npcInfo);
+                $n['Info'] = $npcInfo;
+                $npc[]     = $n;
+            }
+        }
+
+        // foreach ($respawnInfos as $respawnInfo) {
+        //     if ($respawnInfo['map_id'] == $map['Info']['id']) {
+
+        //     }
+        // }
+
+        return ['npc' => $npc, 'monsters' => []];
     }
 
     public function addObject($p)
@@ -118,29 +135,53 @@ class Map
         return $x >= 0 && $x < $m['Width'] && $y >= 0 && $y < $m['Height'];
     }
 
-    public function broadcastP($currentPoint, $msg, $me)
+    public function broadcastP($currentPoint, $msg, $object)
     {
         $GameData = getObject('GameData');
         $objectPl = getObject('PlayerObject');
+        $Point    = getObject('Point');
+        $SendMsg  = getObject('SendMsg');
 
-        $players = $GameData->getMapPlayers($me['Map']['Info']['id']);
-
-        $Point   = getObject('Point');
-        $SendMsg = getObject('SendMsg');
+        $players = $GameData->getMapPlayers($object['Map']['Info']['id']);
 
         foreach ($players as $k => $v) {
-            $player = $objectPl->getPlayer($v['fd']);
+            $player = $objectPl->getIdPlayer($v['ID']);
             if ($Point->inRange($currentPoint, $player['CurrentLocation'], $this->DataRange)) {
-                if ($player['ID'] != $me['ID']) {
+                if ($player['ID'] != $object['ID']) {
                     $SendMsg->send($player['fd'], $msg);
                 }
             }
         }
     }
 
-    public function rangeObject()
+    public function broadcastN($object)
     {
-        # code...
+        $GameData   = getObject('GameData');
+        $Point      = getObject('Point');
+        $SendMsg    = getObject('SendMsg');
+        $MsgFactory = getObject('MsgFactory');
+
+        //同步npc
+        $npcs = $GameData->getMapNpc($object['Map']['Info']['id']);
+        if ($npcs) {
+            foreach ($npcs as $k => $v) {
+                if (!empty($v['CurrentLocation'])) {
+                    // if ($Point->inRange($object['CurrentLocation'], $v['CurrentLocation'], $this->DataRange)) {
+                        $SendMsg->send($object['fd'], ['OBJECT_NPC', $MsgFactory->objectNPC($v)]);
+                    // }
+                }
+            }
+        }
+    }
+
+    public function rangeObject($object)
+    {
+        $objectPl   = getObject('PlayerObject');
+        $MsgFactory = getObject('MsgFactory');
+
+        $objectPl->broadcast($object, ['OBJECT_PLAYER', $MsgFactory->objectPlayer($object)]);
+
+        $this->broadcastN($object);
     }
 
     public function updateObject($object, $point, $type)
@@ -152,8 +193,10 @@ class Map
 
         switch ($type) {
             case $Enum::ObjectTypePlayer:
-                $objectPlayer->broadcast($object, ['OBJECT_PLAYER',$MsgFactory->objectPlayer($object)]);
-                $objectPlayer->enqueueAreaObjects($object, $this->getCell($object['Map'], $object['CurrentLocation']), null);
+                $objectPlayer->broadcast($object, ['OBJECT_PLAYER', $MsgFactory->objectPlayer($object)]);
+
+                $mapInfo = getObject('GameData')->getMap($object['Map']['Info']['id']);
+                $objectPlayer->enqueueAreaObjects($object, $this->getCell($mapInfo, $object['CurrentLocation']), null);
                 break;
 
             case $Enum::ObjectTypeMonster:

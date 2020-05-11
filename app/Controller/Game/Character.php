@@ -80,10 +80,4 @@ class Character
 
         return $data;
     }
-
-    //保存玩家数据
-    public function saveData($p)
-    {
-        
-    }
 }

@@ -6,7 +6,6 @@ namespace App\Controller\Game;
  */
 class PlayersList
 {
-
     protected $key = 'PlayersList';
 
     public function getPlayersList()
@@ -32,15 +31,18 @@ class PlayersList
             return false;
         }
 
-        getObject('GameData')->delMapPlayers($p['Map']['Info']['id'], $p);
+        if (!empty($p['Map'])) {
+            getObject('GameData')->delMapPlayers($p['Map']['Info']['id'], $p);
+        }
+
+        if (!empty($p['ID'])) {
+            $this->delCharacter($p);
+        }
     }
 
-    public function delClientInfo(int $fd = null)
+    public function delCharacter($p)
     {
-        $key   = getClientId($fd);
-        $Redis = getObject('Redis');
-        $Redis->del($key);
-        $Redis->del('SessionIDPlayerMap_' . $key);
+        getObject('Redis')->del('player:character_id_' . $p['ID']);
     }
 
     public function saveData($fd, $p = null)
@@ -55,31 +57,33 @@ class PlayersList
 
         co(function () use ($p) {
 
-            $data = [
-                'current_map_id'     => $p['Map']['Info']['id'],
-                'direction'          => $p['CurrentDirection'],
-                'current_location_x' => $p['CurrentLocation']['X'],
-                'current_location_y' => $p['CurrentLocation']['Y'],
-                'experience'         => $p['Experience'],
-                'hp'                 => $p['HP'],
-                'mp'                 => $p['MP'],
-                'level'              => $p['Level'],
-                'gold'               => $p['Gold'],
-                'attack_mode'        => $p['AMode'],
-                'pet_mode'           => $p['PMode'],
-                'allow_group'        => $p['AllowGroup'],
+            if (!empty($p['Map'])) {
+                $data = [
+                    'current_map_id'     => $p['Map']['Info']['id'],
+                    'direction'          => $p['CurrentDirection'],
+                    'current_location_x' => $p['CurrentLocation']['X'],
+                    'current_location_y' => $p['CurrentLocation']['Y'],
+                    'experience'         => $p['Experience'],
+                    'hp'                 => $p['HP'],
+                    'mp'                 => $p['MP'],
+                    'level'              => $p['Level'],
+                    'gold'               => $p['Gold'],
+                    'attack_mode'        => $p['AMode'],
+                    'pet_mode'           => $p['PMode'],
+                    'allow_group'        => $p['AllowGroup'],
 
-            ];
+                ];
 
-            $where = [
-                'whereInfo' => [
-                    'where' => [
-                        ['id', '=', $p['ID']],
+                $where = [
+                    'whereInfo' => [
+                        'where' => [
+                            ['id', '=', $p['ID']],
+                        ],
                     ],
-                ],
-            ];
+                ];
 
-            getObject('CommonService')->upField('character', $where, $data);
+                getObject('CommonService')->upField('character', $where, $data);
+            }
         });
     }
 }

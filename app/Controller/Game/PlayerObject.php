@@ -104,7 +104,12 @@ class PlayerObject
 
     public function getPlayer($fd)
     {
-        return json_decode(getObject('Redis')->get('SessionIDPlayerMap_' . getClientId($fd)), true);
+        return json_decode(getObject('Redis')->get('player:_' . getClientId($fd)), true);
+    }
+
+    public function getIdPlayer($id)
+    {
+        return json_decode(getObject('Redis')->get('player:character_id_' . $id), true);
     }
 
     public function setPlayer($fd, $data = null)
@@ -115,7 +120,11 @@ class PlayerObject
             }
         }
         $array = json_decode(json_encode($this), true);
-        getObject('Redis')->set('SessionIDPlayerMap_' . getClientId($fd), json_encode($array, JSON_UNESCAPED_UNICODE));
+        getObject('Redis')->set('player:_' . getClientId($fd), json_encode($array, JSON_UNESCAPED_UNICODE));
+
+        if (!empty($array['ID'])) {
+            getObject('Redis')->set('player:character_id_' . $array['ID'], json_encode($array, JSON_UNESCAPED_UNICODE));
+        }
     }
 
     public function updatePlayerInfo(&$PlayerObject, $accountCharacter, $user_magic)
@@ -194,7 +203,7 @@ class PlayerObject
     // GainItem 为玩家增加物品，增加成功返回 true
     public function gainItem($PlayerObject, $v)
     {
-        $itemInfo                = $this->newUserItem($v, $PlayerObject['ID']);
+        $itemInfo                = getObject('MsgFactory')->newUserItem($v, $PlayerObject['ID']);
         $itemInfo['SoulBoundId'] = $PlayerObject['ID'];
 
         $Bag     = getObject('Bag');
@@ -277,41 +286,6 @@ class PlayerObject
         getObject('SendMsg')->send($fd, ['CHAT', ['Message' => $msg, 'Type' => $type]]);
     }
 
-    public function newUserItem($itemInfo, $ID)
-    {
-        return [
-            'ID'             => $ID,
-            'ItemID'         => $itemInfo['id'],
-            'CurrentDura'    => 100,
-            'MaxDura'        => 100,
-            'Count'          => 1,
-            'AC'             => $itemInfo['min_ac'],
-            'MAC'            => $itemInfo['max_ac'],
-            'DC'             => $itemInfo['min_dc'],
-            'MC'             => $itemInfo['min_mc'],
-            'SC'             => $itemInfo['min_sc'],
-            'Accuracy'       => $itemInfo['accuracy'],
-            'Agility'        => $itemInfo['agility'],
-            'HP'             => $itemInfo['hp'],
-            'MP'             => $itemInfo['mp'],
-            'AttackSpeed'    => $itemInfo['attack_speed'],
-            'Luck'           => $itemInfo['luck'],
-            'SoulBoundId'    => 0,
-            'Bools'          => 0,
-            'Strong'         => 0,
-            'MagicResist'    => 0,
-            'PoisonResist'   => 0,
-            'HealthRecovery' => 0,
-            'ManaRecovery'   => 0,
-            'PoisonRecovery' => 0,
-            'CriticalRate'   => 0,
-            'CriticalDamage' => 0,
-            'Freezing'       => 0,
-            'PoisonAttack'   => 0,
-            'Info'           => $itemInfo,
-        ];
-    }
-
     public function enqueueItemInfo(&$p, $ItemID)
     {
         if ($p['SendItemInfo']) {
@@ -352,7 +326,9 @@ class PlayerObject
 
         $this->enqueueQuestInfo($p); //任务
 
-        $SendMsg->send($p['fd'], ['MAP_INFORMATION', $p['Map']['Info']]);
+        $mapInfo = getObject('GameData')->getMap($p['Map']['Info']['id']);
+
+        $SendMsg->send($p['fd'], ['MAP_INFORMATION', $mapInfo['Info']]);
 
         $SendMsg->send($p['fd'], ['USER_INFORMATION', getObject('MsgFactory')->userInformation($p)]);
 
@@ -364,20 +340,16 @@ class PlayerObject
 
         $SendMsg->send($p['fd'], ['SWITCH_GROUP', ['AllowGroup' => $p['AllowGroup'] ?: 0]]);
 
-        $this->enqueueAreaObjects($p, null, $this->getCell($p['Map'], $p['CurrentLocation']));
+        $this->enqueueAreaObjects($p, null, $this->getCell($mapInfo, $p['CurrentLocation']));
 
-        // p.EnqueueAreaObjects(nil, p.GetCell())
-        // p.Enqueue(ServerMessage{}.NPCResponse([]string{}))
-        // p.Broadcast(ServerMessage{}.ObjectPlayer(p))
+        $SendMsg->send($p['fd'], ['NPC_RESPONSE', ['Page' => [0, 0, 0, 0]]]);
 
-        // $Server->send($p['fd'], bytesToString([52, 0, 59, 0, 43, 144, 2, 0, 9, 231, 168, 187, 232, 141, 137, 228, 186, 186, 255, 255, 255, 255, 11, 1, 0, 0, 87, 2, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
-        // $Server->send($p['fd'], bytesToString([52, 0, 59, 0, 12, 144, 2, 0, 9, 231, 168, 187, 232, 141, 137, 228, 186, 186, 255, 255, 255, 255, 9, 1, 0, 0, 87, 2, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
-        // $Server->send($p['fd'], bytesToString([46, 0, 59, 0, 227, 143, 2, 0, 3, 233, 185, 191, 255, 255, 255, 255, 8, 1, 0, 0, 95, 2, 0, 0, 4, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
+        $this->broadcast($p, ['OBJECT_PLAYER', getObject('MsgFactory')->objectPlayer($p)]);
 
-        $Server->send($p['fd'], bytesToString([51, 0, 77, 0, 169, 161, 1, 0, 19, 228, 188, 160, 233, 128, 129, 229, 145, 152, 95, 231, 171, 160, 230, 165, 154, 232, 144, 147, 0, 255, 0, 255, 15, 0, 0, 0, 0, 0, 31, 1, 0, 0, 103, 2, 0, 0, 1, 0, 0, 0, 0]));
-        $Server->send($p['fd'], bytesToString([52, 0, 59, 0, 174, 168, 1, 0, 9, 231, 168, 187, 232, 141, 137, 228, 186, 186, 255, 255, 255, 255, 33, 1, 0, 0, 106, 2, 0, 0, 5, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
-        $Server->send($p['fd'], bytesToString([48, 0, 77, 0, 170, 161, 1, 0, 16, 232, 190, 185, 229, 162, 131, 230, 157, 145, 95, 229, 145, 138, 231, 164, 186, 0, 255, 0, 255, 45, 0, 0, 0, 0, 0, 28, 1, 0, 0, 103, 2, 0, 0, 0, 0, 0, 0, 0]));
-        $Server->send($p['fd'], bytesToString([46, 0, 59, 0, 122, 168, 1, 0, 3, 233, 185, 191, 255, 255, 255, 255, 28, 1, 0, 0, 105, 2, 0, 0, 4, 0, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
+        // $Server->send($p['fd'], bytesToString([51, 0, 77, 0, 169, 161, 1, 0, 19, 228, 188, 160, 233, 128, 129, 229, 145, 152, 95, 231, 171, 160, 230, 165, 154, 232, 144, 147, 0, 255, 0, 255, 15, 0, 0, 0, 0, 0, 31, 1, 0, 0, 103, 2, 0, 0, 1, 0, 0, 0, 0]));
+        // $Server->send($p['fd'], bytesToString([52, 0, 59, 0, 174, 168, 1, 0, 9, 231, 168, 187, 232, 141, 137, 228, 186, 186, 255, 255, 255, 255, 33, 1, 0, 0, 106, 2, 0, 0, 5, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
+        // $Server->send($p['fd'], bytesToString([48, 0, 77, 0, 170, 161, 1, 0, 16, 232, 190, 185, 229, 162, 131, 230, 157, 145, 95, 229, 145, 138, 231, 164, 186, 0, 255, 0, 255, 45, 0, 0, 0, 0, 0, 28, 1, 0, 0, 103, 2, 0, 0, 0, 0, 0, 0, 0]));
+        // $Server->send($p['fd'], bytesToString([46, 0, 59, 0, 122, 168, 1, 0, 3, 233, 185, 191, 255, 255, 255, 255, 28, 1, 0, 0, 105, 2, 0, 0, 4, 0, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
 
         $this->setPlayer($p['fd'], $p);
     }
@@ -390,13 +362,15 @@ class PlayerObject
     //物品
     public function enqueueItemInfos(&$p)
     {
+        $GameData = getObject('GameData');
+
         $itemInfos = [];
 
         if ($p['Inventory']['Items']) {
             foreach ($p['Inventory']['Items'] as $k => $v) {
                 if ($v) {
                     $p['Inventory']['Items'][$k]['isset'] = true;
-                    $itemInfos[]                          = getObject('GameData')->getItemInfoByID($v['item_id']);
+                    $itemInfos[]                          = $GameData->getItemInfoByID($v['item_id']);
                 } else {
                     $p['Inventory']['Items'][$k]['isset'] = false;
                 }
@@ -408,7 +382,7 @@ class PlayerObject
             foreach ($p['Equipment']['Items'] as $k => $v) {
                 if ($v) {
                     $p['Equipment']['Items'][$k]['isset'] = true;
-                    $itemInfos[]                          = getObject('GameData')->getItemInfoByID($v['item_id']);
+                    $itemInfos[]                          = $GameData->getItemInfoByID($v['item_id']);
                 } else {
                     $p['Equipment']['Items'][$k]['isset'] = false;
                 }
@@ -419,7 +393,7 @@ class PlayerObject
             foreach ($p['QuestInventory']['Items'] as $k => $v) {
                 if ($v) {
                     $p['QuestInventory']['Items'][$k]['isset'] = true;
-                    $itemInfos[]                               = getObject('GameData')->getItemInfoByID($v['item_id']);
+                    $itemInfos[]                               = $GameData->getItemInfoByID($v['item_id']);
                 } else {
                     $p['QuestInventory']['Items'][$k]['isset'] = false;
                 }
@@ -752,7 +726,7 @@ class PlayerObject
     public function enqueueAreaObjects($p, $oldCell, $newCell)
     {
         if ($oldCell == null) {
-            // getObject('Map')->rangeObject($p['CurrentLocation'], 20);
+            getObject('Map')->rangeObject($p);
         }
     }
 
@@ -802,8 +776,8 @@ class PlayerObject
         $this->broadcast($p, ['OBJECT_TELEPORT_OUT', ['ObjectID' => $p['ID'], 'Type' => 0]]);
         $this->broadcast($p, ['OBJECT_REMOVE', ['ObjectID' => $p['ID']]]);
 
-        $p['Map']             = $m;
-        $p['CurrentLocation'] = $point;
+        $p['Map']['Info']['id'] = $m['Info']['id'];
+        $p['CurrentLocation']   = $point;
 
         $objectMap->addObject($p);
 
@@ -850,8 +824,43 @@ class PlayerObject
         $SendMsg = getObject('SendMsg');
 
         if (getObject('Map')->openDoor($p['Map']['Info']['id'], $doorIndex)) {
-            $SendMsg->send($p['fd'], ['OPENDOOR', ['DoorIndex' => $doorIndex,'Close'=>false]]);
-            $this->broadcast($p, ['OPENDOOR', ['DoorIndex' => $doorIndex,'Close'=>false]]);
+            $SendMsg->send($p['fd'], ['OPENDOOR', ['DoorIndex' => $doorIndex, 'Close' => false]]);
+            $this->broadcast($p, ['OPENDOOR', ['DoorIndex' => $doorIndex, 'Close' => false]]);
         }
+    }
+
+    //获取用户物品
+    public function getUserItemByID($p, $mirGridType, $id)
+    {
+        $Enum = getObject('Enum');
+
+        $Items = [];
+
+        switch ($mirGridType) {
+            case $Enum::MirGridTypeInventory:
+                $Items = $p['Inventory']['Items'];
+                break;
+
+            case $Enum::MirGridTypeEquipment:
+                $Items = $p['Equipment']['Items'];
+                break;
+
+            case $Enum::MirGridTypeStorage:
+                $Items = $p['Storage']['Items'];
+                break;
+
+            default:
+                EchoLog(sprintf('错误的装备类型: %s', $mirGridType), 'e');
+                return false;
+                break;
+        }
+
+        foreach ($Items as $k => $v) {
+            if (!empty($v['isset']) && $v['id'] == $id) {
+                return $k;
+            }
+        }
+
+        return -1;
     }
 }

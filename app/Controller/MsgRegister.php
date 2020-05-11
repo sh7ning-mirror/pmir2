@@ -24,5 +24,9 @@ class MsgRegister
         'LOG_OUT'          => ['\App\Controller\World\Handler', 'logOut'],
         'CHAT'             => ['\App\Controller\World\Handler', 'chat'],
         'OPENDOOR'         => ['\App\Controller\World\Handler', 'openDoor'],
+        'REFINE_CANCEL'    => ['\App\Controller\World\Handler', 'refineCancel'],
+        'EQUIP_ITEM'       => ['\App\Controller\World\Handler', 'equipItem'],
+        'REMOVE_ITEM'      => ['\App\Controller\World\Handler', 'removeItem'],
+        'MOVE_ITEM'        => ['\App\Controller\World\Handler', 'moveItem'],
     ];
 }

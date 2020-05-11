@@ -1,0 +1,1 @@
+UPDATE `npc` SET `file_name`='WoomyonWoods/Fortress/WWDr-1' WHERE (`id`='72') LIMIT 1;

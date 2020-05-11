@@ -381,7 +381,8 @@ class AuthHandler
      */
     public function startGame($fd, $param = [])
     {
-        $PlayerObject = getObject('PlayerObject')->getPlayer($fd);
+        $objectPlayer = getObject('PlayerObject');
+        $PlayerObject = $objectPlayer->getPlayer($fd);
         $Enum         = getObject('Enum');
 
         if (!$PlayerObject || !isset($PlayerObject['GameStage']) || $PlayerObject['GameStage'] != $Enum::SELECT) {
@@ -445,16 +446,19 @@ class AuthHandler
 
         getObject('SendMsg')->send($fd, ['START_GAME', ['Result' => 4, 'Resolution' => $Enum::AllowedResolution]]);
 
-        getObject('PlayerObject')->updatePlayerInfo($PlayerObject, $accountCharacter['data'], $user_magic['list']);
+        $objectPlayer->updatePlayerInfo($PlayerObject, $accountCharacter['data'], $user_magic['list']);
+
+        $objectPlayer->setPlayer($fd, $PlayerObject);
 
         EchoLog(sprintf('玩家登陆: 账户ID(%s) 角色名(%s)', $PlayerObject['AccountID'], $PlayerObject['Name']), 'i');
 
-        $PlayerObject['Map'] = getObject('GameData')->getMap($accountCharacter['data']['current_map_id']);
+        // $PlayerObject['Map'] = getObject('GameData')->getMap($accountCharacter['data']['current_map_id']);
+        $PlayerObject['Map']['Info']['id'] = $accountCharacter['data']['current_map_id'];
 
         getObject('PlayersList')->addPlayersList($PlayerObject);
 
         getObject('Map')->addObject($PlayerObject);
 
-        getObject('PlayerObject')->StartGame($PlayerObject);
+        $objectPlayer->StartGame($PlayerObject);
     }
 }

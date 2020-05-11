@@ -34,6 +34,10 @@ class ObjectService
         'SendMsg'       => 'App\Controller\SendMsg',
         'MsgFactory'    => 'App\Controller\Game\MsgFactory',
         'MapObject'     => 'App\Controller\Game\MapObject',
+        'Npc'           => 'App\Controller\Game\Npc',
+        'Script'        => 'App\Controller\Game\Script\Script',
+        'Atomic'        => 'App\Controller\Common\Atomic',
+        'Util'          => 'App\Controller\Game\Util\Util',
     ];
 
     public static function getObject($objectName = null)

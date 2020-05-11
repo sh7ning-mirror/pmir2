@@ -13,7 +13,6 @@ class BinaryReader
         'uint16' => 'v',
         'uint32' => 'V',
         'uint64' => 'P',
-        '[]int8' => 'c',
         'bool'   => 'c',
     ];
 
@@ -123,7 +122,7 @@ class BinaryReader
                         $len  = strlen($packet);
                         $info = [];
                         for ($i = 0; $i < $len; $i++) {
-                            $info[] = $this->unPackString($v, $packet);
+                            $info[] = $this->unPackString('int8', $packet);
                             $packet = substr($packet, 1);
                         }
                         $data[$k] = $info;
@@ -162,6 +161,30 @@ class BinaryReader
                             $data .= $this->packString($v, $packet[$k]);
                             break;
 
+                        case '[]int32':
+                            if (is_array($packet[$k])) {
+                                foreach ($packet[$k] as $k1 => $v1) {
+                                    $data .= $this->packString('int32', $v1);
+                                }
+                            }
+                            break;
+                        case '[]uint8':
+                            if (is_array($packet[$k])) {
+                                foreach ($packet[$k] as $k1 => $v1) {
+                                    $data .= $this->packString('uint8', $v1);
+                                }
+                            }
+                            break;
+                            
+                        case '[]string':
+                            if (is_array($packet[$k])) {
+                                foreach ($packet[$k] as $k1 => $v1) {
+                                    $len = $this->packString('string', strlen($v1));
+                                    $data .= $len . $v1;
+                                }
+                            }
+                            break;
+
                         default:
                             $data .= $this->packString($v, $packet[$k]);
                             break;
@@ -172,42 +195,4 @@ class BinaryReader
 
         return $data;
     }
-
-    // public function write(array $struct, array $packet)
-    // {
-    //     $data = '';
-
-    //     foreach ($packet as $k => $v) {
-    //         if (isset($struct[$k]) && $v !== null) {
-    //             if (is_array($v) && $struct[$k]) {
-
-    //                 if (!empty($v[0]) && is_array($v[0])) {
-    //                     foreach ($v as $k1 => $v1) {
-    //                         $data .= $this->write($struct[$k], $v1);
-    //                     }
-    //                 } else {
-    //                     $data .= $this->write($struct[$k], $v);
-    //                 }
-    //             } else {
-    //                 switch ($struct[$k]) {
-    //                     case 'string':
-    //                         $len = $this->packString($struct[$k], strlen($v));
-    //                         $data .= $len . $v;
-    //                         break;
-
-    //                     case 'bool':
-    //                         $v = $v ? 1 : 0;
-    //                         $data .= $this->packString($struct[$k], $v);
-    //                         break;
-
-    //                     default:
-    //                         $data .= $this->packString($struct[$k], $v);
-    //                         break;
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     return $data;
-    // }
 }

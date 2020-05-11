@@ -129,4 +129,64 @@ class Bag
             return $Inventory;
         }
     }
+
+    public function moveTo(&$bag, $from, $to, &$tobag)
+    {
+        if ($from < 0 || $to < 0 || $from > count($bag['Items']) || $to > count($tobag['Items'])) {
+            EchoLog(sprintf('移动装备位置不存在: from=%s to=%s', $from, $to), 'e');
+            return false;
+        }
+
+        $item = $bag['Items'][$from] ?? [];
+
+        if (!$item) {
+            EchoLog(sprintf('背包格子 %s 没有物品', $from), 'e');
+            return false;
+        }
+
+        co(function () use ($item, $tobag, $bag, $from, $to) {
+            $CommonService = getObject('CommonService');
+            $where         = [
+                'whereInfo' => [
+                    'where' => [
+                        ['user_item_id', '=', $item['id']],
+                    ],
+                ],
+            ];
+
+            $data = [
+                'type'  => $tobag['Type'],
+                'index' => $to,
+            ];
+
+            $CommonService->upField('character_user_item', $where, $data);
+
+            $toItem = $tobag['Items'][$to] ?? [];
+            if (!$toItem) {
+                $where = [
+                    'whereInfo' => [
+                        'where' => [
+                            ['user_item_id', '=', $toItem['id']],
+                        ],
+                    ],
+                ];
+
+                $data = [
+                    'type'  => $bag['Type'],
+                    'index' => $from,
+                ];
+
+                $CommonService->upField('character_user_item', $where, $data);
+            }
+        });
+
+        list($bag['Items'][$from], $tobag['Items'][$to]) = [$tobag['Items'][$to], $bag['Items'][$from]];
+
+        return true;
+    }
+
+    public function move(&$bag, $from, $to)
+    {
+        return $this->moveTo($bag, $from, $to, $bag);
+    }
 }
