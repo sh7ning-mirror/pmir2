@@ -521,12 +521,7 @@ if (!function_exists('stringToBytes')) {
     //stringToBytes
     function stringToBytes($string)
     {
-        $bytes = [];
-        for ($i = 0; $i < strlen($string); $i++) {
-            //遍历每一个字符 用ord函数把它们拼接成一个php数组
-            $bytes[] = ord($string[$i]);
-        }
-        return $bytes;
+        return array_map('ord', str_split($string));
     }
 }
 
