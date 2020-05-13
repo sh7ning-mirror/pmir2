@@ -25,4 +25,24 @@ class ExampleTest extends HttpTestCase
         $this->assertTrue(true);
         $this->assertTrue(is_array($this->get('/')));
     }
+
+    public function testStringToBytes()
+    {
+        $expected = function ($string)
+        {
+            $bytes = [];
+            for ($i = 0; $i < strlen($string); $i++) {
+                //遍历每一个字符 用ord函数把它们拼接成一个php数组
+                $bytes[] = ord($string[$i]);
+            }
+            return $bytes;
+        };
+
+        $actual = function ($string)
+        {
+            return array_map('ord', str_split($string));
+        };
+
+        $this->assertSame($expected('从 v@ 额x'), $actual('从 v@ 额x'));
+    }
 }
