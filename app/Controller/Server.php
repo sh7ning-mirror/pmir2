@@ -14,22 +14,22 @@ class Server extends AbstractController
     {
         $this->Checksystem->check();
 
-        $str = "
+        // $str = "
 
-        MMMMMMMM       MMMM    MMMM     MMM     MMMMMMMMM        MMMMM
-        MMM   MMM      MMMM   MMMMM     MMM     MMM   MMMM      MMM MMM
-        MMM    MMM     MMMM   MMMMM     MMM     MMM    MMM     MMM   MMM
-        MMM    MMM     MMMMM  MMMMM     MMM     MMM    MMM           MMM
-        MMM    MMM     MMMMM MMMMMM     MMM     MMM    MMM          MMMM
-        MMM   MMM      MMMMM MMMMMM     MMM     MMM   MMMM          MMM
-        MMMMMMMM       MMMMMMMM MMM     MMM     MMMMMMMM           MMMM
-        MMM            MMMMMMMM MMM     MMM     MMM  MMMM         MMMM
-        MMM            MMM MMMM MMM     MMM     MMM   MMM        MMMM
-        MMM            MMM MMM  MMM     MMM     MMM    MMM      MMM
-        MMM            MMM      MMM     MMM     MMM    MMM     MMMM
-        MMM            MMM      MMM     MMM     MMM    MMMM    MMMMMMMMM
-            ";
-        EchoLog($str, null, true);
+        // MMMMMMMM       MMMM    MMMM     MMM     MMMMMMMMM        MMMMM
+        // MMM   MMM      MMMM   MMMMM     MMM     MMM   MMMM      MMM MMM
+        // MMM    MMM     MMMM   MMMMM     MMM     MMM    MMM     MMM   MMM
+        // MMM    MMM     MMMMM  MMMMM     MMM     MMM    MMM           MMM
+        // MMM    MMM     MMMMM MMMMMM     MMM     MMM    MMM          MMMM
+        // MMM   MMM      MMMMM MMMMMM     MMM     MMM   MMMM          MMM
+        // MMMMMMMM       MMMMMMMM MMM     MMM     MMMMMMMM           MMMM
+        // MMM            MMMMMMMM MMM     MMM     MMM  MMMM         MMMM
+        // MMM            MMM MMMM MMM     MMM     MMM   MMM        MMMM
+        // MMM            MMM MMM  MMM     MMM     MMM    MMM      MMM
+        // MMM            MMM      MMM     MMM     MMM    MMM     MMMM
+        // MMM            MMM      MMM     MMM     MMM    MMMM    MMMMMMMMM
+        //     ";
+        // EchoLog($str, null, true);
 
         EchoLog('Server version ' . env('VERSION', '1.0.1'), null, true);
         EchoLog('author by.fan <fan3750060@163.com>', null, true);
