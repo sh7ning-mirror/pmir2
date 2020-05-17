@@ -61,8 +61,8 @@ class Npc extends AbstractController
                 }
 
                 $g = $this->MsgFactory->newUserItem($item, $this->Atomic->newObjectID());
-
-                $g['Count']     = $count;
+                
+                $g['count']     = $count;
                 $npc['Goods'][] = $g;
             }
         }

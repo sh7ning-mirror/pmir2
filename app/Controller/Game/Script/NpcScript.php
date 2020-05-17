@@ -27,7 +27,7 @@ class NpcScript extends AbstractController
         if ($match) {
             foreach ($match[0] as $v) {
                 $s = substr(trim($v), 2, strlen($v) - 3);
-                var_dump($s);
+
                 switch ($s) {
                     case "USERNAME":
                         $str = str_replace($v, $p['Name'], $str);
