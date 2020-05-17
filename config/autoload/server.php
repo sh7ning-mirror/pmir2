@@ -23,11 +23,12 @@ return [
             'port'      => (int) env('AUTH_PORT', 7000),
             'sock_type' => SWOOLE_SOCK_TCP,
             'callbacks' => [
-                SwooleEvent::ON_START    => [App\Controller\Server::class, 'onStart'],
-                SwooleEvent::ON_CONNECT  => [App\Controller\Server::class, 'onConnect'],
-                SwooleEvent::ON_RECEIVE  => [App\Controller\Server::class, 'onReceive'],
-                SwooleEvent::ON_CLOSE    => [App\Controller\Server::class, 'onClose'],
-                SwooleEvent::ON_SHUTDOWN => [App\Controller\Server::class, 'onShutdown'],
+                SwooleEvent::ON_BEFORE_START => [App\Controller\Server::class, 'beforeStart'],
+                SwooleEvent::ON_START        => [App\Controller\Server::class, 'onStart'],
+                SwooleEvent::ON_CONNECT      => [App\Controller\Server::class, 'onConnect'],
+                SwooleEvent::ON_RECEIVE      => [App\Controller\Server::class, 'onReceive'],
+                SwooleEvent::ON_CLOSE        => [App\Controller\Server::class, 'onClose'],
+                SwooleEvent::ON_SHUTDOWN     => [App\Controller\Server::class, 'onShutdown'],
 
             ],
             'settings'  => [
@@ -35,6 +36,13 @@ return [
                 'open_eof_check'           => false, //打开EOF检测
                 // 'package_eof'              => "", //设置EOF
                 'open_eof_split'           => false, //是否分包
+
+                //固定包头+包体协议
+                'open_length_check'        => true,
+                'package_max_length'       => 20480,
+                'package_length_type'      => 's', //see php pack()
+                'package_length_offset'    => 0, //长度起始字段
+                'package_body_offset'      => 0, //包体起始位置
             ],
         ],
         // [

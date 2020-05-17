@@ -1,16 +1,24 @@
 <?php
 namespace App\Controller;
 
-/**
- * 
- */
-class SendMsg
-{
-	public function packetData(array $packetInfo)
-    {
-        $data = getObject('CodePacket')->writePacketData($packetInfo[0], $packetInfo[1]);
+use App\Controller\AbstractController;
 
-        $cmd = pack('s', getObject('CodeMap')->getServerPackCmd($packetInfo[0]));
+/**
+ *
+ */
+class SendMsg extends AbstractController
+{
+    public function packetData(array $packetInfo)
+    {
+
+        if(isset($packetInfo[1]))
+        {
+            $data = $this->CodePacket->writePacketData($packetInfo[0], $packetInfo[1]);
+        }else{
+            $data = '';
+        }
+
+        $cmd = pack('s', $this->CodeMap->getServerPackCmd($packetInfo[0]));
 
         $data = $cmd . $data;
 
@@ -33,12 +41,23 @@ class SendMsg
         ];
 
         if ($packetInfo) {
-            list($log['cmdName'], $log['res']) = $packetInfo;
+            if(isset($packetInfo[1]))
+            {
+                list($log['cmdName'], $log['res']) = $packetInfo;
+            }else{
+                list($log['cmdName'], $log['res']) = [$packetInfo[0],null];
+            }
         }
 
-        EchoLog(sprintf('Client: [%s] serverSend: %s', $fd, json_encode($log, JSON_UNESCAPED_UNICODE)), 's');
+        $filter = [
+            'KEEP_ALIVE',
+        ];
 
-        getObject('Server')->send($fd, $data);
+        if (!empty($log['cmdName']) && !in_array($log['cmdName'], $filter)) {
+            EchoLog(sprintf('Client: [%s] serverSend: %s', $fd, json_encode($log, JSON_UNESCAPED_UNICODE)), 's');
+        }
+
+        $this->Server->send($fd, $data);
     }
 
     public function unPacketData(string $packet): array
@@ -54,10 +73,10 @@ class SendMsg
 
         $param['packet'] = $packetBytes;
 
-        $param['cmdName'] = getObject('CodeMap')->getCmdName($param['cmd']);
+        $param['cmdName'] = $this->CodeMap->getCmdName($param['cmd']);
 
         if ($param['cmdName']) {
-            $param['res'] = getObject('CodePacket')->readPacketData($param['cmdName'], $paramInfo);
+            $param['res'] = $this->CodePacket->readPacketData($param['cmdName'], $paramInfo);
         }
 
         return $param;

@@ -229,9 +229,9 @@ class CodeMap
         2081 => 'POISONED',
         2082 => 'OBJECT_POISONED',
         2083 => 'MAP_CHANGED',
-        2084 => 'OBJECT_TELEPORT_OUT',
-        2085 => 'OBJECT_TELEPORT_IN',
-        2086 => 'TELEPORT_IN',
+        2084 => 'OBJECT_TELEPORT_OUT', //传送出去
+        2085 => 'OBJECT_TELEPORT_IN', //传送进来
+        2086 => 'TELEPORT_IN', //传送到
         2087 => 'NPC_GOODS',
         2088 => 'NPC_SELL',
         2089 => 'NPC_REPAIR',

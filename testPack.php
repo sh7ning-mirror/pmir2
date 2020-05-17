@@ -44,7 +44,16 @@ class Client
 
     public function run()
     {
-
+        //18 00 00 00 10 00 00 00 3d de 31 5a 3f d2 d1 d5 39 29 a8 a3 e3 62 bc 79
+        //12 00 05 00 06 66 61 6e 66 61 6e 06 66 61 6e 66 61 6e
+        //08 00 08 00 01 00 00 00
+        //05 00 0b 00 02
+        // var_dump(BigInteger(bytesToString([24,0,0,0,16,0,0,0,61,222,49,90,63,210,209,213,57,41,168,163,227,98,188,121]), 256)->toHex());
+        // var_dump(BigInteger(bytesToString([18,0,5,0,6,102,97,110,102,97,110,6,102,97,110,102,97,110]), 256)->toHex());
+        // var_dump(BigInteger(bytesToString([8,0,8,0,1,0,0,0]), 256)->toHex());
+        // var_dump(BigInteger(bytesToString([5,0,11,0,2]), 256)->toHex());
+        // var_dump(BigInteger(bytesToString([16,0,41,0,162,134,1,0,7,91,64,77,97,105,110,93]), 256)->toHex());
+        
         // var_dump(String2Hex(bytesToString([24, 0, 0, 0, 16, 0, 0, 0, 170, 124, 11, 209, 41, 241, 81, 142, 137, 41, 214, 160, 138, 169, 152, 239])));
 
         $client = new Swoole\Client(SWOOLE_SOCK_TCP);
@@ -54,7 +63,7 @@ class Client
 
         //CLIENT_VERSION
         //{"len":24,"cmd":1000,"packet":[24,0,0,0,16,0,0,0,170,124,11,209,41,241,81,142,137,41,214,160,138,169,152,239],"cmdName":"CLIENT_VERSION","res":{"VersionHash":[16,0,0,0,-86,124,11,-47,41,-15,81,-114,-119,41,-42,-96,-118,-87,-104,-17]}}
-        $client->send(bytesToString([24,0,0,0,16,0,0,0,61,222,49,90,63,210,209,213,57,41,168,163,227,98,188,121]));
+        $client->send(bytesToString([24, 0, 0, 0, 16, 0, 0, 0, 170, 124, 11, 209, 41, 241, 81, 142, 137, 41, 214, 160, 138, 169, 152, 239]));
 
         while ($packet = $client->recv()) {
             if ($packet) {
@@ -78,7 +87,7 @@ class Client
 
                             //LOGIN
                             //{"len":18,"cmd":1005,"packet":[18,0,5,0,6,102,97,110,102,97,110,6,102,97,110,102,97,110],"cmdName":"LOGIN","res":{"AccountID":"fanfan","Password":"fanfan"}}
-                            $client->send(bytesToString([18,0,5,0,6,102,97,110,102,97,110,6,102,97,110,102,97,110]));
+                            $client->send(bytesToString([18, 0, 5, 0, 6, 102, 97, 110, 102, 97, 110, 6, 102, 97, 110, 102, 97, 110]));
                             break;
 
                         case 'LOGIN_SUCCESS':
@@ -89,8 +98,11 @@ class Client
 
                             //START_game
                             // {"len":8,"cmd":1008,"packet":[8,0,8,0,14,0,0,0],"cmdName":"START_GAME","res":{"CharacterIndex":1}}
-                            $client->send(bytesToString([8,0,8,0,2,0,0,0]));
+                            $client->send(bytesToString([8, 0, 8, 0, 01, 0, 0, 0]));
                             break;
+
+                        case 'START_GAME':
+                            $client->send(bytesToString([16,0,41,0,196,134,1,0,7,91,64,77,97,105,110,93]));
                         default:
                             # code...
                             break;

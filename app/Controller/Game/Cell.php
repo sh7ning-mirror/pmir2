@@ -14,9 +14,4 @@ class Cell
             'objects'   => [],
         ];
     }
-
-    public function getCell()
-    {
-        # code...
-    }
 }

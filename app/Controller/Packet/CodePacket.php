@@ -3,13 +3,16 @@ declare (strict_types = 1);
 
 namespace App\Controller\Packet;
 
+use App\Controller\AbstractController;
+
 /**
  *
  */
-class CodePacket
+class CodePacket extends AbstractController
 {
     private $clientPacketStruct = [
         'CLIENT_VERSION'   => [
+            'Count'       => 'uint32',
             'VersionHash' => '[]int8',
         ],
         'KEEP_ALIVE'       => [
@@ -62,6 +65,31 @@ class CodePacket
         ],
         'OPENDOOR'         => [
             'DoorIndex' => 'uint8',
+        ],
+        'REFINE_CANCEL'    => [],
+        'EQUIP_ITEM'       => [
+            'Grid'     => 'uint8',
+            'UniqueID' => 'uint64',
+            'To'       => 'int32',
+        ],
+        'REMOVE_ITEM'      => [
+            'Grid'     => 'uint8',
+            'UniqueID' => 'uint64',
+            'To'       => 'int32',
+        ],
+        'MOVE_ITEM'        => [
+            'Grid' => 'uint8',
+            'From' => 'int32',
+            'To'   => 'int32',
+        ],
+        'CALL_NPC'         => [
+            'ObjectID' => 'uint32',
+            'Key'      => 'string',
+        ],
+        'BUY_ITEM'         => [
+            'ItemIndex' => 'uint64',
+            'Count'     => 'uint32',
+            'Type'      => 'uint8',
         ],
     ];
 
@@ -125,34 +153,34 @@ class CodePacket
         ],
         'GAINED_ITEM'              => [
             'Item' => [
-                'ID'             => 'uint64',
-                'ItemID'         => 'int32',
-                'CurrentDura'    => 'uint16',
-                'MaxDura'        => 'uint16',
-                'Count'          => 'uint32',
-                'AC'             => 'uint8',
-                'MAC'            => 'uint8',
-                'DC'             => 'uint8',
-                'MC'             => 'uint8',
-                'SC'             => 'uint8',
-                'Accuracy'       => 'uint8',
-                'Agility'        => 'uint8',
-                'HP'             => 'uint8',
-                'MP'             => 'uint8',
-                'AttackSpeed'    => 'int8',
-                'Luck'           => 'int8',
-                'SoulBoundId'    => 'uint32',
-                'Bools'          => 'uint8',
-                'Strong'         => 'uint8',
-                'MagicResist'    => 'uint8',
-                'PoisonResist'   => 'uint8',
-                'HealthRecovery' => 'uint8',
-                'ManaRecovery'   => 'uint8',
-                'PoisonRecovery' => 'uint8',
-                'CriticalRate'   => 'uint8',
-                'CriticalDamage' => 'uint8',
-                'Freezing'       => 'uint8',
-                'PoisonAttack'   => 'uint8',
+                'id'              => 'uint64',
+                'item_id'         => 'int32',
+                'current_dura'    => 'uint16',
+                'max_dura'        => 'uint16',
+                'count'           => 'uint32',
+                'ac'              => 'uint8',
+                'mac'             => 'uint8',
+                'dc'              => 'uint8',
+                'mc'              => 'uint8',
+                'sc'              => 'uint8',
+                'accuracy'        => 'uint8',
+                'agility'         => 'uint8',
+                'hp'              => 'uint8',
+                'mp'              => 'uint8',
+                'attack_speed'    => 'int8',
+                'luck'            => 'int8',
+                'soul_bound_id'   => 'uint32',
+                'bools'           => 'uint8',
+                'strong'          => 'uint8',
+                'magic_resist'    => 'uint8',
+                'poison_resist'   => 'uint8',
+                'health_recovery' => 'uint8',
+                'mana_recovery'   => 'uint8',
+                'poison_recovery' => 'uint8',
+                'critical_rate'   => 'uint8',
+                'critical_damage' => 'uint8',
+                'freezing'        => 'uint8',
+                'poison_attack'   => 'uint8',
             ],
         ],
         'NEW_ITEM_INFO'            => [
@@ -401,8 +429,9 @@ class CodePacket
             ],
             'Gold'                      => 'uint32',
             'Credit'                    => 'uint32',
-            'HasExpandedStorage'        => 'uint8',
+            'HasExpandedStorage'        => 'bool',
             'ExpandedStorageExpiryTime' => 'int64',
+            'test'                      => 'uint32', //未知
             ////TODO
             // 'ClientMagics'              => [
             //     'name'       => 'string',
@@ -487,9 +516,7 @@ class CodePacket
             'ElementOrbEffect' => 'uint32',
             'ElementOrbLvl'    => 'uint32',
             'ElementOrbMax'    => 'uint32',
-            'Buffs'            => [
-                'BuffType' => 'uint8',
-            ],
+            'Buffs'            => '[]uint8',
             'LevelEffects'     => 'uint8',
         ],
         'OBJECT_TELEPORT_IN'       => [
@@ -546,6 +573,122 @@ class CodePacket
             'DoorIndex' => 'uint8',
             'Close'     => 'bool',
         ],
+        'OBJECT_NPC'               => [
+            'ObjectID'  => 'uint32',
+            'Name'      => 'string',
+            'NameColor' => 'int32',
+            'Image'     => 'uint16',
+            'Color'     => 'int32',
+            'Location'  => [
+                'X' => 'uint32',
+                'Y' => 'uint32',
+            ],
+            'Direction' => 'uint8',
+            'QuestIDs'  => '[]int32',
+        ],
+        'NPC_RESPONSE'             => [
+            'Count' => 'uint32',
+            'Page'  => '[]string',
+        ],
+        'EQUIP_ITEM'               => [
+            'Grid'     => 'uint8',
+            'UniqueID' => 'uint64',
+            'To'       => 'int32',
+            'Success'  => 'bool',
+        ],
+        'REMOVE_ITEM'              => [
+            'Grid'     => 'uint8',
+            'UniqueID' => 'uint64',
+            'To'       => 'int32',
+            'Success'  => 'bool',
+        ],
+        'MOVE_ITEM'                => [
+            'Grid'    => 'uint8',
+            'From'    => 'int32',
+            'To'      => 'int32',
+            'Success' => 'bool',
+        ],
+        'PLAYER_UPDATE'            => [
+            'ObjectID'     => 'uint32',
+            'Light'        => 'uint8',
+            'Weapon'       => 'int16',
+            'WeaponEffect' => 'int16',
+            'Armour'       => 'int16',
+            'WingEffect'   => 'uint8',
+        ],
+        'NPC_GOODS'                => [
+            'Count' => 'uint32',
+            'Goods' => [
+                'id'              => 'uint64',
+                'item_id'         => 'int32',
+                'current_dura'    => 'uint16',
+                'max_dura'        => 'uint16',
+                'count'           => 'uint32',
+                'ac'              => 'uint8',
+                'mac'             => 'uint8',
+                'dc'              => 'uint8',
+                'mc'              => 'uint8',
+                'sc'              => 'uint8',
+                'accuracy'        => 'uint8',
+                'agility'         => 'uint8',
+                'hp'              => 'uint8',
+                'mp'              => 'uint8',
+                'attack_speed'    => 'int8',
+                'luck'            => 'int8',
+                'soul_bound_id'   => 'uint32',
+                'bools'           => 'uint8',
+                'strong'          => 'uint8',
+                'magic_resist'    => 'uint8',
+                'poison_resist'   => 'uint8',
+                'health_recovery' => 'uint8',
+                'mana_recovery'   => 'uint8',
+                'poison_recovery' => 'uint8',
+                'critical_rate'   => 'uint8',
+                'critical_damage' => 'uint8',
+                'freezing'        => 'uint8',
+                'poison_attack'   => 'uint8',
+            ],
+            'Rate'  => 'float32',
+            'Type'  => 'uint8',
+        ],
+        'USER_STORAGE'             => [
+            'isset'   => 'bool',
+            'Count'   => 'int32',
+            'Storage' => [
+                'id'              => 'uint64',
+                'item_id'         => 'int32',
+                'current_dura'    => 'uint16',
+                'max_dura'        => 'uint16',
+                'count'           => 'uint32',
+                'ac'              => 'uint8',
+                'mac'             => 'uint8',
+                'dc'              => 'uint8',
+                'mc'              => 'uint8',
+                'sc'              => 'uint8',
+                'accuracy'        => 'uint8',
+                'agility'         => 'uint8',
+                'hp'              => 'uint8',
+                'mp'              => 'uint8',
+                'attack_speed'    => 'int8',
+                'luck'            => 'int8',
+                'soul_bound_id'   => 'uint32',
+                'bools'           => 'uint8',
+                'strong'          => 'uint8',
+                'magic_resist'    => 'uint8',
+                'poison_resist'   => 'uint8',
+                'health_recovery' => 'uint8',
+                'mana_recovery'   => 'uint8',
+                'poison_recovery' => 'uint8',
+                'critical_rate'   => 'uint8',
+                'critical_damage' => 'uint8',
+                'freezing'        => 'uint8',
+                'poison_attack'   => 'uint8',
+            ],
+        ],
+        'NPC_SELL'                 => [],
+        'LOSE_GOLD'                => [
+            'Gold' => 'uint32',
+        ],
     ];
 
     public function readPacketData(string $cmd, string $packet): array
@@ -553,7 +696,7 @@ class CodePacket
         $struct = $this->clientPacketStruct[$cmd] ?? [];
 
         if ($struct) {
-            return getObject('BinaryReader')->read($struct, $packet);
+            return $this->BinaryReader->read($struct, $packet);
         } else {
             return $struct;
         }
@@ -563,7 +706,7 @@ class CodePacket
     {
         $struct = $this->serverPacketStruct[$cmd] ?? '';
         if ($struct) {
-            return getObject('BinaryReader')->write($struct, $packet);
+            return $this->BinaryReader->write($struct, $packet);
         } else {
             return $struct;
         }

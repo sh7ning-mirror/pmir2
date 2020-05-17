@@ -1,10 +1,12 @@
 <?php
 namespace App\Controller\Game;
 
+use App\Controller\AbstractController;
+
 /**
  *
  */
-class Door
+class Door extends AbstractController
 {
     public $Map;
     public $Index;
@@ -24,11 +26,11 @@ class Door
     public function newDoor()
     {
         return [
-        	'Map' => [],
-        	'Index' => null,
-        	'State' => 0,
-        	'LastTick' => null,
-        	'Location' => [],
+            'Map'      => [],
+            'Index'    => null,
+            'State'    => 0,
+            'LastTick' => null,
+            'Location' => [],
         ];
     }
 
@@ -51,10 +53,9 @@ class Door
         }
     }
 
-    public function get($doorsMap,$point)
+    public function get($doorsMap, $point)
     {
-        if(empty($doorsMap['Grid'][$point['X']][$point['Y']]))
-        {
+        if (empty($doorsMap['Grid'][$point['X']][$point['Y']])) {
             return null;
         }
 

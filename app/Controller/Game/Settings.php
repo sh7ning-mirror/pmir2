@@ -1,10 +1,12 @@
 <?php
 namespace App\Controller\Game;
 
+use App\Controller\AbstractController;
+
 /**
  *
  */
-class Settings
+class Settings extends AbstractController
 {
     public $baseStats = [
         0 => [
@@ -97,28 +99,26 @@ class Settings
 
         $light = 0;
 
-        $Enum = getObject('Enum');
-
         switch ($date) {
             case $date >= 5 && $date < 8:
-                $light = $Enum::LightSettingDawn;
+                $light = $this->Enum::LightSettingDawn;
                 break;
 
             case $date >= 8 && $date < 17:
-                $light = $Enum::LightSettingDay;
+                $light = $this->Enum::LightSettingDay;
                 break;
 
             case $date >= 17 && $date < 20:
-                $light = $Enum::LightSettingEvening;
+                $light = $this->Enum::LightSettingEvening;
                 break;
 
             case $date >= 20 || $date < 5:
-                // $light = $Enum::LightSettingNight; //太黑了 改为傍晚
-                $light = $Enum::LightSettingEvening;
+                // $light = $this->Enum::LightSettingNight; //太黑了 改为傍晚
+                $light = $this->Enum::LightSettingEvening;
                 break;
 
             default:
-                $light = $Enum::LightSettingNormal;
+                $light = $this->Enum::LightSettingNormal;
                 break;
         }
 

@@ -1,60 +1,57 @@
 <?php
 namespace App\Controller\Game;
 
+use App\Controller\AbstractController;
+
 /**
  *
  */
-class Point
+class Point extends AbstractController
 {
-
     public function NextPoint($Point, $direction, $step)
     {
-        $x    = $Point['X'];
-        $y    = $Point['Y'];
-        $Enum = getObject('Enum');
+        $x = $Point['X'];
+        $y = $Point['Y'];
 
         switch ($direction) {
-            case $Enum::MirDirectionUp:
+            case $this->Enum::MirDirectionUp:
                 $y = $y - $step;
                 break;
 
-            case $Enum::MirDirectionUpRight:
+            case $this->Enum::MirDirectionUpRight:
                 $x = $x + $step;
                 $y = $y - $step;
                 break;
 
-            case $Enum::MirDirectionRight:
+            case $this->Enum::MirDirectionRight:
                 $x = $x + $step;
                 break;
 
-            case $Enum::MirDirectionDownRight:
+            case $this->Enum::MirDirectionDownRight:
                 $x = $x + $step;
                 $y = $y + $step;
                 break;
 
-            case $Enum::MirDirectionDown:
+            case $this->Enum::MirDirectionDown:
                 $y = $y + $step;
                 break;
 
-            case $Enum::MirDirectionDownLeft:
+            case $this->Enum::MirDirectionDownLeft:
                 $x = $x - $step;
                 $y = $y + $step;
                 break;
 
-            case $Enum::MirDirectionLeft:
+            case $this->Enum::MirDirectionLeft:
                 $x = $x - $step;
                 break;
 
-            case $Enum::MirDirectionUpLeft:
+            case $this->Enum::MirDirectionUpLeft:
                 $x = $x - $step;
                 $y = $y - $step;
                 break;
         }
 
-        return [
-            'X' => $x,
-            'Y' => $y,
-        ];
+        return $this->NewPoint($x, $y);
     }
 
     public function NewPoint($x, $y)
@@ -64,6 +61,8 @@ class Point
 
     public function inRange($currentPoint, $point, $dataRange)
     {
+        // var_dump('---------------'.$currentPoint['X'].'_'.$point['X'].'___________'.$currentPoint['Y'].'_'.$point['Y']);
+
         return AbsInt($currentPoint['X'] - intval($point['X'])) <= $dataRange && AbsInt(intval($currentPoint['Y']) - intval($point['Y'])) <= $dataRange;
     }
 }

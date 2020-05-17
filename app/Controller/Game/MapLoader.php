@@ -1,10 +1,12 @@
 <?php
 namespace App\Controller\Game;
 
+use App\Controller\AbstractController;
+
 /**
  *
  */
-class MapLoader
+class MapLoader extends AbstractController
 {
     public function loadMap($filepath)
     {
@@ -21,10 +23,8 @@ class MapLoader
 
         $fileBytes = $this->getFileContent($filepath); //全部内容
 
-        $Cell               = getObject('Cell');
-        $Enum               = getObject('Enum');
-        $this->LowWallCell  = $Cell->NewCell($Enum::CellAttributeLowWall);
-        $this->HighWallCell = $Cell->NewCell($Enum::CellAttributeHighWall);
+        $this->LowWallCell  = $this->Cell->NewCell($this->Enum::CellAttributeLowWall);
+        $this->HighWallCell = $this->Cell->NewCell($this->Enum::CellAttributeHighWall);
 
         $data = null;
         switch ($version) {
@@ -190,11 +190,11 @@ class MapLoader
         $width  = intval($w ^ $xor);
         $height = intval($h ^ $xor);
 
-        $m = getObject('Map')->NewMap($width, $height, 1);
+        $m = $this->Map->NewMap($width, $height, 1);
 
         $offset = 54;
 
-        $CellAttributeWalk = getObject('Enum')::CellAttributeWalk;
+        $CellAttributeWalk = $this->Enum::CellAttributeWalk;
 
         // $star_memory = memory_get_usage();
         // EchoLog(sprintf(PHP_EOL . '开始内存：%s', ($star_memory / 1024 / 1024)));
@@ -220,7 +220,7 @@ class MapLoader
                 //     ];
                 // }
 
-                $point = ['X' => $x,'Y' => $y];
+                $point = ['X' => $x, 'Y' => $y];
 
                 // if ($cell['Attribute'] == $CellAttributeWalk) {
                 //     $cell['Point'] = $point;
@@ -260,7 +260,7 @@ class MapLoader
 
         $m['doors'][$doorindex] = $door;
 
-        $m['doorsMap'] = getObject('Door')->Set($m, $loc, $door);
+        $m['doorsMap'] = $this->Door->Set($m, $loc, $door);
     }
 
     public function GetMapV2($fileBytes)

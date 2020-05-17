@@ -1,10 +1,10 @@
 <?php
 
+use App\Controller\ObjectService;
 use App\Libs\Math_BigInteger;
 use Hyperf\Utils\Context;
 use Psr\Http\Message\ServerRequestInterface;
 use Swoole\Server;
-use App\Controller\ObjectService;
 
 if (!function_exists('getClientIp')) {
     function getClientIp()
@@ -546,9 +546,7 @@ function BigInteger($numstr = 0, $base = 10)
 
 function getClientId($fd)
 {
-    $container = \Hyperf\Utils\ApplicationContext::getContainer();
-    $Server    = $container->get(\Swoole\Server::class);
-    return sha1($Server->getClientInfo($fd)['remote_ip'] . '_' . $fd);
+    return sha1(getObject('Server')->worker_id . '_' . $fd);
 }
 
 function int8($i)
@@ -663,8 +661,7 @@ function toClamp($value, $min, $max)
 
 function AbsInt($i)
 {
-    if($i < 0)
-    {
+    if ($i < 0) {
         return -$i;
     }
 
@@ -674,4 +671,33 @@ function AbsInt($i)
 function getObject($objectName)
 {
     return ObjectService::getObject($objectName);
+}
+
+function removeBOM($str)
+{
+    // if (strlen($str) >= 3) {
+    //     if ($str[0] == 0xef && $str[1] == 0xbb && $str[2] == 0xbf) {
+    //         return substr($str, 3);
+    //     }
+    // }
+    // return $str;
+
+    if (strlen($str) >= 3) {
+        $c0 = ord($str[0]);
+        $c1 = ord($str[1]);
+        $c2 = ord($str[2]);
+
+        if ($c0 == 0xFE && $c1 == 0xFF) {
+            // -- UTF-16BE BOM文件头: [0xFE, 0xFF],
+            $str = substr($str, 2);
+        } else if ($c0 == 0xFF && $c1 == 0xFE) {
+            // -- UTF-16LE BOM文件头: [0xFF, 0xFE],
+            $str = substr($str, 2);
+        } else if ($c0 == 0xEF && $c1 == 0xBB && $c2 == 0xBF) {
+            // -- UTF-8 BOM文件头: [0xEF, 0xBB, 0xBF]
+            $str = substr($str, 3);
+        }
+    }
+
+    return $str;
 }

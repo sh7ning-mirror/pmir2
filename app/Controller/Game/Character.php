@@ -1,15 +1,17 @@
 <?php
 namespace App\Controller\Game;
 
+use App\Controller\AbstractController;
+
 /**
  *
  */
-class Character
+class Character extends AbstractController
 {
     public function characterBase($name, $class, $gender)
     {
-        $startPoint = getObject('GameData')->randomStartPoint();
-        $Enum       = getObject('Enum');
+        $startPoint = $this->GameData->randomStartPoint();
+        $Enum       = $this->Enum;
 
         $characterInfo = [
             'name'               => $name,
@@ -61,7 +63,7 @@ class Character
             'pageInfo'  => false,
         ];
 
-        $res = getObject('CommonService')->getList('account_character as a', $where);
+        $res  = $this->CommonService->getList('account_character as a', $where);
         $data = [];
         if ($res['list']) {
             foreach ($res['list'] as $k => $v) {
@@ -79,11 +81,5 @@ class Character
         }
 
         return $data;
-    }
-
-    //保存玩家数据
-    public function saveData($p)
-    {
-        
     }
 }

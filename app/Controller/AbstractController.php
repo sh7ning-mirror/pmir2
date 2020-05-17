@@ -13,24 +13,37 @@ abstract class AbstractController
      */
     protected $container;
 
+    public static $staticObject = [];
+
+    public function __get($name)
+    {
+        if (empty(self::$staticObject[$name])) {
+            $object = getObject($name);
+
+            if ($object) {
+                self::$staticObject[$name] = $object;
+            }
+        }
+
+        return self::$staticObject[$name];
+    }
+
     //处理
     public function handler($cmaName, $fd, $param = [])
     {
-        $SendMsg = getObject('SendMsg');
-
-        $objectInfo = getObject('MsgRegister')->msgList[$cmaName] ?? [];
+        $objectInfo = $this->MsgRegister->msgList[$cmaName] ?? [];
         if ($objectInfo) {
             if (is_array($objectInfo[0])) {
                 foreach ($objectInfo[0] as $key => $value) {
                     $func = $value[1];
                     if ($packetInfo = $this->container->get($value[0])->$func($fd, $param)) {
-                        $SendMsg->sendPacketData($fd, $SendMsg->packetData($packetInfo), $packetInfo);
+                        $this->SendMsg->sendPacketData($fd, $this->SendMsg->packetData($packetInfo), $packetInfo);
                     }
                 }
             } else {
                 $func = $objectInfo[1];
                 if ($packetInfo = $this->container->get($objectInfo[0])->$func($fd, $param)) {
-                    $SendMsg->sendPacketData($fd, $SendMsg->packetData($packetInfo), $packetInfo);
+                    $this->SendMsg->sendPacketData($fd, $this->SendMsg->packetData($packetInfo), $packetInfo);
                 }
             }
         }
@@ -47,7 +60,7 @@ abstract class AbstractController
      */
     public function getConnections(): int
     {
-        return count(getObject('Server')->connections);
+        return count($this->Server->connections);
     }
 
     /**

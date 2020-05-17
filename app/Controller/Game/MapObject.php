@@ -1,15 +1,17 @@
 <?php
 namespace App\Controller\Game;
 
+use App\Controller\AbstractController;
+
 /**
  *
  */
-class MapObject
+class MapObject extends AbstractController
 {
     //同步血值
     public function iMapObject_BroadcastHealthChange($m, $objectType = null)
     {
-        if ($objectType == null && $objectType != getObject('Enum')::ObjectTypeMonster) {
+        if ($objectType == null && $objectType != $this->Enum::ObjectTypeMonster) {
             return false;
         }
 

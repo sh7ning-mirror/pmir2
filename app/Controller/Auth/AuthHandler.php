@@ -3,10 +3,12 @@ declare (strict_types = 1);
 
 namespace App\Controller\Auth;
 
+use App\Controller\AbstractController;
+
 /**
  *
  */
-class AuthHandler
+class AuthHandler extends AbstractController
 {
     public function keepAlive($fd, $param)
     {
@@ -23,11 +25,13 @@ class AuthHandler
      */
     public function clientVersion($fd, $param = [])
     {
-        $PlayerObject = getObject('PlayerObject');
-        co(function () use ($fd, $PlayerObject) {
-            $PlayerObject->GameStage = getObject('Enum')::LOGIN;
-            $PlayerObject->fd        = $fd;
-            $PlayerObject->setPlayer($fd);
+        co(function () use ($fd) {
+
+            $p              = $this->PlayerObject->playerInfo;
+            $p['GameStage'] = $this->Enum::LOGIN;
+            $p['fd']        = $fd;
+
+            $this->PlayerObject->setPlayer($fd,$p);
         });
 
         return ['CLIENT_VERSION', ['Result' => 1]];
@@ -46,8 +50,8 @@ class AuthHandler
      */
     public function newAccount($fd, $param = [])
     {
-        $PlayerObject = getObject('PlayerObject')->getPlayer($fd);
-        if (!$PlayerObject || !isset($PlayerObject['GameStage']) || $PlayerObject['GameStage'] != getObject('Enum')::LOGIN) {
+        $p = $this->PlayerObject->getPlayer($fd);
+        if (!$p || !isset($p['GameStage']) || $p['GameStage'] != $this->Enum::LOGIN) {
             return [];
         }
 
@@ -69,12 +73,11 @@ class AuthHandler
             ],
         ];
 
-        $CommonService = getObject('CommonService');
-        $res           = $CommonService->getOne('account', $where);
+        $res = $this->CommonService->getOne('account', $where);
 
         $Result = 0;
         if ($res['code'] != 2000) {
-            $res = $CommonService->save('account', $data);
+            $res = $this->CommonService->save('account', $data);
 
             if ($res['code'] == 2000) {
                 $Result = 8;
@@ -97,8 +100,8 @@ class AuthHandler
      */
     public function changePassword($fd, $param = [])
     {
-        $PlayerObject = getObject('PlayerObject')->getPlayer($fd);
-        if (!$PlayerObject || !isset($PlayerObject['GameStage']) || $PlayerObject['GameStage'] != getObject('Enum')::LOGIN) {
+        $p = $this->PlayerObject->getPlayer($fd);
+        if (!$p || !isset($p['GameStage']) || $p['GameStage'] != $this->Enum::LOGIN) {
             return [];
         }
 
@@ -110,8 +113,7 @@ class AuthHandler
             ],
         ];
 
-        $CommonService = getObject('CommonService');
-        $res           = $CommonService->getOne('account', $where);
+        $res = $this->CommonService->getOne('account', $where);
 
         if ($res['code'] == 2000) {
             if ($res['data']['password'] == $param['res']['CurrentPassword']) {
@@ -119,7 +121,7 @@ class AuthHandler
                     'password' => $param['res']['NewPassword'],
                 ];
 
-                $res = $CommonService->upField('account', $where, $data);
+                $res = $this->CommonService->upField('account', $where, $data);
 
                 if ($res['code'] == 2000) {
                     $Result = 6;
@@ -143,11 +145,9 @@ class AuthHandler
      */
     public function login($fd, $param = [])
     {
-        $PlayerObject = getObject('PlayerObject')->getPlayer($fd);
+        $p = $this->PlayerObject->getPlayer($fd);
 
-        $Enum = getObject('Enum');
-
-        if (!$PlayerObject || !isset($PlayerObject['GameStage']) || $PlayerObject['GameStage'] != $Enum::LOGIN) {
+        if (!$p || !isset($p['GameStage']) || $p['GameStage'] != $this->Enum::LOGIN) {
             return ['LOGIN', ['Result' => 0]];
         }
 
@@ -159,28 +159,27 @@ class AuthHandler
             ],
         ];
 
-        $CommonService = getObject('CommonService');
-        $res           = $CommonService->getOne('account', $where);
+        $res = $this->CommonService->getOne('account', $where);
 
         if ($res['code'] == 2000) {
             if ($res['data']['password'] == $param['res']['Password']) {
 
-                $Characters = getObject('Character')->getAccountCharacters($param['res']['account']);
+                $Characters = $this->Character->getAccountCharacters($param['res']['account']);
 
-                co(function () use ($fd, $where, $res, $Characters, $PlayerObject, $CommonService, $Enum, $param) {
+                co(function () use ($fd, $where, $res, $Characters, $p, $param) {
                     $data = [
                         'login_date' => date('Y-m-d H:i:s'),
-                        'login_ip'   => getObject('Server')->getClientInfo($fd)['remote_ip'],
+                        'login_ip'   => $this->Server->getClientInfo($fd)['remote_ip'],
                     ];
 
-                    $CommonService->upField('account', $where, $data);
+                    $this->CommonService->upField('account', $where, $data);
 
-                    $PlayerObject['AccountID']  = $res['data']['id'];
-                    $PlayerObject['account']    = $param['res']['account'];
-                    $PlayerObject['GameStage']  = $Enum::SELECT;
-                    $PlayerObject['Characters'] = $Characters;
+                    $p['AccountID']  = $res['data']['id'];
+                    $p['account']    = $param['res']['account'];
+                    $p['GameStage']  = $this->Enum::SELECT;
+                    $p['Characters'] = $Characters;
 
-                    getObject('PlayerObject')->setPlayer($fd, $PlayerObject);
+                    $this->PlayerObject->setPlayer($fd, $p);
                 });
 
                 return ['LOGIN_SUCCESS', ['Count' => count($Characters), 'Characters' => $Characters]];
@@ -204,14 +203,13 @@ class AuthHandler
      */
     public function newCharacter($fd, $param = [])
     {
-        $PlayerObject = getObject('PlayerObject')->getPlayer($fd);
-        $Enum         = getObject('Enum');
+        $p = $this->PlayerObject->getPlayer($fd);
 
-        if (!$PlayerObject || !isset($PlayerObject['GameStage']) || $PlayerObject['GameStage'] != $Enum::SELECT) {
+        if (!$p || !isset($p['GameStage']) || $p['GameStage'] != $this->Enum::SELECT) {
             return [];
         }
 
-        if (count($PlayerObject['Characters']) >= $Enum::AccountCharacter) {
+        if (count($p['Characters']) >= $this->Enum::AccountCharacter) {
             return ['NEW_CHARACTER', ['Result' => 4]];
         }
 
@@ -224,8 +222,7 @@ class AuthHandler
             ],
         ];
 
-        $CommonService = getObject('CommonService');
-        $res           = $CommonService->getOne('character', $where);
+        $res = $this->CommonService->getOne('character', $where);
 
         if ($res['code'] != 2000) {
             $data = [
@@ -235,17 +232,17 @@ class AuthHandler
             ];
 
             //获取角色基础数据
-            $characterBase = getObject('Character')->characterBase($param['res']['Name'], $param['res']['Class'], $param['res']['Gender']);
+            $characterBase = $this->Character->characterBase($param['res']['Name'], $param['res']['Class'], $param['res']['Gender']);
 
-            $res = $CommonService->save('character', $characterBase);
+            $res = $this->CommonService->save('character', $characterBase);
             if ($res['code'] == 2000) {
 
                 $data = [
-                    'account_id'   => $PlayerObject['AccountID'],
+                    'account_id'   => $p['AccountID'],
                     'character_id' => $res['data']['id'],
                 ];
 
-                $res = $CommonService->save('account_character', $data);
+                $res = $this->CommonService->save('account_character', $data);
                 if ($res['code'] == 2000) {
                     $CharInfo = [
                         'Index'      => $data['character_id'],
@@ -256,13 +253,13 @@ class AuthHandler
                         'LastAccess' => 0,
                     ];
 
-                    $PlayerObject['Characters'][] = $CharInfo;
+                    $p['Characters'][] = $CharInfo;
 
-                    co(function () use ($fd, $PlayerObject, $CommonService, $data, $Enum) {
-                        getObject('PlayerObject')->setPlayer($fd, $PlayerObject);
+                    co(function () use ($fd, $p, $data) {
+                        $this->PlayerObject->setPlayer($fd, $p);
 
                         //初始化新手装备
-                        $startItems = getObject('GameData')->getStartItems();
+                        $startItems = $this->GameData->getStartItems();
 
                         foreach ($startItems as $k => $v) {
                             $info = [
@@ -295,17 +292,17 @@ class AuthHandler
                                 'poison_attack'   => $v['poison_attack'],
                             ];
 
-                            $res = $CommonService->save('user_item', $info);
+                            $res = $this->CommonService->save('user_item', $info);
 
                             if ($res['code'] == 2000) {
                                 $info = [
                                     'character_id' => $data['character_id'],
                                     'user_item_id' => $res['data']['id'],
-                                    'type'         => $Enum::UserItemTypeInventory,
+                                    'type'         => $this->Enum::UserItemTypeInventory,
                                     'index'        => $k,
                                 ];
 
-                                $CommonService->save('character_user_item', $info);
+                                $this->CommonService->save('character_user_item', $info);
                             }
                         }
                     });
@@ -326,18 +323,18 @@ class AuthHandler
      */
     public function deleteCharacter($fd, $param = [])
     {
-        $PlayerObject = getObject('PlayerObject')->getPlayer($fd);
+        $p = $this->PlayerObject->getPlayer($fd);
 
-        if (!$PlayerObject || !isset($PlayerObject['GameStage']) || $PlayerObject['GameStage'] != getObject('Enum')::SELECT) {
+        if (!$p || !isset($p['GameStage']) || $p['GameStage'] != $this->Enum::SELECT) {
             return [];
         }
 
         $temp = false;
 
-        foreach ($PlayerObject['Characters'] as $k => $v) {
+        foreach ($p['Characters'] as $k => $v) {
             if ($v['Index'] == $param['res']['CharacterIndex']) {
                 $temp = true;
-                unset($PlayerObject['Characters'][$k]);
+                unset($p['Characters'][$k]);
                 break;
             }
         }
@@ -358,12 +355,12 @@ class AuthHandler
             'isdel' => 2,
         ];
 
-        $res = getObject('CommonService')->upField('character', $where, $data);
+        $res = $this->CommonService->upField('character', $where, $data);
 
         if ($res['code'] == 2000) {
 
-            co(function () use ($fd, $PlayerObject) {
-                getObject('PlayerObject')->setPlayer($fd, $PlayerObject);
+            co(function () use ($fd, $p) {
+                $this->PlayerObject->setPlayer($fd, $p);
             });
 
             return ['DELETE_CHARACTER_SUCCESS', ['CharacterIndex' => $param['res']['CharacterIndex']]];
@@ -381,24 +378,23 @@ class AuthHandler
      */
     public function startGame($fd, $param = [])
     {
-        $PlayerObject = getObject('PlayerObject')->getPlayer($fd);
-        $Enum         = getObject('Enum');
+        $p = $this->PlayerObject->getPlayer($fd);
 
-        if (!$PlayerObject || !isset($PlayerObject['GameStage']) || $PlayerObject['GameStage'] != $Enum::SELECT) {
-            return ['START_GAME', ['Result' => 0, 'Resolution' => $Enum::AllowedResolution]];
+        if (!$p || !isset($p['GameStage']) || $p['GameStage'] != $this->Enum::SELECT) {
+            return ['START_GAME', ['Result' => 0, 'Resolution' => $this->Enum::AllowedResolution]];
         }
 
-        if (!$Enum::AllowStartGame) {
-            return ['START_GAME', ['Result' => 0, 'Resolution' => $Enum::AllowedResolution]];
+        if (!$this->Enum::AllowStartGame) {
+            return ['START_GAME', ['Result' => 0, 'Resolution' => $this->Enum::AllowedResolution]];
         }
 
-        if (!$PlayerObject['AccountID'] || !$PlayerObject['Characters']) {
-            return ['START_GAME', ['Result' => 1, 'Resolution' => $Enum::AllowedResolution]];
+        if (!$p['AccountID'] || !$p['Characters']) {
+            return ['START_GAME', ['Result' => 1, 'Resolution' => $this->Enum::AllowedResolution]];
         }
 
         $temp = false;
 
-        foreach ($PlayerObject['Characters'] as $k => $v) {
+        foreach ($p['Characters'] as $k => $v) {
             if ($v['Index'] == $param['res']['CharacterIndex']) {
                 $temp = true;
                 break;
@@ -406,13 +402,13 @@ class AuthHandler
         }
 
         if (!$temp) {
-            return ['START_GAME', ['Result' => 2, 'Resolution' => $Enum::AllowedResolution]];
+            return ['START_GAME', ['Result' => 2, 'Resolution' => $this->Enum::AllowedResolution]];
         }
 
         $where = [
             'whereInfo' => [
                 'where' => [
-                    ['a.account_id', '=', $PlayerObject['AccountID']],
+                    ['a.account_id', '=', $p['AccountID']],
                     ['b.id', '=', $param['res']['CharacterIndex']],
                     ['b.isdel', '=', 1],
                 ],
@@ -426,9 +422,9 @@ class AuthHandler
             'pageInfo'  => false,
         ];
 
-        $accountCharacter = getObject('CommonService')->getOne('account_character as a', $where);
+        $accountCharacter = $this->CommonService->getOne('account_character as a', $where);
         if ($accountCharacter['code'] != 2000) {
-            return ['START_GAME', ['Result' => 2, 'Resolution' => $Enum::AllowedResolution]];
+            return ['START_GAME', ['Result' => 2, 'Resolution' => $this->Enum::AllowedResolution]];
         }
 
         $where = [
@@ -439,22 +435,25 @@ class AuthHandler
             ],
         ];
 
-        $user_magic = getObject('CommonService')->getList('user_magic', $where);
+        $user_magic = $this->CommonService->getList('user_magic', $where);
 
-        getObject('SendMsg')->send($fd, ['SET_CONCENTRATION', ['ObjectID' => $PlayerObject['AccountID'], 'Enabled' => 0, 'Interrupted' => 0]]);
+        $this->SendMsg->send($fd, ['SET_CONCENTRATION', ['ObjectID' => $p['AccountID'], 'Enabled' => 0, 'Interrupted' => 0]]);
 
-        getObject('SendMsg')->send($fd, ['START_GAME', ['Result' => 4, 'Resolution' => $Enum::AllowedResolution]]);
+        $this->SendMsg->send($fd, ['START_GAME', ['Result' => 4, 'Resolution' => $this->Enum::AllowedResolution]]);
 
-        getObject('PlayerObject')->updatePlayerInfo($PlayerObject, $accountCharacter['data'], $user_magic['list']);
+        $this->PlayerObject->updatePlayerInfo($p, $accountCharacter['data'], $user_magic['list']);
 
-        EchoLog(sprintf('玩家登陆: 账户ID(%s) 角色名(%s)', $PlayerObject['AccountID'], $PlayerObject['Name']), 'i');
+        $this->PlayerObject->setPlayer($fd, $p);
 
-        $PlayerObject['Map'] = getObject('GameData')->getMap($accountCharacter['data']['current_map_id']);
+        EchoLog(sprintf('玩家登陆: 账户ID(%s) 角色名(%s)', $p['AccountID'], $p['Name']), 'i');
 
-        getObject('PlayersList')->addPlayersList($PlayerObject);
+        // $p['Map'] = $this->GameData->getMap($accountCharacter['data']['current_map_id']);
+        $p['Map']['Info']['id'] = $accountCharacter['data']['current_map_id'];
 
-        getObject('Map')->addObject($PlayerObject);
+        $this->PlayersList->addPlayersList($p);
 
-        getObject('PlayerObject')->StartGame($PlayerObject);
+        $this->Map->addObject($p);
+
+        $this->PlayerObject->StartGame($p);
     }
 }

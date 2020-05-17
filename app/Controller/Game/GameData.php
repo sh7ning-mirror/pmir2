@@ -1,25 +1,32 @@
 <?php
 namespace App\Controller\Game;
 
+use App\Controller\AbstractController;
+
 /**
  *
  */
-class GameData
+class GameData extends AbstractController
 {
+    public $npcInfos;
+    public $respawnInfos;
+    public $safeZoneInfo;
+
     public function loadGameData()
     {
-        getObject('Redis')->flushDB(); //清空当前库全部缓存
+        $this->Redis->flushDB(); //清空当前库全部缓存
 
-        $gameShopItems = $this->gameShopItems();
-        $itemInfos     = $this->itemInfos();
-        $magicInfos    = $this->magicInfos();
-        $mapInfos      = $this->mapInfos();
-        $monsterInfos  = $this->monsterInfos();
-        $movementInfos = $this->movementInfos();
-        $npcInfos      = $this->npcInfos();
-        $questInfos    = $this->questInfos();
-        $respawnInfos  = $this->respawnInfos();
-        $safeZoneInfos = $this->safeZoneInfos();
+        $gameShopItems      = $this->gameShopItems();
+        $itemInfos          = $this->itemInfos();
+        $magicInfos         = $this->magicInfos();
+        $monsterInfos       = $this->monsterInfos();
+        $movementInfos      = $this->movementInfos();
+        $defaultNPC         = $this->defaultNPC();
+        $this->npcInfos     = $this->npcInfos();
+        $questInfos         = $this->questInfos();
+        $this->respawnInfos = $this->respawnInfos();
+        $this->safeZoneInfo = $this->safeZoneInfos();
+        $mapInfos           = $this->mapInfos();
 
         EchoLog(sprintf('数据初始化加载 商品:%s 物品:%s 技能:%s 地图:%s 怪物:%s 怪物巡逻:%s NPC:%s 任务:%s 重新生成:%s 安全区:%s',
             $gameShopItems['total'],
@@ -28,10 +35,10 @@ class GameData
             $mapInfos['total'],
             $monsterInfos['total'],
             $movementInfos['total'],
-            $npcInfos['total'],
+            $this->npcInfos['total'],
             $questInfos['total'],
-            $respawnInfos['total'],
-            $safeZoneInfos['total']
+            $this->respawnInfos['total'],
+            $this->safeZoneInfo['total']
         ), null, true);
 
         $this->loadMonsterDrop($monsterInfos['list']); //怪物掉落
@@ -44,9 +51,9 @@ class GameData
         $where = [
             'pageInfo' => false,
         ];
-        $res = getObject('CommonService')->getList('game_shop_item', $where);
+        $res = $this->CommonService->getList('game_shop_item', $where);
 
-        getObject('Redis')->set('gameShopItems', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('gameShopItems', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
         return $res;
     }
 
@@ -55,7 +62,7 @@ class GameData
         $where = [
             'pageInfo' => false,
         ];
-        $res = getObject('CommonService')->getList('item', $where);
+        $res = $this->CommonService->getList('item', $where);
 
         $startItems      = [];
         $itemIDInfoMap   = [];
@@ -87,14 +94,13 @@ class GameData
             }
         }
 
-        $Redis = getObject('Redis');
-        $Redis->set('itemInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('itemInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
 
-        $Redis->set('startItems', json_encode($startItems, JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('startItems', json_encode($startItems, JSON_UNESCAPED_UNICODE));
 
-        $Redis->set('itemIDInfoMap', json_encode($itemIDInfoMap, JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('itemIDInfoMap', json_encode($itemIDInfoMap, JSON_UNESCAPED_UNICODE));
 
-        $Redis->set('itemNameInfoMap', json_encode($itemNameInfoMap, JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('itemNameInfoMap', json_encode($itemNameInfoMap, JSON_UNESCAPED_UNICODE));
 
         return $res;
     }
@@ -104,7 +110,7 @@ class GameData
         $where = [
             'pageInfo' => false,
         ];
-        $res = getObject('CommonService')->getList('magic', $where);
+        $res = $this->CommonService->getList('magic', $where);
 
         $magicIDInfoMap = [];
 
@@ -113,10 +119,10 @@ class GameData
                 $magicIDInfoMap[$v['id']] = $v;
             }
         }
-        $Redis = getObject('Redis');
-        $Redis->set('magicInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
 
-        $Redis->set('magicIDInfoMap', json_encode($magicIDInfoMap, JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('magicInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
+
+        $this->Redis->set('magicIDInfoMap', json_encode($magicIDInfoMap, JSON_UNESCAPED_UNICODE));
 
         return $res;
     }
@@ -126,7 +132,7 @@ class GameData
         $where = [
             'pageInfo' => false,
         ];
-        $res = getObject('CommonService')->getList('map', $where);
+        $res = $this->CommonService->getList('map', $where);
 
         $mapIDInfoMap = [];
         $Maps         = [];
@@ -147,28 +153,27 @@ class GameData
 
             $num = 0;
 
-            $MapLoader = getObject('MapLoader');
-            $Redis     = getObject('Redis');
-
             foreach ($res['list'] as $k => $v) {
 
                 $mapIDInfoMap[$v['id']] = $v;
 
                 //加载地图数据
-                $m              = $MapLoader->loadMap($uppercaseNameRealNameMap[strtoupper(trim($v['file_name']) . ".map")]);
+                $m              = $this->MapLoader->loadMap($uppercaseNameRealNameMap[strtoupper(trim($v['file_name']) . ".map")]);
                 $v['file_name'] = strtoupper(trim($v['file_name']));
                 $m['Info']      = $v;
 
                 $Maps[$v['id']] = $m;
+
+                $map_data = $this->Map->initAll($m, $this->npcInfos['list'], $this->respawnInfos['list'], $this->safeZoneInfo['list']);
 
                 //生成地图缓存
                 $players_key  = 'map:players_' . $v['id'];
                 $npcs_key     = 'map:npcs_' . $v['id'];
                 $monsters_key = 'map:monsters_' . $v['id'];
 
-                $Redis->set($players_key, json_encode([], JSON_UNESCAPED_UNICODE));
-                $Redis->set($npcs_key, json_encode([], JSON_UNESCAPED_UNICODE));
-                $Redis->set($monsters_key, json_encode([], JSON_UNESCAPED_UNICODE));
+                $this->Redis->set($players_key, json_encode([], JSON_UNESCAPED_UNICODE));
+                $this->Redis->set($npcs_key, json_encode($map_data['npc'], JSON_UNESCAPED_UNICODE));
+                $this->Redis->set($monsters_key, json_encode($map_data['monsters'], JSON_UNESCAPED_UNICODE));
             }
 
             $etime = microtime(true);
@@ -176,11 +181,11 @@ class GameData
             EchoLog(sprintf(PHP_EOL . '加载完成 %s', $total));
         }
 
-        // $Redis->set('mapInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
+        // $this->Redis->set('mapInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
 
-        $Redis->set('Maps', json_encode($Maps, JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('Maps', json_encode($Maps, JSON_UNESCAPED_UNICODE));
 
-        $Redis->set('mapIDInfoMap', json_encode($mapIDInfoMap, JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('mapIDInfoMap', json_encode($mapIDInfoMap, JSON_UNESCAPED_UNICODE));
 
         return $res;
     }
@@ -190,7 +195,7 @@ class GameData
         $where = [
             'pageInfo' => false,
         ];
-        $res = getObject('CommonService')->getList('monster', $where);
+        $res = $this->CommonService->getList('monster', $where);
 
         $monsterIDInfoMap   = [];
         $monsterNameInfoMap = [];
@@ -202,12 +207,11 @@ class GameData
             }
         }
 
-        $Redis = getObject('Redis');
-        $Redis->set('monsterInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('monsterInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
 
-        $Redis->set('monsterIDInfoMap', json_encode($monsterIDInfoMap, JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('monsterIDInfoMap', json_encode($monsterIDInfoMap, JSON_UNESCAPED_UNICODE));
 
-        $Redis->set('monsterNameInfoMap', json_encode($monsterNameInfoMap, JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('monsterNameInfoMap', json_encode($monsterNameInfoMap, JSON_UNESCAPED_UNICODE));
 
         return $res;
     }
@@ -217,9 +221,9 @@ class GameData
         $where = [
             'pageInfo' => false,
         ];
-        $res = getObject('CommonService')->getList('movement', $where);
+        $res = $this->CommonService->getList('movement', $where);
 
-        getObject('Redis')->set('movementInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('movementInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
 
         return $res;
     }
@@ -229,9 +233,9 @@ class GameData
         $where = [
             'pageInfo' => false,
         ];
-        $res = getObject('CommonService')->getList('npc', $where);
+        $res = $this->CommonService->getList('npc', $where);
 
-        getObject('Redis')->set('npcInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('npcInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
 
         return $res;
     }
@@ -241,9 +245,9 @@ class GameData
         $where = [
             'pageInfo' => false,
         ];
-        $res = getObject('CommonService')->getList('quest', $where);
+        $res = $this->CommonService->getList('quest', $where);
 
-        getObject('Redis')->set('questInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('questInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
 
         return $res;
     }
@@ -253,9 +257,9 @@ class GameData
         $where = [
             'pageInfo' => false,
         ];
-        $res = getObject('CommonService')->getList('respawn', $where);
+        $res = $this->CommonService->getList('respawn', $where);
 
-        getObject('Redis')->set('respawnInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('respawnInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
 
         return $res;
     }
@@ -265,7 +269,7 @@ class GameData
         $where = [
             'pageInfo' => false,
         ];
-        $res = getObject('CommonService')->getList('safe_zone', $where);
+        $res = $this->CommonService->getList('safe_zone', $where);
 
         $startPoints = [];
 
@@ -276,10 +280,10 @@ class GameData
                 }
             }
         }
-        $Redis = getObject('Redis');
-        $Redis->set('startPoints', json_encode($startPoints, JSON_UNESCAPED_UNICODE));
 
-        $Redis->set('safeZoneInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('startPoints', json_encode($startPoints, JSON_UNESCAPED_UNICODE));
+
+        $this->Redis->set('safeZoneInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
 
         return $res;
     }
@@ -295,7 +299,7 @@ class GameData
             }
         }
 
-        getObject('Redis')->set('dropInfoMap', json_encode($dropInfoMap, JSON_UNESCAPED_UNICODE));
+        $this->Redis->set('dropInfoMap', json_encode($dropInfoMap, JSON_UNESCAPED_UNICODE));
     }
 
     public function loadDropFile($file = '')
@@ -314,6 +318,8 @@ class GameData
             if (!$content || $content == ' ' || strpos($content, ';') !== false) {
                 continue;
             }
+
+            $content = removeBOM($content); //去除bom头
 
             $txt = preg_replace("/\s(?=\s)/", "\\1", $content);
 
@@ -385,6 +391,8 @@ class GameData
                 continue;
             }
 
+            $txt = removeBOM($txt); //去除bom头
+
             $content = str_replace('Level', '', $txt);
             $content = explode('=', $content);
 
@@ -402,44 +410,44 @@ class GameData
 
             $num++;
         }
-
-        getObject('Redis')->set('expList', json_encode($data, JSON_UNESCAPED_UNICODE));
+        fclose($fp);
+        $this->Redis->set('expList', json_encode($data, JSON_UNESCAPED_UNICODE));
     }
 
     public function randomStartPoint()
     {
-        $startPoints = json_decode(getObject('Redis')->get('startPoints'), true);
+        $startPoints = json_decode($this->Redis->get('startPoints'), true);
 
         return $startPoints[mt_rand(0, count($startPoints) - 1)];
     }
 
     public function getMagicInfoByID($magic_id)
     {
-        $magicIDInfoMap = json_decode(getObject('Redis')->get('magicIDInfoMap'));
+        $magicIDInfoMap = json_decode($this->Redis->get('magicIDInfoMap'));
 
         return $magicIDInfoMap[$magic_id] ?: [];
     }
 
     public function getExpList($level = null)
     {
-        $expList = json_decode(getObject('Redis')->get('expList'), true);
+        $expList = json_decode($this->Redis->get('expList'), true);
         return $level == null ? $expList : $expList[$level] ?: 1;
     }
 
     public function getStartItems()
     {
-        return json_decode(getObject('Redis')->get('startItems'), true);
+        return json_decode($this->Redis->get('startItems'), true);
     }
 
     public function getItemInfoByID($ItemID)
     {
-        $itemIDInfoMap = json_decode(getObject('Redis')->get('itemIDInfoMap'), true);
+        $itemIDInfoMap = json_decode($this->Redis->get('itemIDInfoMap'), true);
         return $itemIDInfoMap[$ItemID] ?: null;
     }
 
     public function getMap($mapId = null)
     {
-        $Maps = json_decode(getObject('Redis')->get('Maps'), true);
+        $Maps = json_decode($this->Redis->get('Maps'), true);
 
         if ($mapId == null) {
             return $Maps;
@@ -450,7 +458,7 @@ class GameData
 
     public function getItemInfos()
     {
-        return json_decode(getObject('Redis')->get('itemInfos'), true);
+        return json_decode($this->Redis->get('itemInfos'), true);
     }
 
     public function getRealItem($origin, $level, $job, $itemList)
@@ -471,14 +479,13 @@ class GameData
     public function getClassAndLevelBasedItem($origin, $job, $level, $itemList)
     {
         $output = $origin;
-        $Enum   = getObject('Enum');
 
         for ($i = 0; $i < count($itemList); $i++) {
             $info = $itemList[$i];
             if (strpos($info['Name'], $origin['Name']) === 0) {
 
                 if ($info['required_class'] == (1 << $job)) {
-                    if ($info['required_type'] == $Enum::RequiredTypeLevel && $info['required_amount'] <= $level && $output['required_amount'] <= $info['required_amount'] && $origin['required_gender'] == $info['required_gender']) {
+                    if ($info['required_type'] == $this->Enum::RequiredTypeLevel && $info['required_amount'] <= $level && $output['required_amount'] <= $info['required_amount'] && $origin['required_gender'] == $info['required_gender']) {
                         $output = $info;
                     }
                 }
@@ -503,12 +510,11 @@ class GameData
     public function getLevelBasedItem($origin, $level, $itemList)
     {
         $output = $origin;
-        $Enum   = getObject('Enum');
 
         for ($i = 0; $i < count($itemList); $i++) {
             $info = $itemList[$i];
             if (strpos($info['Name'], $origin['Name']) === 0) {
-                if ($info['RequiredType'] == $Enum::RequiredTypeLevel && $info['RequiredAmount'] <= $level && $output['RequiredAmount'] < $info['RequiredAmount'] && $origin['RequiredGender'] == $info['RequiredGender']) {
+                if ($info['RequiredType'] == $this->Enum::RequiredTypeLevel && $info['RequiredAmount'] <= $level && $output['RequiredAmount'] < $info['RequiredAmount'] && $origin['RequiredGender'] == $info['RequiredGender']) {
                     $output = $info;
                 }
             }
@@ -516,11 +522,18 @@ class GameData
         return $output;
     }
 
+    //获取地图所有npc
+    public function getMapNpc($map_id)
+    {
+        $key = 'map:npcs_' . $map_id;
+        return json_decode($this->Redis->get($key), true);
+    }
+
     //获取地图中人物
     public function getMapPlayers($map_id)
     {
         $key = 'map:players_' . $map_id;
-        return json_decode(getObject('Redis')->get($key), true);
+        return json_decode($this->Redis->get($key), true);
     }
 
     //添加地图人物
@@ -535,7 +548,7 @@ class GameData
             'Name' => $p['Name'],
         ];
 
-        getObject('Redis')->set($key, json_encode($mapPlayers, JSON_UNESCAPED_UNICODE));
+        $this->Redis->set($key, json_encode($mapPlayers, JSON_UNESCAPED_UNICODE));
     }
 
     //删除地图人物
@@ -547,11 +560,48 @@ class GameData
         $mapPlayers[$p['ID']] = null;
         unset($mapPlayers[$p['ID']]);
 
-        getObject('Redis')->set($key, json_encode($mapPlayers, JSON_UNESCAPED_UNICODE));
+        $this->Redis->set($key, json_encode($mapPlayers, JSON_UNESCAPED_UNICODE));
     }
 
     public function getMovementInfos()
     {
-        return json_decode(getObject('Redis')->get('movementInfos'), true);
+        return json_decode($this->Redis->get('movementInfos'), true);
+    }
+
+    public function defaultNPC()
+    {
+        $defaultNPC = $this->Npc->newNpc(null, $this->Atomic->newObjectID(), [
+            'map_id'         => '',
+            'file_name'      => '00Default',
+            'name'           => 'DefaultNPC',
+            'chinese_name'   => '',
+            'location_x'     => '',
+            'location_y'     => '',
+            'rate'           => '',
+            'image'          => '',
+            'time_visible'   => '',
+            'hour_start'     => '',
+            'minute_start'   => '',
+            'hour_end'       => '',
+            'minute_end'     => '',
+            'min_lev'        => '',
+            'max_lev'        => '',
+            'day_of_week'    => '',
+            'class_required' => '',
+            'flag_needed'    => '',
+            'conquest'       => '',
+        ]);
+
+        $this->Redis->set('defaultNPC', json_encode($defaultNPC, JSON_UNESCAPED_UNICODE));
+    }
+
+    public function getItemInfoByName($name = '')
+    {
+        # code...
+    }
+
+    public function getDefaultNPC()
+    {
+        return json_decode($this->Redis->get('defaultNPC'), true);
     }
 }

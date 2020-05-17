@@ -178,6 +178,7 @@ class Enum
     const ChatTypeShout2       = 14;
     const ChatTypeShout3       = 15;
 
+    const MirGridType               = 0;
     const MirGridTypeNone           = 0;
     const MirGridTypeInventory      = 1;
     const MirGridTypeEquipment      = 2;
@@ -915,5 +916,37 @@ class Enum
     const BindModeUnableToRent        = 4096;
     const BindModeUnableToDisassemble = 8192;
     const BindModeNoMail              = 16384;
+
+
+    const MainKey           = "[@MAIN]";
+    const BuyKey            = "[@BUY]";
+    const SellKey           = "[@SELL]";
+    const BuySellKey        = "[@BUYSELL]";
+    const RepairKey         = "[@REPAIR]";
+    const SRepairKey        = "[@SREPAIR]";
+    const RefineKey         = "[@REFINE]";
+    const RefineCheckKey    = "[@REFINECHECK]";
+    const RefineCollectKey  = "[@REFINECOLLECT]";
+    const ReplaceWedRingKey = "[@REPLACEWEDDINGRING]";
+    const BuyBackKey        = "[@BUYBACK]";
+    const StorageKey        = "[@STORAGE]";
+    const ConsignKey        = "[@CONSIGN]";
+    const MarketKey         = "[@MARKET]";
+    const ConsignmentsKey   = "[@CONSIGNMENT]";
+    const CraftKey          = "[@CRAFT]";
+    const TradeKey          = "[TRADE]";
+    const RecipeKey         = "[RECIPE]";
+    const TypeKey           = "[TYPES]";
+    const QuestKey          = "[QUESTS]";
+    const GuildCreateKey    = "[@CREATEGUILD]";
+    const RequestWarKey     = "[@REQUESTWAR]";
+    const SendParcelKey     = "[@SENDPARCEL]";
+    const CollectParcelKey  = "[@COLLECTPARCEL]";
+    const AwakeningKey      = "[@AWAKENING]";
+    const DisassembleKey    = "[@DISASSEMBLE]";
+    const DowngradeKey      = "[@DOWNGRADE]";
+    const ResetKey          = "[@RESET]";
+    const PearlBuyKey       = "[@PEARLBUY]";
+    const BuyUsedKey        = "[@BUYUSED]";
 
 }

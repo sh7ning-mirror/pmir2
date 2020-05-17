@@ -35,7 +35,7 @@ author by.fan <fan3750060@163.com>
 加载地图 /home/2020_pmir/storage/Maps/GA2.mapp
 加载完成 19.826506853104
 数据初始化加载 商品:81 物品:1348 技能:105 地图:389 怪物:521 怪物巡逻:1838 NPC:301 任务:157 重新生成:5639 安全区:19
-[2020-05-01 8:44:50 ERROR  ] 掉落分子错误 content: ﻿1/5 Gold 500; /home/2020_pmir/storage/Envir/Drops/蝎蛇3.txt line: 1; 
+[2020-05-01 8:44:50 ERROR] 掉落分子错误 content: ﻿1/5 Gold 500; /home/2020_pmir/storage/Envir/Drops/蝎蛇3.txt line: 1;
 
 ~~~
 

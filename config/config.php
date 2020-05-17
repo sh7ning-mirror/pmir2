@@ -29,4 +29,5 @@ return [
     ],
 
     'settings_path' => BASE_PATH . '/storage',
+    'dataRange' => 20,//视野范围
 ];
