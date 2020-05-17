@@ -29,5 +29,5 @@ return [
     ],
 
     'settings_path' => BASE_PATH . '/storage',
-    'dataRange' => 20,//ÊÓÒ°·¶Î§
+    'dataRange' => 20,
 ];
