@@ -40,6 +40,7 @@ class ObjectService
         'NpcScript'     => 'App\Controller\Game\Script\NpcScript',
         'Atomic'        => 'App\Controller\Common\Atomic',
         'Util'          => 'App\Controller\Game\Util\Util',
+        'Item'          => 'App\Controller\Game\Item',
     ];
 
     public static function getObject($objectName = null)

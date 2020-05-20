@@ -31,7 +31,7 @@ class AuthHandler extends AbstractController
             $p['GameStage'] = $this->Enum::LOGIN;
             $p['fd']        = $fd;
 
-            $this->PlayerObject->setPlayer($fd,$p);
+            $this->PlayerObject->setPlayer($fd, $p);
         });
 
         return ['CLIENT_VERSION', ['Result' => 1]];
@@ -452,7 +452,7 @@ class AuthHandler extends AbstractController
 
         $this->PlayersList->addPlayersList($p);
 
-        $this->Map->addObject($p);
+        $this->Map->addObject($p, $this->Enum::ObjectTypePlayer);
 
         $this->PlayerObject->StartGame($p);
     }

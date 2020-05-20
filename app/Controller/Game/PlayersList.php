@@ -88,4 +88,27 @@ class PlayersList extends AbstractController
             }
         });
     }
+
+    public function saveGold($id, $gold)
+    {
+        if (!$id) {
+            return false;
+        }
+
+        co(function () use ($id, $gold) {
+            $data = [
+                'gold' => $gold, //改数据库会覆盖
+            ];
+
+            $where = [
+                'whereInfo' => [
+                    'where' => [
+                        ['id', '=', $id],
+                    ],
+                ],
+            ];
+
+            $this->CommonService->upField('character', $where, $data);
+        });
+    }
 }

@@ -25,6 +25,8 @@ abstract class AbstractController
             }
         }
 
+        $this->$name = self::$staticObject[$name];
+
         return self::$staticObject[$name];
     }
 

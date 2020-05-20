@@ -62,6 +62,11 @@ class Bag extends AbstractController
         return $bag;
     }
 
+    public function useCount($Inventory, $i, $count)
+    {
+        return $this->setCount($Inventory, $i, $Inventory['Items'][$i]['count'] - $count);
+    }
+
     public function setCount($Inventory, $i, $count)
     {
         if ($count == 0) {
@@ -94,12 +99,17 @@ class Bag extends AbstractController
             if ($Inventory['Items'][$i]['isset']) {
                 EchoLog('该位置有物品了', 'w');
             }
-            
+
+            if(empty($item['Info']['id']))
+            {
+                return false;
+            }
+
             $info = [
                 'item_id'         => $item['Info']['id'],
                 'current_dura'    => 100,
                 'max_dura'        => 100,
-                'count'           => 1,
+                'count'           => !empty($item['count']) ? $item['count'] : 1,
                 'ac'              => $item['Info']['min_ac'],
                 'mac'             => $item['Info']['min_mac'],
                 'dc'              => $item['Info']['min_dc'],

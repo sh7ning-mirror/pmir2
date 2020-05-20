@@ -509,11 +509,7 @@ if (!function_exists('bytesToString')) {
     //bytesToString
     function bytesToString($bytes)
     {
-        $str = '';
-        foreach ($bytes as $ch) {
-            $str .= chr($ch); //这里用chr函数
-        }
-        return $str;
+        return implode('', array_map('chr', $bytes));
     }
 }
 
@@ -521,12 +517,7 @@ if (!function_exists('stringToBytes')) {
     //stringToBytes
     function stringToBytes($string)
     {
-        $bytes = [];
-        for ($i = 0; $i < strlen($string); $i++) {
-            //遍历每一个字符 用ord函数把它们拼接成一个php数组
-            $bytes[] = ord($string[$i]);
-        }
-        return $bytes;
+        return array_map('ord', str_split($string));
     }
 }
 
@@ -675,13 +666,6 @@ function getObject($objectName)
 
 function removeBOM($str)
 {
-    // if (strlen($str) >= 3) {
-    //     if ($str[0] == 0xef && $str[1] == 0xbb && $str[2] == 0xbf) {
-    //         return substr($str, 3);
-    //     }
-    // }
-    // return $str;
-
     if (strlen($str) >= 3) {
         $c0 = ord($str[0]);
         $c1 = ord($str[1]);

@@ -91,6 +91,27 @@ class CodePacket extends AbstractController
             'Count'     => 'uint32',
             'Type'      => 'uint8',
         ],
+        'SELL_ITEM'        => [
+            'UniqueID' => 'uint64',
+            'Count'    => 'uint32',
+        ],
+        'DROP_ITEM'        => [
+            'UniqueID' => 'uint64',
+            'Count'    => 'uint32',
+        ],
+        'PICK_UP'          => [],
+        'CHANGE_A_MODE'    => [
+            'Mode' => 'uint8',
+        ],
+        'CHANGE_P_MODE'    => [
+            'Mode' => 'uint8',
+        ],
+        'USE_ITEM'         => [
+            'UniqueID' => 'uint64',
+        ],
+        'DROP_GOLD'        => [
+            'Amount' => 'uint32',
+        ],
     ];
 
     private $serverPacketStruct = [
@@ -688,6 +709,54 @@ class CodePacket extends AbstractController
         'NPC_SELL'                 => [],
         'LOSE_GOLD'                => [
             'Gold' => 'uint32',
+        ],
+        'DROP_ITEM'                => [
+            'UniqueID' => 'uint64',
+            'Count'    => 'uint32',
+            'Success'  => 'bool',
+        ],
+        'SELL_ITEM'                => [
+            'UniqueID' => 'uint64',
+            'Count'    => 'uint32',
+            'Success'  => 'bool',
+        ],
+        'OBJECT_ITEM'              => [
+            'ObjectID'  => 'uint32',
+            'Name'      => 'string',
+            'NameColor' => 'int32',
+            'LocationX' => 'int32',
+            'LocationY' => 'int32',
+            'Image'     => 'uint16',
+            'Grade'     => 'uint8',
+        ],
+        'OBJECT_GOLD'              => [
+            'ObjectID'  => 'uint32',
+            'Gold'      => 'uint32',
+            'LocationX' => 'int32',
+            'LocationY' => 'int32',
+        ],
+        'GAINED_GOLD'              => [
+            'Gold' => 'uint32',
+        ],
+        'USE_ITEM'                 => [
+            'UniqueID' => 'uint64',
+            'Success'  => 'bool',
+        ],
+        'DEATH'                    => [
+            'LocationX' => 'int32',
+            'LocationY' => 'int32',
+            'Direction' => 'uint8',
+        ],
+        'OBJECT_DIED'              => [
+            'ObjectID'  => 'int32',
+            'LocationX' => 'int32',
+            'LocationY' => 'int32',
+            'Direction' => 'uint8',
+            'Type'      => 'uint8',
+        ],
+        'HEALTH_CHANGED'           => [
+            'HP' => 'uint16',
+            'MP' => 'uint16',
         ],
     ];
 

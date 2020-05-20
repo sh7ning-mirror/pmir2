@@ -61,7 +61,7 @@ class Npc extends AbstractController
                 }
 
                 $g = $this->MsgFactory->newUserItem($item, $this->Atomic->newObjectID());
-                
+
                 $g['count']     = $count;
                 $npc['Goods'][] = $g;
             }
@@ -81,9 +81,13 @@ class Npc extends AbstractController
         # code...
     }
 
-    public function getPlayerBuyBack($p)
+    public function getPlayerBuyBack($p, $npc)
     {
-        # code...
+        $key = 'npc:buyBack_' . $npc['ID'];
+
+        $buyBackList = json_decode($this->Redis->get($key),true);
+
+        return !empty($buyBackList[$p['ID']]) ? $buyBackList[$p['ID']] : [];
     }
 
     public function buy($p, $npc, $userItemID, $count)
@@ -92,13 +96,16 @@ class Npc extends AbstractController
         $iter      = [];
         $isBuyBack = false;
 
-        $items = !empty($npc['BuyBack'][$p['ID']]) ? $npc['BuyBack'][$p['ID']] : '';
+        $items = $this->getPlayerBuyBack($p, $npc);
 
         if ($items) {
-
-            if (!empty($items[$userItemID])) {
-                $userItem  = $items[$userItemID];
-                $isBuyBack = true;
+            foreach ($items as $k => $v) 
+            {
+                if ($v['id'] == $userItemID) {
+                    $userItem  = $v;
+                    $isBuyBack = true;
+                    break;
+                }
             }
         }
 
@@ -109,33 +116,63 @@ class Npc extends AbstractController
         if (!$userItem || !$count || $count > $userItem['Info']['stack_size']) {
             return false;
         }
+        $price = $this->Item->price($userItem);
 
-        if ($userItem['Info']['price'] > $p['Gold']) {
+        if ($price > $p['Gold']) {
             return;
         }
 
         if ($isBuyBack) {
-            $count = $userItem['Count'];
+            $userItem['Info']['count'] = $count;
             $this->removeBuyBack($npc, $p, $userItemID);
 
             $this->PlayerObject->sendBuyBackGoods($p, $npc, false);
         } else {
-            $userItem          = $this->MsgFactory->newUserItem($userItem['Info'], $this->Atomic->newObjectID());
-            $userItem['Count'] = $count;
+            $userItem                  = $this->MsgFactory->newUserItem($userItem['Info'], $this->Atomic->newObjectID());
+            $userItem['Info']['count'] = $count;
         }
 
         if ($this->PlayerObject->gainItem($p, $userItem['Info'])) {
-            $this->PlayerObject->takeGold($p, $userItem['Info']['price']);
+            $this->PlayerObject->takeGold($p, $price);
         }
+    }
+
+    public function addBuyBack($npc, $p, $temp)
+    {
+        co(function () use ($npc, $p, $temp) {
+
+            $key = 'npc:buyBack_' . $npc['ID'];
+
+            $buyBackList = json_decode($this->Redis->get($key),true);
+
+            $timeExpire         = 3 * 60 * 60; //过期时间,过期后放入商店 TODO 需要做定时器
+            $temp['timeExpire'] = $timeExpire;
+
+            $buyBackList[$p['ID']][] = $temp;
+            
+            $this->Redis->set($key, json_encode($buyBackList, JSON_UNESCAPED_UNICODE));
+        });
     }
 
     public function removeBuyBack($npc, $p, $userItemID)
     {
-        co(function () use ($npc, $p, $userItemID) {
-            unset($npc['BuyBack'][$p['ID']][$userItemID]);
-            $key = 'map:npcs_' . $npc['Map'];
-            $this->Redis->set($key, $npc);
-        });
+        // co(function () use ($npc, $p, $userItemID) {
+            $key = 'npc:buyBack_' . $npc['ID'];
+
+            $buyBackList = json_decode($this->Redis->get($key),true);
+
+
+            foreach ($buyBackList[$p['ID']] as $k => $v) 
+            {
+                if($v['id'] == $userItemID)
+                {
+                    unset($buyBackList[$p['ID']][$k]);
+                    break;
+                }
+            }
+
+            $this->Redis->set($key, json_encode($buyBackList, JSON_UNESCAPED_UNICODE));
+        // });
     }
 
     public function getUserItemByID($npc, $id)
@@ -143,6 +180,17 @@ class Npc extends AbstractController
         foreach ($npc['Goods'] as $key => $v) {
             if ($v['id'] == $id) {
                 return $v;
+            }
+        }
+    }
+
+    public function hasType($npc, $type)
+    {
+        if (!empty($npc['Script']['Types'])) {
+            foreach ($npc['Script']['Types'] as $k => $v) {
+                if ($v == $type) {
+                    return true;
+                }
             }
         }
     }

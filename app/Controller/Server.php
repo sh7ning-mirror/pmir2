@@ -85,11 +85,14 @@ class Server extends AbstractController
         $filter = [
             'KEEP_ALIVE',
         ];
-        
+
         if (!empty($data['cmdName']) && !in_array($data['cmdName'], $filter)) {
             EchoLog(sprintf('Client: [%s] serverReceive: %s', $fd, json_encode($data, JSON_UNESCAPED_UNICODE)), 'i');
 
-            if (empty($data['res'])) {
+            $pakc_filter = [
+                'PICK_UP'
+            ];
+            if (empty($data['res']) && !in_array($data['cmdName'], $pakc_filter)) {
                 EchoLog(sprintf('未正确解析数据包: %s', $data['cmdName']), 'w');
             }
         }

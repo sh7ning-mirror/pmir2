@@ -249,9 +249,9 @@ class Handler extends AbstractController
             'Success'  => false,
         ];
 
-        $index = $this->PlayerObject->getUserItemByID($p, $param['res']['Grid'], $param['res']['UniqueID']);
+        $res = $this->PlayerObject->getUserItemByID($p, $param['res']['Grid'], $param['res']['UniqueID']);
 
-        if ($index === false) {
+        if ($res[0] === false) {
             return ['EQUIP_ITEM', $msg];
         }
 
@@ -261,13 +261,13 @@ class Handler extends AbstractController
 
         switch ($param['res']['Grid']) {
             case $this->Enum::MirGridTypeInventory:
-                $err            = $this->Bag->moveTo($Inventory, $index, $msg['To'], $Equipment);
+                $err            = $this->Bag->moveTo($Inventory, $res[0], $msg['To'], $Equipment);
                 $p['Inventory'] = $Inventory;
                 $p['Equipment'] = $Equipment;
                 break;
 
             case $this->Enum::MirGridTypeStorage:
-                $err            = $this->Bag->moveTo($Inventory, $index, $msg['To'], $Storage);
+                $err            = $this->Bag->moveTo($Inventory, $res[0], $msg['To'], $Storage);
                 $p['Inventory'] = $Inventory;
                 $p['Storage']   = $Storage;
                 break;
@@ -298,9 +298,9 @@ class Handler extends AbstractController
             'Success'  => false,
         ];
 
-        $index = $this->PlayerObject->getUserItemByID($p, $this->Enum::MirGridTypeEquipment, $param['res']['UniqueID']);
+        $res = $this->PlayerObject->getUserItemByID($p, $this->Enum::MirGridTypeEquipment, $param['res']['UniqueID']);
 
-        if ($index === false) {
+        if ($res[0] === false) {
             return ['REMOVE_ITEM', $msg];
         }
 
@@ -310,7 +310,7 @@ class Handler extends AbstractController
 
         switch ($param['res']['Grid']) {
             case $this->Enum::MirGridTypeInventory:
-                $this->Bag->moveTo($Equipment, $index, $msg['To'], $Inventory);
+                $this->Bag->moveTo($Equipment, $res[0], $msg['To'], $Inventory);
                 $p['Equipment'] = $Equipment;
                 $p['Inventory'] = $Inventory;
                 break;
@@ -321,7 +321,7 @@ class Handler extends AbstractController
                     return ['REMOVE_ITEM', $msg];
                 }
 
-                $this->Bag->moveTo($Equipment, $index, $msg['To'], $Storage);
+                $this->Bag->moveTo($Equipment, $res[0], $msg['To'], $Storage);
                 $p['Equipment'] = $Equipment;
                 $p['Storage']   = $Storage;
                 break;
@@ -376,7 +376,7 @@ class Handler extends AbstractController
         }
 
         if (!$err) {
-            $this->PlayerObject->receiveChat('移动物品失败', $this->Enum::ChatTypeSystem);
+            $this->PlayerObject->receiveChat($p['fd'], '移动物品失败', $this->Enum::ChatTypeSystem);
         } else {
             $msg['Success'] = true;
             $this->PlayerObject->setPlayer($p['fd'], $p);
@@ -423,5 +423,249 @@ class Handler extends AbstractController
         $npc = $this->Map->getNpc($p['Map']['Info']['id'], $p['CallingNPC']);
 
         $this->Npc->buy($p, $npc, $param['res']['ItemIndex'], $param['res']['Count']);
+    }
+
+    public function dropItem($fd, $param)
+    {
+        $p = $this->PlayerObject->getPlayer($fd);
+        if ($p['Dead']) {
+            return false;
+        }
+
+        $res = $this->PlayerObject->getUserItemByID($p, $this->Enum::MirGridTypeInventory, $param['res']['UniqueID']);
+        if (!$res[1]) {
+            return $this->MsgFactory->dropItem($param['res']['UniqueID'], $param['res']['Count'], false);
+        }
+
+        $item = $this->Item->newItem($p['Map'], $res[1]);
+
+        $dropMsg = $this->Item->drop($item, $p['CurrentLocation'], 1);
+        if (!$dropMsg) {
+            $this->PlayerObject->receiveChat($p['fd'], sprintf('坐标(%s)附近没有合适的点放置物品;', $p['CurrentLocation']), $this->Enum::ChatTypeSystem);
+
+            return $this->MsgFactory->dropItem($param['res']['UniqueID'], $param['res']['Count'], false);
+        }
+
+        if ($param['res']['Count'] >= $res[1]['count']) {
+            $p['Inventory'] = $this->Bag->set($p['ID'], $p['Inventory'], $res[0], null);
+        } else {
+            $p['Inventory'] = $this->Bag->useCount($p['Inventory'], $res[0], $param['res']['Count']);
+        }
+
+        $this->PlayerObject->refreshBagWeight($p);
+
+        $this->PlayerObject->setPlayer($fd, $p);
+
+        return $this->MsgFactory->dropItem($param['res']['UniqueID'], $param['res']['Count'], true);
+    }
+
+    public function sellItem($fd, $param)
+    {
+        $p = $this->PlayerObject->getPlayer($fd);
+        if ($p['Dead'] || !$param['res']['Count']) {
+            return $this->MsgFactory->sellItem($param['res']['UniqueID'], $param['res']['Count'], false);
+        }
+
+        if (!$this->Util->stringEqualFold($p['CallingNPCPage'], [$this->Enum::BuySellKey, $this->Enum::SellKey])) {
+            return $this->MsgFactory->sellItem($param['res']['UniqueID'], $param['res']['Count'], false);
+        }
+
+        $index = -1;
+        $temp  = null;
+
+        foreach ($p['Inventory']['Items'] as $k => $v) {
+            if (!isset($v['isset']) || !$v['isset'] || $param['res']['UniqueID'] != $v['id']) {
+                continue;
+            }
+
+            $temp  = $v;
+            $index = $k;
+            break;
+        }
+
+        if (!$temp || $index == -1 || $param['res']['Count'] > $temp['count']) {
+            return $this->MsgFactory->sellItem($param['res']['UniqueID'], $param['res']['Count'], false);
+        }
+
+        if ($this->Util->hasFlagUint16($temp['Info']['bind'], $this->Enum::BindModeDontSell)) {
+            return $this->MsgFactory->sellItem($param['res']['UniqueID'], $param['res']['Count'], false);
+        }
+
+        $npc = $this->Map->getNpc($p['Map']['Info']['id'], $p['CallingNPC']);
+        if (!$this->Npc->hasType($npc, $temp['Info']['type'])) {
+            $this->PlayerObject->receiveChat($p['fd'], '不能在这里卖这类商品', $this->Enum::ChatTypeSystem);
+            return $this->MsgFactory->sellItem($param['res']['UniqueID'], $param['res']['Count'], false);
+        }
+
+        if ($temp['Info']['stack_size'] > 1 && $param['res']['Count'] != $temp['count']) {
+            $item          = $this->MsgFactory->newUserItem($temp['Info'], $this->Atomic->newObjectID());
+            $item['count'] = $param['res']['Count'];
+
+            if ($this->Item->price($item) + $p['Gold'] > 18446744073709551615) {
+                return $this->MsgFactory->sellItem($param['res']['UniqueID'], $param['res']['Count'], false);
+            }
+
+            $temp['count'] -= $param['res']['Count'];
+            $temp = $item;
+        } else {
+            $p['Inventory'] = $this->Bag->set($p['ID'], $p['Inventory'], $index, null);
+        }
+
+        $this->Npc->addBuyBack($npc, $p, $temp); //出售回购
+
+        $this->PlayerObject->refreshBagWeight($p);
+
+        $this->PlayerObject->gainGold($p, $this->Item->price($temp) / 2);
+
+        $this->PlayerObject->setPlayer($fd, $p);
+
+        return $this->MsgFactory->sellItem($param['res']['UniqueID'], $param['res']['Count'], true);
+    }
+
+    public function pickUp($fd, $param)
+    {
+        $p = $this->PlayerObject->getPlayer($fd);
+        if ($p['Dead']) {
+            return false;
+        }
+
+        $items = [];
+
+        $item = $this->Map->getObjectByPoint($p, $this->Enum::ObjectTypeItem);
+
+        if (!$item) {
+            return false;
+        }
+
+        if (empty($item['UserItem'])) {
+            $this->PlayerObject->gainGold($p, $item['Gold']);
+            $items[] = $item;
+        } else {
+            $item['UserItem']['Info']['count'] = $item['UserItem']['count'];
+            if ($this->PlayerObject->gainItem($p, $item['UserItem']['Info'])) {
+                $items[] = $item;
+            }
+        }
+
+        $this->PlayerObject->setPlayer($fd, $p);
+
+        foreach ($items as $key => $item) {
+            $object = [
+                'CurrentLocation' => $p['CurrentLocation'],
+                'Map'             => $p['Map'],
+                'ID'              => $item['ID'],
+            ];
+
+            $this->Map->deleteObject($object, $this->Enum::ObjectTypeItem);
+
+            $this->Item->broadcast($object, $this->MsgFactory->objectRemove($item));
+        }
+    }
+
+    public function changeAMode($fd, $param)
+    {
+        $p = $this->PlayerObject->getPlayer($fd);
+
+        $p['AMode'] = $param['res']['Mode'];
+
+        $this->PlayerObject->setPlayer($fd, $p);
+
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->changeAMode($param['res']['Mode']));
+    }
+
+    public function changePMode($fd, $param)
+    {
+        $p = $this->PlayerObject->getPlayer($fd);
+
+        $p['PMode'] = $param['res']['Mode'];
+
+        $this->PlayerObject->setPlayer($fd, $p);
+
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->changePMode($param['res']['Mode']));
+    }
+
+    public function useItem($fd, $param)
+    {
+        $p = $this->PlayerObject->getPlayer($fd);
+        if ($p['Dead']) {
+            return false;
+        }
+
+        $res = $this->PlayerObject->getUserItemByID($p, $this->Enum::MirGridTypeInventory, $param['res']['UniqueID']);
+        if (empty($res[1]) || $res[1]['id'] === 0 || !$this->PlayerObject->canUseItem($p, $res[1])) {
+            return $this->MsgFactory->useItem($param['res']['UniqueID'], false);
+        }
+
+        $info = $res[1]['Info'];
+
+        $msg = $this->MsgFactory->useItem($param['res']['UniqueID'], false);
+
+        switch ($info['type']) {
+            case $this->Enum::ItemTypePotion:
+                $msg[1]['Success'] = $this->PlayerObject->userItemPotion($p, $res[1]);
+                break;
+
+            case $this->Enum::ItemTypeScroll:
+                $msg[1]['Success'] = $this->PlayerObject->useItemScroll($p, $res[1]);
+                break;
+
+            case $this->Enum::ItemTypeBook:
+                $msg[1]['Success'] = $this->PlayerObject->giveSkill($p, $res[1]);
+                break;
+
+            case $this->Enum::ItemTypeScript:
+                $this->PlayerObject->callDefaultNPC($p, $this->Enum::DefaultNPCTypeUseItem, $info['shape']);
+                $msg[1]['Success'] = true;
+                break;
+
+            case $this->Enum::ItemTypeFood:
+                # code...
+                break;
+
+            case $this->Enum::ItemTypePets:
+                # code...
+                break;
+
+            case $this->Enum::ItemTypeTransform:
+                # code...
+                break;
+        }
+
+        if ($msg[1]['Success']) {
+            if ($res[1]['count'] > 1) {
+                $p['Inventory'] = $this->Bag->useCount($p['Inventory'], $res[0], 1);
+            } else {
+                $p['Inventory'] = $this->Bag->set($p['ID'], $p['Inventory'], $res[0], null);
+            }
+
+            $this->PlayerObject->refreshBagWeight($p);
+
+            $this->PlayerObject->setPlayer($fd, $p);
+
+            return $msg;
+        }
+    }
+
+    public function dropGold($fd, $param)
+    {
+        $p = $this->PlayerObject->getPlayer($fd);
+        if ($p['Dead']) {
+            return false;
+        }
+
+        if ($p['Gold'] < $param['res']['Amount']) {
+            return false;
+        }
+
+        $item = $this->Item->newGold($p['Map'], $param['res']['Amount']);
+
+        $dropMsg = $this->Item->drop($item, $p['CurrentLocation'], 3);
+
+        if (!$dropMsg) {
+            $this->PlayerObject->receiveChat($p['fd'], sprintf('坐标(%s)附近没有合适的点放置物品;', $p['CurrentLocation']), $this->Enum::ChatTypeSystem);
+            return false;
+        }
+
+        $this->PlayerObject->takeGold($p, $param['res']['Amount']);
     }
 }

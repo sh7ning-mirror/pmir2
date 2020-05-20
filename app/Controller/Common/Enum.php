@@ -891,6 +891,7 @@ class Enum
     const ObjectTypeMonster  = 5;
     const ObjectTypeDeco     = 6;
     const ObjectTypeCreature = 7;
+    const ObjectTypeNPC      = 8;
 
     const DefenceTypeACAgility  = 0;
     const DefenceTypeAC         = 1;
@@ -916,7 +917,6 @@ class Enum
     const BindModeUnableToRent        = 4096;
     const BindModeUnableToDisassemble = 8192;
     const BindModeNoMail              = 16384;
-
 
     const MainKey           = "[@MAIN]";
     const BuyKey            = "[@BUY]";
@@ -949,4 +949,22 @@ class Enum
     const PearlBuyKey       = "[@PEARLBUY]";
     const BuyUsedKey        = "[@BUYUSED]";
 
+    const ColorWhite       = ['R' => 255, 'G' => 255, 'B' => 255];
+    const ColorDeepSkyBlue = ['R' => 0, 'G' => 0, 'B' => 255];
+    const ColorDarkOrange  = ['R' => 255, 'G' => 135, 'B' => 0];
+    const ColorPlum        = ['R' => 100, 'G' => 0, 'B' => 150];
+
+    const DefaultNPCType              = 0;
+    const DefaultNPCTypeLogin         = 0;
+    const DefaultNPCTypeLevelUp       = 1;
+    const DefaultNPCTypeUseItem       = 2;
+    const DefaultNPCTypeMapCoord      = 3;
+    const DefaultNPCTypeMapEnter      = 4;
+    const DefaultNPCTypeDie           = 5;
+    const DefaultNPCTypeTrigger       = 6;
+    const DefaultNPCTypeCustomCommand = 7;
+    const DefaultNPCTypeOnAcceptQuest = 8;
+    const DefaultNPCTypeOnFinishQuest = 9;
+    const DefaultNPCTypeDaily         = 10;
+    const DefaultNPCTypeTalkMonster   = 11;
 }

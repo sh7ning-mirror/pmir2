@@ -163,4 +163,9 @@ class NpcScript extends AbstractController
     {
         return true;
     }
+
+    public function CHECKGOLD($param, $p)
+    {
+        return $this->compareInt($param[0], $p['Gold'], $param[1]);
+    }
 }

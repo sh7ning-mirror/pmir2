@@ -88,18 +88,86 @@ class Map extends AbstractController
         return ['npc' => $npc, 'monsters' => []];
     }
 
-    public function addObject($p)
+    public function addObject($object, $type)
     {
-        if (empty($p['ID'])) {
+        if (empty($object['ID'])) {
             return false;
         }
 
-        $this->GameData->setMapPlayers($p['Map']['Info']['id'], $p);
+        switch ($type) {
+            case $this->Enum::ObjectTypePlayer:
+                $this->GameData->setMapPlayers($object['Map']['Info']['id'], $object);
+                break;
+
+            case $this->Enum::ObjectTypeItem:
+                $this->GameData->setMapItem($object['Map']['Info']['id'], $object);
+                break;
+
+            case $this->Enum::ObjectTypeMonster:
+                # code...
+                break;
+
+            case $this->Enum::ObjectTypeNPC:
+                # code...
+                break;
+        }
     }
 
-    public function deleteObject($p)
+    public function getObjectByPoint($object, $type)
     {
-        $this->GameData->delMapPlayers($p['Map']['Info']['id'], $p);
+        if (empty($object['ID'])) {
+            return false;
+        }
+
+        switch ($type) {
+            case $this->Enum::ObjectTypePlayer:
+                $players = $this->GameData->getMapPlayers($object['Map']['Info']['id']);
+
+                foreach ($players as $k => $v) {
+                    if ($v['CurrentLocation']['X'] == $object['CurrentLocation']['X'] && $v['CurrentLocation']['Y'] == $object['CurrentLocation']['Y']) {
+                        return $v;
+                    }
+                }
+
+                break;
+
+            case $this->Enum::ObjectTypeItem:
+                return $this->GameData->getMapItem($object['Map']['Info']['id'], $object['CurrentLocation']);
+                break;
+
+            case $this->Enum::ObjectTypeMonster:
+                # code...
+                break;
+
+            case $this->Enum::ObjectTypeNPC:
+                # code...
+                break;
+        }
+    }
+
+    public function deleteObject($object, $type)
+    {
+        if (empty($object['ID'])) {
+            return false;
+        }
+
+        switch ($type) {
+            case $this->Enum::ObjectTypePlayer:
+                $this->GameData->delMapPlayers($object['Map']['Info']['id'], $object);
+                break;
+
+            case $this->Enum::ObjectTypeItem:
+                $this->GameData->delMapItem($object['Map']['Info']['id'], $object['CurrentLocation']);
+                break;
+
+            case $this->Enum::ObjectTypeMonster:
+                # code...
+                break;
+
+            case $this->Enum::ObjectTypeNPC:
+                # code...
+                break;
+        }
     }
 
     public function getCell($m, $point)
@@ -231,5 +299,42 @@ class Map extends AbstractController
         }
 
         return $npcs[$id] ?? null;
+    }
+
+    public function rangeCell($object, $m, $p, $depth, $fun)
+    {
+        $px = $p['X'];
+        $py = $p['Y'];
+
+        for ($d = 0; $d <= $depth; $d++) {
+            for ($y = $py - $d; $y <= $py + $d; $y++) {
+                if ($y < 0) {
+                    continue;
+                }
+
+                if ($y >= $m['Height']) {
+                    break;
+                }
+
+                for ($x = $px - $d; $x <= $px + $d;) {
+
+                    if ($x >= $m['Width']) {
+                        break;
+                    }
+
+                    if ($x >= 0) {
+                        if (!call_user_func_array($fun, [$object, $m['Info']['id'], $x, $y])) {
+                            return true;
+                        }
+                    }
+
+                    if ($y - $py == $d || $y - $py == -$d) {
+                        $x++; // x += 1
+                    } else {
+                        $x += $d * 2;
+                    }
+                }
+            }
+        }
     }
 }

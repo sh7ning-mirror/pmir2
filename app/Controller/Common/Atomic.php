@@ -35,6 +35,12 @@ class Atomic extends AbstractController
 
     public function newObjectID()
     {
-        return $this->get()->add(1);
+        $ObjectId = $this->get()->add(1);
+
+        co(function () use ($ObjectId) {
+            $this->Redis->set('ObjectId', $ObjectId);
+        });
+
+        return $ObjectId;
     }
 }

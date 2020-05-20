@@ -177,7 +177,7 @@ class MsgFactory extends AbstractController
             'item_id'         => $itemInfo['id'],
             'current_dura'    => 100,
             'max_dura'        => 100,
-            'count'           => 1,
+            'count'           => !empty($itemInfo['count']) ? $itemInfo['count'] : 1,
             'ac'              => $itemInfo['min_ac'],
             'mac'             => $itemInfo['max_ac'],
             'dc'              => $itemInfo['min_dc'],
@@ -189,7 +189,7 @@ class MsgFactory extends AbstractController
             'mp'              => $itemInfo['mp'],
             'attack_speed'    => $itemInfo['attack_speed'],
             'luck'            => $itemInfo['luck'],
-            'soul_bound_id'   => 0,
+            'soul_bound_id'   => !empty($itemInfo['soul_bound_id']) ? $itemInfo['soul_bound_id'] : 0,
             'bools'           => 0,
             'strong'          => 0,
             'magic_resist'    => 0,
@@ -202,6 +202,16 @@ class MsgFactory extends AbstractController
             'freezing'        => 0,
             'poison_attack'   => 0,
             'Info'            => $itemInfo,
+        ];
+    }
+
+    public function gainedItem($itemInfo)
+    {
+        return [
+            'GAINED_ITEM',
+            [
+                'Item' => $this->newUserItem($itemInfo, $this->Atomic->newObjectID()),
+            ],
         ];
     }
 
@@ -276,5 +286,163 @@ class MsgFactory extends AbstractController
             'LOSE_GOLD',
             ['Gold' => $gold],
         ];
+    }
+
+    public function dropItem($id, $count, $status = false)
+    {
+        return [
+            'DROP_ITEM', [
+                'UniqueID' => $id,
+                'Count'    => $count,
+                'Success'  => $status,
+            ],
+        ];
+    }
+
+    public function sellItem($id, $count, $status = false)
+    {
+        return [
+            'SELL_ITEM', [
+                'UniqueID' => $id,
+                'Count'    => $count,
+                'Success'  => $status,
+            ],
+        ];
+    }
+
+    public function objectItem($item)
+    {
+        return [
+            'OBJECT_ITEM', [
+                'ObjectID'  => $item['ID'],
+                'Name'      => $item['Name'],
+                'NameColor' => Int32(pack('c4', $item['NameColor']['R'], $item['NameColor']['G'], $item['NameColor']['B'], 255)),
+                'LocationX' => $item['CurrentLocation']['X'],
+                'LocationY' => $item['CurrentLocation']['Y'],
+                'Image'     => $this->Item->getImage($item),
+                'Grade'     => $this->Enum::ItemGradeNone,
+            ],
+        ];
+    }
+
+    public function objectGold($item)
+    {
+        return [
+            'OBJECT_GOLD', [
+                'ObjectID'  => $item['ID'],
+                'Gold'      => $item['Gold'],
+                'LocationX' => $item['CurrentLocation']['X'],
+                'LocationY' => $item['CurrentLocation']['Y'],
+            ],
+        ];
+    }
+
+    public function gainedGold($gold)
+    {
+        return [
+            'GAINED_GOLD', [
+                'Gold' => $gold,
+            ],
+        ];
+    }
+
+    public function objectRemove($item)
+    {
+        return [
+            'OBJECT_REMOVE',
+            [
+                'ObjectID' => $item['ID'],
+            ],
+        ];
+    }
+
+    public function changeAMode($mode)
+    {
+        return [
+            'CHANGE_A_MODE',
+            [
+                'Mode' => $mode,
+            ],
+        ];
+    }
+
+    public function changePMode($mode)
+    {
+        return [
+            'CHANGE_P_MODE',
+            [
+                'Mode' => $mode,
+            ],
+        ];
+    }
+
+    public function useItem($id, $status = false)
+    {
+        return [
+            'USE_ITEM',
+            [
+                'UniqueID' => $id,
+                'Success'  => $status,
+            ],
+        ];
+    }
+
+    public function death($p)
+    {
+        return [
+            'DEATH', [
+                'LocationX' => $p['CurrentLocation']['X'],
+                'LocationY' => $p['CurrentLocation']['Y'],
+                'Direction' => $p['CurrentDirection'],
+            ],
+        ];
+    }
+
+    public function objectDied($p)
+    {
+        return [
+            'OBJECT_DIED', [
+                'ObjectID'  => $p['ID'],
+                'LocationX' => $p['CurrentLocation']['X'],
+                'LocationY' => $p['CurrentLocation']['Y'],
+                'Direction' => $p['CurrentDirection'],
+                'Type'      => 0,
+            ],
+        ];
+    }
+
+    public function healthChanged($p)
+    {
+        return [
+            'HEALTH_CHANGED', [
+                'HP' => $p['HP'],
+                'MP' => $p['MP'],
+            ],
+        ];
+    }
+
+    public function health($health)
+    {
+        $newHealth = [
+            // 生命药水回复
+            'HPPotValue'    => null, // 回复总值
+            'HPPotPerValue' => null, // 一次回复多少
+            'HPPotNextTime' => null, // 下次生效时间
+            'HPPotDuration' => null, // 两次生效时间间隔
+            'HPPotTickNum'  => null, // 总共跳几次
+            'HPPotTickTime' => null, // 当前第几跳
+            // 魔法药水回复
+            'MPPotValue'    => null,
+            'MPPotPerValue' => null,
+            'MPPotNextTime' => null,
+            'MPPotDuration' => null,
+            'MPPotTickNum'  => null,
+            'MPPotTickTime' => null,
+            // 角色生命/魔法回复
+            'HealNextTime'  => null,
+            'HealDuration'  => null,
+        ];
+
+        return array_merge($newHealth, $health);
     }
 }

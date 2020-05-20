@@ -170,15 +170,17 @@ class GameData extends AbstractController
                 $players_key  = 'map:players_' . $v['id'];
                 $npcs_key     = 'map:npcs_' . $v['id'];
                 $monsters_key = 'map:monsters_' . $v['id'];
+                $item_key     = 'map:item_' . $v['id'];
 
                 $this->Redis->set($players_key, json_encode([], JSON_UNESCAPED_UNICODE));
                 $this->Redis->set($npcs_key, json_encode($map_data['npc'], JSON_UNESCAPED_UNICODE));
                 $this->Redis->set($monsters_key, json_encode($map_data['monsters'], JSON_UNESCAPED_UNICODE));
+                $this->Redis->set($item_key, json_encode([], JSON_UNESCAPED_UNICODE));
             }
 
             $etime = microtime(true);
             $total = $etime - $stime;
-            EchoLog(sprintf(PHP_EOL . '加载完成 %s', $total));
+            EchoLog(sprintf(PHP_EOL . '加载完成用时:%s 秒', $total));
         }
 
         // $this->Redis->set('mapInfos', json_encode($res['list'], JSON_UNESCAPED_UNICODE));
@@ -549,6 +551,43 @@ class GameData extends AbstractController
         ];
 
         $this->Redis->set($key, json_encode($mapPlayers, JSON_UNESCAPED_UNICODE));
+    }
+
+    public function setMapItem($map_id, $object)
+    {
+        $key             = 'map:item_' . $map_id;
+        $mapItem         = $this->getMapItem($map_id) ?: [];
+        $point           = $object['CurrentLocation']['X'] . '_' . $object['CurrentLocation']['Y'];
+        $mapItem[$point] = $object;
+
+        $this->Redis->set($key, json_encode($mapItem, JSON_UNESCAPED_UNICODE));
+    }
+
+    public function getMapItem($map_id, $point = null)
+    {
+        $key   = 'map:item_' . $map_id;
+        $items = json_decode($this->Redis->get($key), true);
+
+        if ($point) {
+            return !empty($items[$point['X'] . '_' . $point['Y']]) ? $items[$point['X'] . '_' . $point['Y']] : '';
+        } else {
+            return $items;
+        }
+    }
+
+    public function delMapItem($map_id, $point = null)
+    {
+        if (!$map_id || !$point) {
+            return;
+        }
+
+        $key   = 'map:item_' . $map_id;
+        $items = json_decode($this->Redis->get($key), true);
+
+        if (!empty($items[$point['X'] . '_' . $point['Y']])) {
+            unset($items[$point['X'] . '_' . $point['Y']]);
+            $this->Redis->set($key, json_encode($items, JSON_UNESCAPED_UNICODE));
+        }
     }
 
     //删除地图人物

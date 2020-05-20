@@ -30,5 +30,12 @@ class MsgRegister
         'MOVE_ITEM'        => ['\App\Controller\World\Handler', 'moveItem'],
         'CALL_NPC'         => ['\App\Controller\World\Handler', 'callNpc'],
         'BUY_ITEM'         => ['\App\Controller\World\Handler', 'buyItem'],
+        'DROP_ITEM'        => ['\App\Controller\World\Handler', 'dropItem'],
+        'SELL_ITEM'        => ['\App\Controller\World\Handler', 'sellItem'],
+        'PICK_UP'          => ['\App\Controller\World\Handler', 'pickUp'],
+        'CHANGE_A_MODE'    => ['\App\Controller\World\Handler', 'changeAMode'],
+        'CHANGE_P_MODE'    => ['\App\Controller\World\Handler', 'changePMode'],
+        'USE_ITEM'         => ['\App\Controller\World\Handler', 'useItem'],
+        'DROP_GOLD'        => ['\App\Controller\World\Handler', 'dropGold'],
     ];
 }

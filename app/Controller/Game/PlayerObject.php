@@ -168,14 +168,18 @@ class PlayerObject extends AbstractController
         $p['ActionList'] = []; //TODO
         $p['PoisonList'] = []; //TODO
         $p['BuffList']   = [];
-        $p['Health']     = [
+
+        $health = [
             'HPPotNextTime' => time(),
-            'HPPotDuration' => 1,
+            'HPPotDuration' => 1 * 60,
             'MPPotNextTime' => time(),
-            'MPPotDuration' => 1,
-            'HealNextTime'  => time(),
-            'HealDuration'  => 10,
+            'MPPotDuration' => 1 * 60,
+            'HealNextTime'  => time() + 10,
+            'HealDuration'  => 10 * 60,
         ];
+
+        $p['Health'] = $this->MsgFactory->health($health);
+
         $p['Pets']       = [];
         $p['PKPoints']   = 0;
         $p['AMode']      = $accountCharacter['attack_mode'];
@@ -199,27 +203,27 @@ class PlayerObject extends AbstractController
     // GainItem 为玩家增加物品，增加成功返回 true
     public function gainItem(&$p, $item)
     {
-        $itemInfo                = $this->MsgFactory->newUserItem($item, $this->Atomic->newObjectID());
-        $itemInfo['SoulBoundId'] = $p['ID'];
+        $itemInfo                  = $this->MsgFactory->newUserItem($item, $this->Atomic->newObjectID());
+        $itemInfo['soul_bound_id'] = $p['ID'];
 
         if ($itemInfo['Info']['stack_size'] > 1) {
-            foreach ($p['Inventory']['Items'] as $k1 => $v1) {
+            foreach ($p['Inventory']['Items'] as $k => $v) {
 
-                if (empty($v1['isset']) || $itemInfo['Info']['id'] != $v1['Info']['id'] || $v1['count'] > $itemInfo['Info']['stack_size']) {
+                if (empty($v['isset']) || $itemInfo['Info']['id'] != $v['Info']['id'] || $v['count'] > $itemInfo['Info']['stack_size']) {
                     continue;
                 }
 
-                if ($itemInfo['count'] + $v1['count'] <= $item['stack_size']) {
+                if ($itemInfo['count'] + $v['count'] <= $v['Info']['stack_size']) {
 
-                    $p['Inventory'] = $this->Bag->setCount($p['Inventory'], $k1, $itemInfo['count'] + $itemInfo['count']);
+                    $p['Inventory'] = $this->Bag->setCount($p['Inventory'], $k, $v['count'] + $itemInfo['count']);
 
-                    $this->SendMsg->send($p['fd'], ['GAINED_ITEM', ['Item' => $itemInfo]]);
-
+                    $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['Info']));
+                    $this->setPlayer($p['fd'], $p);
                     return true;
                 }
 
-                $p['Inventory'] = $this->Bag->setCount($p['Inventory'], $k1, $item['count'] + $itemInfo['count']);
-                $itemInfo['count'] -= $itemInfo['Info']['stack_size'] - $v1['count'];
+                $p['Inventory'] = $this->Bag->setCount($p['Inventory'], $k, $v['count'] + $itemInfo['count']);
+                $itemInfo['count'] -= $itemInfo['Info']['stack_size'] - $v['count'];
             }
         }
 
@@ -246,11 +250,11 @@ class PlayerObject extends AbstractController
                 continue;
             }
 
-            $p['Inventory'] = $this->Bag->Set($p['ID'], $p['Inventory'], $i, $itemInfo);
+            $p['Inventory'] = $this->Bag->set($p['ID'], $p['Inventory'], $i, $itemInfo);
             $this->enqueueItemInfo($p, $itemInfo['item_id']);
-            $this->SendMsg->send($p['fd'], ['GAINED_ITEM', ['Item' => [$itemInfo]]]);
+            $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['Info']));
             $this->refreshBagWeight($p);
-
+            $this->setPlayer($p['fd'], $p);
             return $p;
         }
 
@@ -261,15 +265,29 @@ class PlayerObject extends AbstractController
 
             $p['Inventory'] = $this->Bag->set($p['ID'], $p['Inventory'], $i, $itemInfo);
             $this->enqueueItemInfo($p, $itemInfo['item_id']);
-            $this->SendMsg->send($p['fd'], ['GAINED_ITEM', ['Item' => [$itemInfo]]]);
+            $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['Info']));
             $this->refreshBagWeight($p);
-
+            $this->setPlayer($p['fd'], $p);
             return true;
         }
 
         $this->receiveChat($p['fd'], '没有合适的格子放置物品', $this->Enum::ChatTypeSystem);
 
         return false;
+    }
+
+    //为玩家增加金币
+    public function gainGold(&$p, $gold)
+    {
+        if ($gold <= 0) {
+            return;
+        }
+
+        $p['Gold'] += $gold;
+
+        $this->PlayersList->saveGold($p['ID'], $p['Gold']);
+
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedGold($gold));
     }
 
     public function receiveChat($fd, $msg, $type)
@@ -321,9 +339,9 @@ class PlayerObject extends AbstractController
 
         $this->SendMsg->send($p['fd'], ['TIME_OF_DAY', ['Lights' => $this->Settings->lightSet()]]);
 
-        $this->SendMsg->send($p['fd'], ['CHANGE_A_MODE', ['Mode' => $p['AMode']]]);
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->changeAMode($p['AMode']));
 
-        $this->SendMsg->send($p['fd'], ['CHANGE_P_MODE', ['Mode' => $p['PMode']]]);
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->changePMode($p['PMode']));
 
         $this->SendMsg->send($p['fd'], ['SWITCH_GROUP', ['AllowGroup' => $p['AllowGroup'] ?: 0]]);
 
@@ -336,7 +354,7 @@ class PlayerObject extends AbstractController
 
     public function stopGame($p)
     {
-        $this->broadcast($p, ['OBJECT_REMOVE', ['ObjectID' => $p['ID']]]);
+        $this->broadcast($p, $this->MsgFactory->objectRemove($p));
     }
 
     //物品
@@ -686,7 +704,6 @@ class PlayerObject extends AbstractController
 
     public function getCell($map, $CurrentLocation)
     {
-        var_dump(json_encode($this->Map));
         return $this->Map->getCell($map, $CurrentLocation);
     }
 
@@ -722,15 +739,15 @@ class PlayerObject extends AbstractController
             return false;
         }
 
-        $this->Map->deleteObject($p);
+        $this->Map->deleteObject($p, $this->Enum::ObjectTypePlayer);
 
         $this->broadcast($p, ['OBJECT_TELEPORT_OUT', ['ObjectID' => $p['ID'], 'Type' => 0]]);
-        $this->broadcast($p, ['OBJECT_REMOVE', ['ObjectID' => $p['ID']]]);
+        $this->broadcast($p, $this->MsgFactory->objectRemove($p));
 
         $p['Map']['Info']['id'] = $m['Info']['id'];
         $p['CurrentLocation']   = $point;
 
-        $this->Map->addObject($p);
+        $this->Map->addObject($p, $this->Enum::ObjectTypePlayer);
 
         $this->broadcastInfo($p); //广播人物
 
@@ -798,17 +815,17 @@ class PlayerObject extends AbstractController
 
             default:
                 EchoLog(sprintf('错误的装备类型: %s', $mirGridType), 'e');
-                return false;
+                return [false, []];
                 break;
         }
 
         foreach ($Items as $k => $v) {
             if (!empty($v['isset']) && $v['id'] == $id) {
-                return $k;
+                return [$k, $v];
             }
         }
 
-        return -1;
+        return [-1, []];
     }
 
     public function callNPC1($p, $npc, $key)
@@ -867,7 +884,6 @@ class PlayerObject extends AbstractController
             foreach ($npc['Goods'] as $key => $item) {
                 $this->enqueueItemInfo($p, $item['item_id']);
             }
-
             $this->SendMsg->send($p['fd'], $this->MsgFactory->npcGoods($npc['Goods'], 1.0, $this->Enum::PanelTypeBuy));
         }
     }
@@ -885,7 +901,7 @@ class PlayerObject extends AbstractController
 
     public function sendBuyBackGoods($p, $npc, $syncItem)
     {
-        $goods = $this->Npc->getPlayerBuyBack($p);
+        $goods = $this->Npc->getPlayerBuyBack($p, $npc);
 
         if ($syncItem && $goods) {
             foreach ($goods as $key => $item) {
@@ -908,9 +924,191 @@ class PlayerObject extends AbstractController
         co(function () use ($p) {
             $this->setPlayer($p['fd'], $p);
 
-            $this->PlayersList->saveData($p['fd'], $p);
+            $this->PlayersList->saveGold($p['ID'], $p['Gold']);
         });
 
         $this->SendMsg->send($p['fd'], $this->MsgFactory->loseGold($gold));
     }
+
+    # 药水是消耗品，可以治愈或增强玩家的生命。
+    # 常用名称形状使用的统计信息描述
+    #   普通药水 0 HP / MP逐渐治愈玩家。
+    #   太阳药剂 1 HP / MP立即治愈玩家。
+    #   神秘水 2 没有允许玩家取消装备被诅咒的物品（仅适用于官方神秘物品）。
+    #   Buff 药剂 3 DC / MC / SC / ASpeed / HP / MP / MaxAC / MaxMAC /Durability 为玩家提供相对的增益 抛光时间的长短取决于药水的耐久性。 1 dura = 1分钟。
+    #   经验值 4 运气/耐力通过运气统计数据增加玩家获得的经验值百分比。 抛光时间的长短取决于药水的耐久性。 1 dura = 1分钟。
+    public function userItemPotion($p, $item)
+    {
+        $info = $item['Info'];
+
+        switch ($info['shape']) {
+            case 0:
+                # code...
+                break;
+
+            default:
+                # code...
+                break;
+        }
+    }
+
+    public function process($p)
+    {
+        $p = $this->getPlayer($p['fd']);
+        if(!$p || $p == 'null')
+        {
+            return;
+        }
+
+        $now = time();
+        $this->processBuffs($p);
+        $this->processPoison($p);
+
+        $ch = &$p['Health'];
+
+        if ($ch['HPPotValue'] != 0 && $ch['HPPotNextTime'] < $now) {
+            $this->changeHp($p, $ch['HPPotPerValue']);
+            $ch['HPPotTickTime'] += 1;
+
+            if ($ch['HPPotTickTime'] >= $ch['HPPotTickNum']) {
+                $ch['HPPotValue'] = 0; //回复总值
+            } else {
+                $ch['HPPotNextTime'] = $now; //下次生效时间
+            }
+        }
+
+        if ($ch['MPPotValue'] != 0 && $ch['MPPotNextTime'] < $now) {
+            $this->changeMp($p, $ch['MPPotPerValue']);
+            $ch['MPPotTickTime'] += 1;
+
+            if ($ch['MPPotTickTime'] >= $ch['MPPotTickNum']) {
+                $ch['MPPotValue'] = 0; //回复总值
+            } else {
+                $ch['MPPotNextTime'] = $now; //下次生效时间
+            }
+        }
+
+        if ($ch['HealNextTime'] < $now) {
+            $ch['HealNextTime'] = $now;
+
+            $this->changeHp($p, intval($p['MaxHP'] * 0.03) + 1);
+            $this->changeMp($p, intval($p['MaxMP'] * 0.03) + 1);
+        }
+
+        $this->setPlayer($p['fd'], $p);
+    }
+
+    public function processBuffs($p)
+    {
+
+    }
+
+    public function processPoison($p)
+    {
+
+    }
+
+    public function changeHp(&$p, $amount)
+    {
+        if ($amount == 0 || $p['Dead'] || $p['HP'] >= $p['MaxHP']) {
+            return false;
+        }
+
+        $hp = intval($p['HP'] + $amount);
+
+        if ($hp <= 0) {
+            $hp = 0;
+        }
+
+        $this->setHp($p, $hp);
+    }
+
+    public function changeMp(&$p, $amount)
+    {
+        if ($amount == 0 || $p['Dead'] || $p['MP'] >= $p['MaxMP']) {
+            return;
+        }
+
+        $mp = intval($p['MP'] + $amount);
+
+        if ($mp <= 0) {
+            $mp = 0;
+        }
+
+        $this->setMp($p, $mp);
+    }
+
+    public function setHp(&$p, $amount)
+    {
+        if ($p['HP'] == $amount) {
+            return;
+        }
+
+        if ($amount >= $p['MaxHP']) {
+            $amount = $p['MaxHP'];
+        }
+
+        $p['HP'] = $amount;
+
+        if (!$p['Dead'] && $p['HP'] == 0) {
+            $this->die($p);
+        }
+
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->healthChanged($p));
+
+        $this->broadcastHealthChange($p);
+    }
+
+    public function setMp(&$p, $amount)
+    {
+        if ($p['MP'] == $amount) {
+            return false;
+        }
+
+        $p['MP'] = $amount;
+
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->healthChanged($p));
+
+        $this->broadcastHealthChange($p);
+    }
+
+    function die(&$p) {
+        $p['HP']   = 0;
+        $p['Dead'] = true;
+
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->death($p));
+        $this->broadcast($p, $this->MsgFactory->objectDied($p));
+
+        // $this->callDefaultNPC($p, $this->Enum::DefaultNPCTypeDie);
+    }
+
+    public function callDefaultNPC(&$p, $calltype, ...$args)
+    {
+        $key = '';
+        switch ($calltype) {
+            case $this->Enum::DefaultNPCTypeDie:
+                $key = 'UseItem('.$args[0].')';
+                break;
+        }
+
+        $key = '[@_'.$key.']';
+    }
+
+    // func (p *Player) CallDefaultNPC(calltype DefaultNPCType, args ...interface{}) {
+    //     var key string
+
+    //     switch calltype {
+    //     case DefaultNPCTypeUseItem:
+    //         key = fmt.Sprintf("UseItem(%v)", args[0])
+    //     }
+
+    //     key = fmt.Sprintf("[@_%s]", key)
+
+    //     p.ActionList.PushAction(DelayedTypeNPC, func() {
+    //         p.CallNPC1(env.DefaultNPC, key)
+    //     })
+
+    //     p.Enqueue(&server.NPCUpdate{NPCID: env.DefaultNPC.GetID()})
+    // }
+
 }
