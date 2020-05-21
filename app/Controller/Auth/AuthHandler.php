@@ -13,7 +13,7 @@ class AuthHandler extends AbstractController
     public function keepAlive($fd, $param)
     {
         $data = [
-            'Time' => $param['res']['Time'],
+            'time' => $param['res']['time'],
         ];
 
         return ['KEEP_ALIVE', $data];
@@ -28,13 +28,13 @@ class AuthHandler extends AbstractController
         co(function () use ($fd) {
 
             $p              = $this->PlayerObject->playerInfo;
-            $p['GameStage'] = $this->Enum::LOGIN;
+            $p['game_stage'] = $this->Enum::LOGIN;
             $p['fd']        = $fd;
 
             $this->PlayerObject->setPlayer($fd, $p);
         });
 
-        return ['CLIENT_VERSION', ['Result' => 1]];
+        return ['CLIENT_VERSION', ['result' => 1]];
     }
 
     /**
@@ -51,18 +51,18 @@ class AuthHandler extends AbstractController
     public function newAccount($fd, $param = [])
     {
         $p = $this->PlayerObject->getPlayer($fd);
-        if (!$p || !isset($p['GameStage']) || $p['GameStage'] != $this->Enum::LOGIN) {
+        if (!$p || !isset($p['game_stage']) || $p['game_stage'] != $this->Enum::LOGIN) {
             return [];
         }
 
         $data = [
             'account'   => $param['res']['account'],
-            'password'  => $param['res']['Password'],
-            'birth_day' => $param['res']['DateTime'],
-            'username'  => $param['res']['UserName'],
-            'questions' => $param['res']['SecretQuestion'],
-            'answers'   => $param['res']['SecretAnswer'],
-            'mail'      => $param['res']['EMailAddress'],
+            'password'  => $param['res']['password'],
+            'birth_day' => $param['res']['date_time'],
+            'username'  => $param['res']['user_name'],
+            'questions' => $param['res']['secret_question'],
+            'answers'   => $param['res']['secret_answer'],
+            'mail'      => $param['res']['email_address'],
         ];
 
         $where = [
@@ -86,7 +86,7 @@ class AuthHandler extends AbstractController
             $Result = 7;
         }
 
-        return ['NEW_ACCOUNT', ['Result' => $Result]];
+        return ['NEW_ACCOUNT', ['result' => $Result]];
     }
 
     /*
@@ -101,7 +101,7 @@ class AuthHandler extends AbstractController
     public function changePassword($fd, $param = [])
     {
         $p = $this->PlayerObject->getPlayer($fd);
-        if (!$p || !isset($p['GameStage']) || $p['GameStage'] != $this->Enum::LOGIN) {
+        if (!$p || !isset($p['game_stage']) || $p['game_stage'] != $this->Enum::LOGIN) {
             return [];
         }
 
@@ -116,9 +116,9 @@ class AuthHandler extends AbstractController
         $res = $this->CommonService->getOne('account', $where);
 
         if ($res['code'] == 2000) {
-            if ($res['data']['password'] == $param['res']['CurrentPassword']) {
+            if ($res['data']['password'] == $param['res']['current_password']) {
                 $data = [
-                    'password' => $param['res']['NewPassword'],
+                    'password' => $param['res']['new_password'],
                 ];
 
                 $res = $this->CommonService->upField('account', $where, $data);
@@ -133,7 +133,7 @@ class AuthHandler extends AbstractController
             $Result = 4;
         }
 
-        return ['CHANGE_PASSWORD', ['Result' => $Result]];
+        return ['CHANGE_PASSWORD', ['result' => $Result]];
     }
 
     /*
@@ -147,8 +147,8 @@ class AuthHandler extends AbstractController
     {
         $p = $this->PlayerObject->getPlayer($fd);
 
-        if (!$p || !isset($p['GameStage']) || $p['GameStage'] != $this->Enum::LOGIN) {
-            return ['LOGIN', ['Result' => 0]];
+        if (!$p || !isset($p['game_stage']) || $p['game_stage'] != $this->Enum::LOGIN) {
+            return ['LOGIN', ['result' => 0]];
         }
 
         $where = [
@@ -162,7 +162,7 @@ class AuthHandler extends AbstractController
         $res = $this->CommonService->getOne('account', $where);
 
         if ($res['code'] == 2000) {
-            if ($res['data']['password'] == $param['res']['Password']) {
+            if ($res['data']['password'] == $param['res']['password']) {
 
                 $Characters = $this->Character->getAccountCharacters($param['res']['account']);
 
@@ -174,15 +174,15 @@ class AuthHandler extends AbstractController
 
                     $this->CommonService->upField('account', $where, $data);
 
-                    $p['AccountID']  = $res['data']['id'];
+                    $p['account_id']  = $res['data']['id'];
                     $p['account']    = $param['res']['account'];
-                    $p['GameStage']  = $this->Enum::SELECT;
-                    $p['Characters'] = $Characters;
+                    $p['game_stage']  = $this->Enum::SELECT;
+                    $p['characters'] = $Characters;
 
                     $this->PlayerObject->setPlayer($fd, $p);
                 });
 
-                return ['LOGIN_SUCCESS', ['Count' => count($Characters), 'Characters' => $Characters]];
+                return ['LOGIN_SUCCESS', ['count' => count($Characters), 'characters' => $Characters]];
             } else {
                 $Result = 2;
             }
@@ -190,7 +190,7 @@ class AuthHandler extends AbstractController
             $Result = 1;
         }
 
-        return ['LOGIN', ['Result' => $Result]];
+        return ['LOGIN', ['result' => $Result]];
     }
 
     /**
@@ -205,18 +205,18 @@ class AuthHandler extends AbstractController
     {
         $p = $this->PlayerObject->getPlayer($fd);
 
-        if (!$p || !isset($p['GameStage']) || $p['GameStage'] != $this->Enum::SELECT) {
+        if (!$p || !isset($p['game_stage']) || $p['game_stage'] != $this->Enum::SELECT) {
             return [];
         }
 
-        if (count($p['Characters']) >= $this->Enum::AccountCharacter) {
-            return ['NEW_CHARACTER', ['Result' => 4]];
+        if (count($p['characters']) >= $this->Enum::AccountCharacter) {
+            return ['NEW_CHARACTER', ['result' => 4]];
         }
 
         $where = [
             'whereInfo' => [
                 'where' => [
-                    ['name', '=', $param['res']['Name']],
+                    ['name', '=', $param['res']['name']],
                     ['isdel', '=', 1],
                 ],
             ],
@@ -226,34 +226,34 @@ class AuthHandler extends AbstractController
 
         if ($res['code'] != 2000) {
             $data = [
-                'name'   => $param['res']['Name'],
-                'gender' => $param['res']['Gender'],
-                'class'  => $param['res']['Class'],
+                'name'   => $param['res']['name'],
+                'gender' => $param['res']['gender'],
+                'class'  => $param['res']['class'],
             ];
 
             //获取角色基础数据
-            $characterBase = $this->Character->characterBase($param['res']['Name'], $param['res']['Class'], $param['res']['Gender']);
+            $characterBase = $this->Character->characterBase($param['res']['name'], $param['res']['class'], $param['res']['gender']);
 
             $res = $this->CommonService->save('character', $characterBase);
             if ($res['code'] == 2000) {
 
                 $data = [
-                    'account_id'   => $p['AccountID'],
+                    'account_id'   => $p['account_id'],
                     'character_id' => $res['data']['id'],
                 ];
 
                 $res = $this->CommonService->save('account_character', $data);
                 if ($res['code'] == 2000) {
                     $CharInfo = [
-                        'Index'      => $data['character_id'],
-                        'Name'       => $param['res']['Name'],
-                        'Level'      => $characterBase['level'],
-                        'Class'      => $param['res']['Class'],
-                        'Gender'     => $param['res']['Gender'],
-                        'LastAccess' => 0,
+                        'index'      => $data['character_id'],
+                        'name'       => $param['res']['name'],
+                        'level'      => $characterBase['level'],
+                        'class'      => $param['res']['class'],
+                        'gender'     => $param['res']['gender'],
+                        'last_access' => 0,
                     ];
 
-                    $p['Characters'][] = $CharInfo;
+                    $p['characters'][] = $CharInfo;
 
                     co(function () use ($fd, $p, $data) {
                         $this->PlayerObject->setPlayer($fd, $p);
@@ -307,14 +307,14 @@ class AuthHandler extends AbstractController
                         }
                     });
 
-                    return ['NEW_CHARACTER_SUCCESS', ['CharInfo' => [$CharInfo]]];
+                    return ['NEW_CHARACTER_SUCCESS', ['char_info' => [$CharInfo]]];
                 }
             }
         } else {
             $Result = 5;
         }
 
-        return ['NEW_CHARACTER', ['Result' => $Result]];
+        return ['NEW_CHARACTER', ['result' => $Result]];
     }
 
     /**
@@ -325,28 +325,28 @@ class AuthHandler extends AbstractController
     {
         $p = $this->PlayerObject->getPlayer($fd);
 
-        if (!$p || !isset($p['GameStage']) || $p['GameStage'] != $this->Enum::SELECT) {
+        if (!$p || !isset($p['game_stage']) || $p['game_stage'] != $this->Enum::SELECT) {
             return [];
         }
 
         $temp = false;
 
-        foreach ($p['Characters'] as $k => $v) {
-            if ($v['Index'] == $param['res']['CharacterIndex']) {
+        foreach ($p['characters'] as $k => $v) {
+            if ($v['Index'] == $param['res']['character_index']) {
                 $temp = true;
-                unset($p['Characters'][$k]);
+                unset($p['characters'][$k]);
                 break;
             }
         }
 
         if (!$temp) {
-            return ['NEW_CHARACTER', ['Result' => $Result]];
+            return ['NEW_CHARACTER', ['result' => $Result]];
         }
 
         $where = [
             'whereInfo' => [
                 'where' => [
-                    ['id', '=', $param['res']['CharacterIndex']],
+                    ['id', '=', $param['res']['character_index']],
                 ],
             ],
         ];
@@ -363,10 +363,10 @@ class AuthHandler extends AbstractController
                 $this->PlayerObject->setPlayer($fd, $p);
             });
 
-            return ['DELETE_CHARACTER_SUCCESS', ['CharacterIndex' => $param['res']['CharacterIndex']]];
+            return ['DELETE_CHARACTER_SUCCESS', ['character_index' => $param['res']['character_index']]];
         }
 
-        return ['NEW_CHARACTER', ['Result' => 0]];
+        return ['NEW_CHARACTER', ['result' => 0]];
     }
 
     /**
@@ -380,36 +380,36 @@ class AuthHandler extends AbstractController
     {
         $p = $this->PlayerObject->getPlayer($fd);
 
-        if (!$p || !isset($p['GameStage']) || $p['GameStage'] != $this->Enum::SELECT) {
-            return ['START_GAME', ['Result' => 0, 'Resolution' => $this->Enum::AllowedResolution]];
+        if (!$p || !isset($p['game_stage']) || $p['game_stage'] != $this->Enum::SELECT) {
+            return ['START_GAME', ['result' => 0, 'resolution' => $this->Enum::AllowedResolution]];
         }
 
         if (!$this->Enum::AllowStartGame) {
-            return ['START_GAME', ['Result' => 0, 'Resolution' => $this->Enum::AllowedResolution]];
+            return ['START_GAME', ['result' => 0, 'resolution' => $this->Enum::AllowedResolution]];
         }
 
-        if (!$p['AccountID'] || !$p['Characters']) {
-            return ['START_GAME', ['Result' => 1, 'Resolution' => $this->Enum::AllowedResolution]];
+        if (!$p['account_id'] || !$p['characters']) {
+            return ['START_GAME', ['result' => 1, 'resolution' => $this->Enum::AllowedResolution]];
         }
 
         $temp = false;
 
-        foreach ($p['Characters'] as $k => $v) {
-            if ($v['Index'] == $param['res']['CharacterIndex']) {
+        foreach ($p['characters'] as $k => $v) {
+            if ($v['index'] == $param['res']['character_index']) {
                 $temp = true;
                 break;
             }
         }
 
         if (!$temp) {
-            return ['START_GAME', ['Result' => 2, 'Resolution' => $this->Enum::AllowedResolution]];
+            return ['START_GAME', ['result' => 2, 'resolution' => $this->Enum::AllowedResolution]];
         }
 
         $where = [
             'whereInfo' => [
                 'where' => [
-                    ['a.account_id', '=', $p['AccountID']],
-                    ['b.id', '=', $param['res']['CharacterIndex']],
+                    ['a.account_id', '=', $p['account_id']],
+                    ['b.id', '=', $param['res']['character_index']],
                     ['b.isdel', '=', 1],
                 ],
             ],
@@ -424,31 +424,31 @@ class AuthHandler extends AbstractController
 
         $accountCharacter = $this->CommonService->getOne('account_character as a', $where);
         if ($accountCharacter['code'] != 2000) {
-            return ['START_GAME', ['Result' => 2, 'Resolution' => $this->Enum::AllowedResolution]];
+            return ['START_GAME', ['result' => 2, 'resolution' => $this->Enum::AllowedResolution]];
         }
 
         $where = [
             'whereInfo' => [
                 'where' => [
-                    ['character_id', '=', $param['res']['CharacterIndex']],
+                    ['character_id', '=', $param['res']['character_index']],
                 ],
             ],
         ];
 
         $user_magic = $this->CommonService->getList('user_magic', $where);
 
-        $this->SendMsg->send($fd, ['SET_CONCENTRATION', ['ObjectID' => $p['AccountID'], 'Enabled' => 0, 'Interrupted' => 0]]);
+        $this->SendMsg->send($fd, ['SET_CONCENTRATION', ['object_id' => $p['account_id'], 'enabled' => 0, 'interrupted' => 0]]);
 
-        $this->SendMsg->send($fd, ['START_GAME', ['Result' => 4, 'Resolution' => $this->Enum::AllowedResolution]]);
+        $this->SendMsg->send($fd, ['START_GAME', ['result' => 4, 'resolution' => $this->Enum::AllowedResolution]]);
 
         $this->PlayerObject->updatePlayerInfo($p, $accountCharacter['data'], $user_magic['list']);
 
         $this->PlayerObject->setPlayer($fd, $p);
 
-        EchoLog(sprintf('玩家登陆: 账户ID(%s) 角色名(%s)', $p['AccountID'], $p['Name']), 'i');
+        EchoLog(sprintf('玩家登陆: 账户ID(%s) 角色名(%s)', $p['account_id'], $p['name']), 'i');
 
         // $p['Map'] = $this->GameData->getMap($accountCharacter['data']['current_map_id']);
-        $p['Map']['Info']['id'] = $accountCharacter['data']['current_map_id'];
+        $p['map']['info']['id'] = $accountCharacter['data']['current_map_id'];
 
         $this->PlayersList->addPlayersList($p);
 

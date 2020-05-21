@@ -146,30 +146,30 @@ class Script extends AbstractController
             return false;
         }
 
-        $sc['Pages'] = [
-            "Name"        => [],
-            "CheckList"   => [],
-            "ActList"     => [],
-            "ElseActList" => [],
-            "Say"         => [],
-            "ElseSay"     => [],
+        $sc['pages'] = [
+            "name"         => [],
+            "check_list"   => [],
+            "actList"      => [],
+            "else_actList" => [],
+            "say"          => [],
+            "else_say"     => [],
         ];
 
-        foreach ($obj['Pages'] as $key => $ps) {
+        foreach ($obj['pages'] as $key => $ps) {
             $page = [
-                'Name'        => strtoupper($ps['Name']),
-                "CheckList"   => [],
-                "ActList"     => [],
-                "ElseActList" => [],
-                "Say"         => [],
-                "ElseSay"     => [],
+                'name'         => strtoupper($ps['name']),
+                "check_list"   => [],
+                "actList"      => [],
+                "else_actList" => [],
+                "say"          => [],
+                "else_say"     => [],
             ];
 
             if (!$this->parsePage($ps, $page)) {
                 return false;
             }
 
-            $sc['Pages'][strtoupper($page['Name'])] = $page;
+            $sc['pages'][strtoupper($page['name'])] = $page;
         }
 
         return $sc;
@@ -193,12 +193,12 @@ class Script extends AbstractController
 
                 if (count($match) > 0) {
                     if ($curPage) {
-                        $ret['Pages'][strtoupper($curPage['Name'])] = $curPage;
+                        $ret['pages'][strtoupper($curPage['name'])] = $curPage;
                     }
 
                     $curPage = [
-                        'Name'  => $match[1],
-                        'Lines' => [],
+                        'name'  => $match[1],
+                        'lines' => [],
                     ];
 
                     continue;
@@ -206,12 +206,12 @@ class Script extends AbstractController
             }
 
             if ($curPage) {
-                $curPage['Lines'][] = $line;
+                $curPage['lines'][] = $line;
             }
         }
 
         if ($curPage) {
-            $ret['Pages'][strtoupper($curPage['Name'])] = $curPage;
+            $ret['pages'][strtoupper($curPage['name'])] = $curPage;
         }
 
         return $ret;
@@ -223,9 +223,9 @@ class Script extends AbstractController
 
         $ps = false;
 
-        if (!empty($obj['Pages'][$name])) {
-            $ps = $obj['Pages'][$name];
-            unset($obj['Pages'][$name]);
+        if (!empty($obj['pages'][$name])) {
+            $ps = $obj['pages'][$name];
+            unset($obj['pages'][$name]);
         }
 
         return $ps;
@@ -233,14 +233,14 @@ class Script extends AbstractController
 
     public function parseGoods(&$sc, $pages)
     {
-        $sc['Goods'] = [];
+        $sc['goods'] = [];
 
         if (!$pages) {
             return true;
         }
 
-        foreach ($pages['Lines'] as $key => $v) {
-            $sc['Goods'][] = trim($v);
+        foreach ($pages['lines'] as $key => $v) {
+            $sc['goods'][] = trim($v);
         }
 
         return true;
@@ -248,13 +248,13 @@ class Script extends AbstractController
 
     public function parseTypes(&$sc, $pages)
     {
-        $sc['Types'] = $this->parseIntArray($sc, $pages);
+        $sc['types'] = $this->parseIntArray($sc, $pages);
         return true;
     }
 
     public function parseQuests(&$sc, $pages)
     {
-        $sc['Quests'] = $this->parseIntArray($sc, $pages);
+        $sc['quests'] = $this->parseIntArray($sc, $pages);
         return true;
     }
 
@@ -266,7 +266,7 @@ class Script extends AbstractController
 
         $ret = [];
 
-        foreach ($pages['Lines'] as $key => $v) {
+        foreach ($pages['lines'] as $key => $v) {
             $ret[] = intval($v);
         }
 
@@ -284,7 +284,7 @@ class Script extends AbstractController
         ];
         $currentCmd = '';
 
-        foreach ($ps['Lines'] as $k => $line) {
+        foreach ($ps['lines'] as $k => $line) {
             // $line = trim($v);
 
             if (!$line || $line == '' || $line[0] == ";") {
@@ -330,21 +330,21 @@ class Script extends AbstractController
             $info[$currentCmd][] = rtrim($line);
         }
 
-        $page['Say']     = !empty($info['SAY']) ? $info['SAY'] : [];
-        $page['ElseSay'] = !empty($info['ELSESAY']) ? $info['ELSESAY'] : [];
+        $page['say']     = !empty($info['SAY']) ? $info['SAY'] : [];
+        $page['elseSay'] = !empty($info['ELSESAY']) ? $info['ELSESAY'] : [];
 
-        $page['CheckList'] = $this->parseActions($this->Context->defaultContext['Checks'], $info['IF']);
-        if ($page['CheckList'] === false) {
+        $page['check_list'] = $this->parseActions($this->Context->defaultContext['checks'], $info['IF']);
+        if ($page['check_list'] === false) {
             return true;
         }
 
-        $page['ActList'] = $this->parseActions($this->Context->defaultContext['Actions'], $info['ACT']);
-        if ($page['ActList'] === false) {
+        $page['actList'] = $this->parseActions($this->Context->defaultContext['actions'], $info['ACT']);
+        if ($page['actList'] === false) {
             return true;
         }
 
-        $page['ElseActList'] = $this->parseActions($this->Context->defaultContext['Actions'], $info['ELSEACT']);
-        if ($page['ElseActList'] === false) {
+        $page['else_actList'] = $this->parseActions($this->Context->defaultContext['actions'], $info['ELSEACT']);
+        if ($page['else_actList'] === false) {
             return true;
         }
 
@@ -382,9 +382,9 @@ class Script extends AbstractController
         }
 
         $inst           = [];
-        $inst['Args']   = array_slice($parts, 1);
-        $inst['Func']   = $method['Func'];
-        $inst['Skiped'] = true;
+        $inst['args']   = array_slice($parts, 1);
+        $inst['func']   = $method['func'];
+        $inst['skiped'] = true;
 
         return $inst;
     }
@@ -473,7 +473,7 @@ class Script extends AbstractController
     {
         $page = strtoupper($page);
 
-        $ps = $npc['Script']['Pages'][$page] ?? null;
+        $ps = $npc['script']['pages'][$page] ?? null;
 
         if (!$ps) {
             EchoLog(sprintf('没有页面： %s; ', $page), 'w');
@@ -484,29 +484,28 @@ class Script extends AbstractController
         $say  = [];
 
         if ($this->check($ps, $npc, $p)) {
-            $acts = $ps['ActList'];
-            $say  = $ps['Say'];
+            $acts = $ps['actList'];
+            $say  = $ps['say'];
         } else {
-            $acts = $ps['ElseActList'];
-            $say  = $ps['ElseSay'];
+            $acts = $ps['else_actList'];
+            $say  = $ps['elseSay'];
         }
 
         if ($acts) {
             foreach ($acts as $act) {
                 $shouldBreak = false;
 
-                switch ($act['Func']) {
+                switch ($act['func']) {
                     case 'BREAK':
                         $shouldBreak = true;
                         break;
-                    
+
                     case 'GOTO':
-                        return $this->call('['.$act['Args'][0].']',$npc,$p);
+                        return $this->call('[' . $act['args'][0] . ']', $npc, $p);
                         break;
                 }
 
-                if($shouldBreak)
-                {
+                if ($shouldBreak) {
                     break;
                 }
             }
@@ -517,16 +516,15 @@ class Script extends AbstractController
 
     public function check($ps, $npc, $p)
     {
-        if (empty($ps['CheckList']) || count($ps['CheckList']) == 0) {
+        if (empty($ps['check_list']) || count($ps['check_list']) == 0) {
             return true;
         }
 
         $flag = false;
 
-        foreach ($ps['CheckList'] as $value) {
-            $func = $value['Func'];
-            if($this->NpcScript->$func($value['Args'], $p))
-            {
+        foreach ($ps['check_list'] as $value) {
+            $func = $value['func'];
+            if ($this->NpcScript->$func($value['args'], $p)) {
                 $flag = true;
             };
         }

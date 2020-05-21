@@ -33,18 +33,18 @@ class PlayersList extends AbstractController
             return false;
         }
 
-        if (!empty($p['Map'])) {
-            $this->GameData->delMapPlayers($p['Map']['Info']['id'], $p);
+        if (!empty($p['map'])) {
+            $this->GameData->delMapPlayers($p['map']['info']['id'], $p);
         }
 
-        if (!empty($p['ID'])) {
+        if (!empty($p['id'])) {
             $this->delCharacter($p);
         }
     }
 
     public function delCharacter($p)
     {
-        $this->Redis->del('player:character_id_' . $p['ID']);
+        $this->Redis->del('player:character_id_' . $p['id']);
     }
 
     public function saveData($fd, $p = null)
@@ -59,27 +59,27 @@ class PlayersList extends AbstractController
 
         co(function () use ($p) {
 
-            if (!empty($p['Map'])) {
+            if (!empty($p['map'])) {
                 $data = [
-                    'current_map_id'     => $p['Map']['Info']['id'],
-                    'direction'          => $p['CurrentDirection'],
-                    'current_location_x' => $p['CurrentLocation']['X'],
-                    'current_location_y' => $p['CurrentLocation']['Y'],
-                    'experience'         => $p['Experience'],
-                    'hp'                 => $p['HP'],
-                    'mp'                 => $p['MP'],
-                    'level'              => $p['Level'],
-                    // 'gold'               => $p['Gold'], //改数据库会覆盖
-                    'attack_mode'        => $p['AMode'],
-                    'pet_mode'           => $p['PMode'],
-                    'allow_group'        => $p['AllowGroup'],
+                    'current_map_id'     => $p['map']['info']['id'],
+                    'direction'          => $p['current_direction'],
+                    'current_location_x' => $p['current_location']['x'],
+                    'current_location_y' => $p['current_location']['y'],
+                    'experience'         => $p['experience'],
+                    'hp'                 => $p['hp'],
+                    'mp'                 => $p['mp'],
+                    'level'              => $p['level'],
+                    // 'gold'               => $p['gold'], //改数据库会覆盖
+                    'attack_mode'        => $p['a_mode'],
+                    'pet_mode'           => $p['p_mode'],
+                    'allow_group'        => $p['allow_group'],
 
                 ];
 
                 $where = [
                     'whereInfo' => [
                         'where' => [
-                            ['id', '=', $p['ID']],
+                            ['id', '=', $p['id']],
                         ],
                     ],
                 ];
@@ -109,6 +109,17 @@ class PlayersList extends AbstractController
             ];
 
             $this->CommonService->upField('character', $where, $data);
+        });
+    }
+
+    public function addSkill($magic)
+    {
+        if (!$id) {
+            return false;
+        }
+
+        co(function () use ($magic) {
+            $this->CommonService->save('user_magic', $magic);
         });
     }
 }

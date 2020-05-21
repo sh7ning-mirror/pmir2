@@ -9,8 +9,8 @@ class Cell
     public function NewCell($attr)
     {
         return [
-            'Point'     => [],
-            'Attribute' => $attr,
+            'point'     => [],
+            'attribute' => $attr,
             'objects'   => [],
         ];
     }

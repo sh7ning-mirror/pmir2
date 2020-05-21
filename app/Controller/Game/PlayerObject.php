@@ -9,101 +9,101 @@ use App\Controller\AbstractController;
 class PlayerObject extends AbstractController
 {
     public $playerInfo = [
-        'fd'                 => null,
-        'AccountID'          => null, //账户id
-        'GameStage'          => null, //游戏状态
-        'MapObject'          => null, //地图信息
-        'HP'                 => null, //血量
-        'MP'                 => null, //魔法值
-        'Level'              => null, //等级
-        'Experience'         => null, //经验值
-        'MaxExperience'      => null, //最大经验值
-        'Gold'               => null, //金币
-        'GuildName'          => null, //工会名称
-        'GuildRankName'      => null, //公会等级名称
-        'Class'              => null, //职业
-        'Gender'             => null, //性别
-        'Hair'               => null, //发型
-        'Light'              => null,
-        'Inventory'          => null,
-        'Equipment'          => null,
-        'QuestInventory'     => null, //任务清单
-        'Storage'            => null,
-        'Trade'              => null,
-        'Refine'             => null,
-        'LooksArmour'        => null, //衣服外观
-        'LooksWings'         => null, //翅膀外观
-        'LooksWeapon'        => null, //武器外观
-        'LooksWeaponEffect'  => null, //武器特效
-        'SendItemInfo'       => null,
-        'CurrentBagWeight'   => null,
-        'MaxHP'              => null, //最大血值
-        'MaxMP'              => null, //最大魔法值
-        'MinAC'              => null, // 物理防御力
-        'MaxAC'              => null,
-        'MinMAC'             => null, // 魔法防御力
-        'MaxMAC'             => null,
-        'MinDC'              => null, // 攻击力
-        'MaxDC'              => null,
-        'MinMC'              => null, // 魔法力
-        'MaxMC'              => null,
-        'MinSC'              => null, // 道术力
-        'MaxSC'              => null,
-        'Accuracy'           => null, //精准度
-        'Agility'            => null, //敏捷
-        'CriticalRate'       => null,
-        'CriticalDamage'     => null,
-        'MaxBagWeight'       => null, //Other Stats'=>null,
-        'MaxWearWeight'      => null,
-        'MaxHandWeight'      => null,
-        'ASpeed'             => null,
-        'Luck'               => null,
-        'LifeOnHit'          => null,
-        'HpDrainRate'        => null,
-        'Reflect'            => null, // TODO
-        'MagicResist'        => null,
-        'PoisonResist'       => null,
-        'HealthRecovery'     => null,
-        'SpellRecovery'      => null,
-        'PoisonRecovery'     => null,
-        'Holy'               => null,
-        'Freezing'           => null,
-        'PoisonAttack'       => null,
-        'ExpRateOffset'      => null,
-        'ItemDropRateOffset' => null,
-        'MineRate'           => null,
-        'GemRate'            => null,
-        'FishRate'           => null,
-        'CraftRate'          => null,
-        'GoldDropRateOffset' => null,
-        'AttackBonus'        => null,
-        'Magics'             => null,
-        'ActionList'         => null,
-        'PoisonList'         => null,
-        'BuffList'           => null,
-        'Health'             => null, // 状态恢复
-        'Pets'               => null,
-        'PKPoints'           => null,
-        'AMode'              => null,
-        'PMode'              => null,
-        'CallingNPC'         => null,
-        'CallingNPCPage'     => null,
-        'Slaying'            => null, // TODO
-        'FlamingSword'       => null, // TODO
-        'TwinDrakeBlade'     => null, // TODO
-        'BindMapIndex'       => null, // 绑定的地图 死亡时复活用
-        'BindLocation'       => null, // 绑定的坐标 死亡时复活用
-        'MagicShield'        => null, // TODO 是否有魔法盾
-        'MagicShieldLv'      => null, // TODO 魔法盾等级
-        'ArmourRate'         => null, // 防御
-        'DamageRate'         => null, // 伤害
-        'StruckTime'         => null, // 被攻击硬直时间
-        'AllowGroup'         => null, // 是否允许组队
-        'GroupMembers'       => null, // 小队成员
-        'GroupInvitation'    => null, // 组队邀请人
-        'CurrentDirection'   => null,
-        'CurrentLocation'    => null,
-        'Characters'         => null,
+        'fd'                    => null,
+        'account_id'            => null, //账户id
+        'game_stage'            => null, //游戏状态
+        'map_object'            => null, //地图信息
+        'hp'                    => null, //血量
+        'mp'                    => null, //魔法值
+        'level'                 => null, //等级
+        'experience'            => null, //经验值
+        'max_experience'        => null, //最大经验值
+        'gold'                  => null, //金币
+        'guild_name'            => null, //工会名称
+        'guild_rank_name'       => null, //公会等级名称
+        'class'                 => null, //职业
+        'gender'                => null, //性别
+        'hair'                  => null, //发型
+        'light'                 => null,
+        'inventory'             => null,
+        'equipment'             => null,
+        'quest_inventory'       => null, //任务清单
+        'storage'               => null,
+        'trade'                 => null,
+        'refine'                => null,
+        'looks_armour'          => null, //衣服外观
+        'looks_wings'           => null, //翅膀外观
+        'looks_weapon'          => null, //武器外观
+        'looks_weapon_effect'   => null, //武器特效
+        'send_item_info'        => null,
+        'current_bag_weight'    => null,
+        'max_hp'                => null, //最大血值
+        'max_mp'                => null, //最大魔法值
+        'min_ac'                => null, // 物理防御力
+        'max_ac'                => null,
+        'min_mac'               => null, // 魔法防御力
+        'max_mac'               => null,
+        'min_dc'                => null, // 攻击力
+        'max_dc'                => null,
+        'min_mc'                => null, // 魔法力
+        'max_mc'                => null,
+        'min_sc'                => null, // 道术力
+        'max_sc'                => null,
+        'accuracy'              => null, //精准度
+        'agility'               => null, //敏捷
+        'critical_rate'         => null,
+        'critical_damage'       => null,
+        'max_bag_weight'        => null, //Other Stats'=>null,
+        'max_wear_weight'       => null,
+        'max_hand_weight'       => null,
+        'a_speed'               => null,
+        'luck'                  => null,
+        'life_on_hit'           => null,
+        'hp_drain_rate'         => null,
+        'reflect'               => null, // TODO
+        'magic_resist'          => null,
+        'poison_resist'         => null,
+        'health_recovery'       => null,
+        'spell_recovery'        => null,
+        'poison_recovery'       => null,
+        'holy'                  => null,
+        'freezing'              => null,
+        'poison_attack'         => null,
+        'exp_rate_offset'       => null,
+        'item_drop_rate_offset' => null,
+        'mine_rate'             => null,
+        'gem_rate'              => null,
+        'fish_rate'             => null,
+        'craft_rate'            => null,
+        'gold_drop_rate_offset' => null,
+        'attack_bonus'          => null,
+        'magics'                => null,
+        'action_list'           => null,
+        'poison_list'           => null,
+        'buff_list'             => null,
+        'health'                => null, // 状态恢复
+        'pets'                  => null,
+        'pk_points'             => null,
+        'a_mode'                => null,
+        'p_mode'                => null,
+        'calling_npc'           => null,
+        'calling_npc_page'      => null,
+        'slaying'               => null, // TODO
+        'flaming_sword'         => null, // TODO
+        'twin_drake_blade'      => null, // TODO
+        'bind_map_index'        => null, // 绑定的地图 死亡时复活用
+        'bind_location'         => null, // 绑定的坐标 死亡时复活用
+        'magic_shield'          => null, // TODO 是否有魔法盾
+        'magic_shieldLv'        => null, // TODO 魔法盾等级
+        'armour_rate'           => null, // 防御
+        'damage_rate'           => null, // 伤害
+        'struck_time'           => null, // 被攻击硬直时间
+        'allow_group'           => null, // 是否允许组队
+        'group_members'         => null, // 小队成员
+        'group_invitation'      => null, // 组队邀请人
+        'current_direction'     => null,
+        'current_location'      => null,
+        'characters'            => null,
     ];
 
     public function getPlayer($fd)
@@ -121,79 +121,79 @@ class PlayerObject extends AbstractController
         co(function () use ($fd, $data) {
             $this->Redis->set('player:_' . getClientId($fd), json_encode($data, JSON_UNESCAPED_UNICODE));
 
-            if (!empty($data['ID'])) {
-                $this->Redis->set('player:character_id_' . $data['ID'], json_encode($data, JSON_UNESCAPED_UNICODE));
+            if (!empty($data['id'])) {
+                $this->Redis->set('player:character_id_' . $data['id'], json_encode($data, JSON_UNESCAPED_UNICODE));
             }
         });
     }
 
     public function updatePlayerInfo(&$p, $accountCharacter, $user_magic)
     {
-        $p['GameStage']        = $this->Enum::GAME;
-        $p['ID']               = $accountCharacter['id'];
-        $p['Name']             = $accountCharacter['name'];
-        $p['NameColor']        = ['R' => 255, 'G' => 255, 'B' => 255];
-        $p['CurrentDirection'] = $accountCharacter['direction'];
-        $p['CurrentLocation']  = ['X' => $accountCharacter['current_location_x'], 'Y' => $accountCharacter['current_location_y']];
-        $p['BindLocation']     = ['X' => $accountCharacter['bind_location_x'], 'Y' => $accountCharacter['bind_location_y']];
-        $p['BindMapIndex']     = $accountCharacter['bind_map_id'];
+        $p['game_stage']        = $this->Enum::GAME;
+        $p['id']                = $accountCharacter['id'];
+        $p['name']              = $accountCharacter['name'];
+        $p['name_color']        = ['r' => 255, 'g' => 255, 'b' => 255];
+        $p['current_direction'] = $accountCharacter['direction'];
+        $p['current_location']  = ['x' => $accountCharacter['current_location_x'], 'y' => $accountCharacter['current_location_y']];
+        $p['bind_location']     = ['x' => $accountCharacter['bind_location_x'], 'y' => $accountCharacter['bind_location_y']];
+        $p['bind_map_index']    = $accountCharacter['bind_map_id'];
 
-        $p['Inventory']      = $this->Bag->bagLoadFromDB($accountCharacter['id'], $this->Enum::UserItemTypeInventory, 46);
-        $p['Equipment']      = $this->Bag->bagLoadFromDB($accountCharacter['id'], $this->Enum::UserItemTypeEquipment, 14);
-        $p['QuestInventory'] = $this->Bag->bagLoadFromDB($accountCharacter['id'], $this->Enum::UserItemTypeQuestInventory, 40);
-        $p['Storage']        = $this->Bag->bagLoadFromDB($accountCharacter['id'], $this->Enum::UserItemTypeStorage, 80);
+        $p['inventory']       = $this->Bag->bagLoadFromDB($accountCharacter['id'], $this->Enum::UserItemTypeInventory, 46);
+        $p['equipment']       = $this->Bag->bagLoadFromDB($accountCharacter['id'], $this->Enum::UserItemTypeEquipment, 14);
+        $p['quest_inventory'] = $this->Bag->bagLoadFromDB($accountCharacter['id'], $this->Enum::UserItemTypeQuestInventory, 40);
+        $p['storage']         = $this->Bag->bagLoadFromDB($accountCharacter['id'], $this->Enum::UserItemTypeStorage, 80);
 
-        $p['Dead']          = 0;
-        $p['HP']            = $accountCharacter['hp'];
-        $p['MP']            = $accountCharacter['mp'];
-        $p['Level']         = $accountCharacter['level'];
-        $p['Experience']    = $accountCharacter['experience'];
-        $p['Gold']          = $accountCharacter['gold'];
-        $p['GuildName']     = ''; //TODO
-        $p['GuildRankName'] = ''; //TODO
-        $p['Class']         = $accountCharacter['class'];
-        $p['Gender']        = $accountCharacter['gender'];
-        $p['Hair']          = $accountCharacter['hair'];
-        $p['SendItemInfo']  = [];
-        $p['MaxExperience'] = $this->GameData->getExpList($accountCharacter['level']);
+        $p['dead']            = 0;
+        $p['hp']              = $accountCharacter['hp'];
+        $p['mp']              = $accountCharacter['mp'];
+        $p['level']           = $accountCharacter['level'];
+        $p['experience']      = $accountCharacter['experience'];
+        $p['gold']            = $accountCharacter['gold'];
+        $p['guild_name']      = ''; //TODO
+        $p['guild_rank_name'] = ''; //TODO
+        $p['class']           = $accountCharacter['class'];
+        $p['gender']          = $accountCharacter['gender'];
+        $p['hair']            = $accountCharacter['hair'];
+        $p['send_item_info']  = [];
+        $p['max_experience']  = $this->GameData->getExpList($accountCharacter['level']);
 
         if ($user_magic) {
             foreach ($user_magic as $k => $v) {
-                $user_magic[$k]['Info'] = $this->GameData->getMagicInfoByID($v['magic_id']);
+                $user_magic[$k]['info'] = $this->GameData->getMagicInfoByID($v['magic_id']);
             }
         }
 
-        $p['Magics'] = $user_magic;
+        $p['magics'] = $user_magic;
 
-        $p['ActionList'] = []; //TODO
-        $p['PoisonList'] = []; //TODO
-        $p['BuffList']   = [];
+        $p['action_list'] = []; //TODO
+        $p['poison_list'] = []; //TODO
+        $p['buff_list']   = [];
 
         $health = [
-            'HPPotNextTime' => time(),
-            'HPPotDuration' => 1 * 60,
-            'MPPotNextTime' => time(),
-            'MPPotDuration' => 1 * 60,
-            'HealNextTime'  => time() + 10,
-            'HealDuration'  => 10 * 60,
+            'hp_pot_next_time' => time(),
+            'hp_pot_duration'  => 1 * 60,
+            'mp_pot_next_time' => time(),
+            'mp_pot_duration'  => 1 * 60,
+            'heal_next_time'   => time() + 10,
+            'heal_duration'    => 10 * 60,
         ];
 
-        $p['Health'] = $this->MsgFactory->health($health);
+        $p['health'] = $this->MsgFactory->health($health);
 
-        $p['Pets']       = [];
-        $p['PKPoints']   = 0;
-        $p['AMode']      = $accountCharacter['attack_mode'];
-        $p['PMode']      = $accountCharacter['pet_mode'];
-        $p['CallingNPC'] = null;
-        $p['StruckTime'] = time();
-        $p['DamageRate'] = 1.0;
-        $p['ArmourRate'] = 1.0;
-        $p['AllowGroup'] = $accountCharacter['allow_group'];
-        $p['Pets']       = [];
+        $p['pets']        = [];
+        $p['pk_points']   = 0;
+        $p['a_mode']      = $accountCharacter['attack_mode'];
+        $p['p_mode']      = $accountCharacter['pet_mode'];
+        $p['calling_npc'] = null;
+        $p['struck_time'] = time();
+        $p['damage_rate'] = 1.0;
+        $p['armour_rate'] = 1.0;
+        $p['allow_group'] = $accountCharacter['allow_group'];
+        $p['pets']        = [];
 
         $StartItems = $this->GameData->getStartItems();
 
-        if ($p['Level'] < 1) {
+        if ($p['level'] < 1) {
             foreach ($StartItems as $k => $v) {
                 $this->gainItem($p, $v);
             }
@@ -204,39 +204,39 @@ class PlayerObject extends AbstractController
     public function gainItem(&$p, $item)
     {
         $itemInfo                  = $this->MsgFactory->newUserItem($item, $this->Atomic->newObjectID());
-        $itemInfo['soul_bound_id'] = $p['ID'];
+        $itemInfo['soul_bound_id'] = $p['id'];
 
-        if ($itemInfo['Info']['stack_size'] > 1) {
-            foreach ($p['Inventory']['Items'] as $k => $v) {
+        if ($itemInfo['info']['stack_size'] > 1) {
+            foreach ($p['inventory']['items'] as $k => $v) {
 
-                if (empty($v['isset']) || $itemInfo['Info']['id'] != $v['Info']['id'] || $v['count'] > $itemInfo['Info']['stack_size']) {
+                if (empty($v['isset']) || $itemInfo['info']['id'] != $v['info']['id'] || $v['count'] > $itemInfo['info']['stack_size']) {
                     continue;
                 }
 
-                if ($itemInfo['count'] + $v['count'] <= $v['Info']['stack_size']) {
+                if ($itemInfo['count'] + $v['count'] <= $v['info']['stack_size']) {
 
-                    $p['Inventory'] = $this->Bag->setCount($p['Inventory'], $k, $v['count'] + $itemInfo['count']);
+                    $p['inventory'] = $this->Bag->setCount($p['inventory'], $k, $v['count'] + $itemInfo['count']);
 
-                    $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['Info']));
+                    $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['info']));
                     $this->setPlayer($p['fd'], $p);
                     return true;
                 }
 
-                $p['Inventory'] = $this->Bag->setCount($p['Inventory'], $k, $v['count'] + $itemInfo['count']);
-                $itemInfo['count'] -= $itemInfo['Info']['stack_size'] - $v['count'];
+                $p['inventory'] = $this->Bag->setCount($p['inventory'], $k, $v['count'] + $itemInfo['count']);
+                $itemInfo['count'] -= $itemInfo['info']['stack_size'] - $v['count'];
             }
         }
 
         $i = 0;
         $j = 46;
 
-        if ($itemInfo['Info']['type'] == $this->Enum::ItemTypePotion
-            || $itemInfo['Info']['type'] == $this->Enum::ItemTypeScroll
-            || ($itemInfo['Info']['type'] == $this->Enum::ItemTypeScript && $itemInfo['Info']['effect'])
+        if ($itemInfo['info']['type'] == $this->Enum::ItemTypePotion
+            || $itemInfo['info']['type'] == $this->Enum::ItemTypeScroll
+            || ($itemInfo['info']['type'] == $this->Enum::ItemTypeScript && $itemInfo['info']['effect'])
         ) {
             $i = 0;
             $j = 4;
-        } elseif ($itemInfo['Info']['type'] == $this->Enum::ItemTypeAmulet) {
+        } elseif ($itemInfo['info']['type'] == $this->Enum::ItemTypeAmulet) {
             $i = 4;
             $j = 6;
         } else {
@@ -246,26 +246,26 @@ class PlayerObject extends AbstractController
 
         for ($i = $i; $i < $j; $i++) {
 
-            if ($p['Inventory']['Items'][$i]['isset'] == true) {
+            if ($p['inventory']['items'][$i]['isset'] == true) {
                 continue;
             }
 
-            $p['Inventory'] = $this->Bag->set($p['ID'], $p['Inventory'], $i, $itemInfo);
+            $p['inventory'] = $this->Bag->set($p['id'], $p['inventory'], $i, $itemInfo);
             $this->enqueueItemInfo($p, $itemInfo['item_id']);
-            $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['Info']));
+            $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['info']));
             $this->refreshBagWeight($p);
             $this->setPlayer($p['fd'], $p);
             return $p;
         }
 
         for ($i = 0; $i < 46; $i++) {
-            if ($p['Inventory']['Items'][$i]['isset'] == true) {
+            if ($p['inventory']['items'][$i]['isset'] == true) {
                 continue;
             }
 
-            $p['Inventory'] = $this->Bag->set($p['ID'], $p['Inventory'], $i, $itemInfo);
+            $p['inventory'] = $this->Bag->set($p['id'], $p['inventory'], $i, $itemInfo);
             $this->enqueueItemInfo($p, $itemInfo['item_id']);
-            $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['Info']));
+            $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['info']));
             $this->refreshBagWeight($p);
             $this->setPlayer($p['fd'], $p);
             return true;
@@ -283,22 +283,22 @@ class PlayerObject extends AbstractController
             return;
         }
 
-        $p['Gold'] += $gold;
+        $p['gold'] += $gold;
 
-        $this->PlayersList->saveGold($p['ID'], $p['Gold']);
+        $this->PlayersList->saveGold($p['id'], $p['gold']);
 
         $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedGold($gold));
     }
 
     public function receiveChat($fd, $msg, $type)
     {
-        $this->SendMsg->send($fd, ['CHAT', ['Message' => $msg, 'Type' => $type]]);
+        $this->SendMsg->send($fd, ['CHAT', ['message' => $msg, 'type' => $type]]);
     }
 
     public function enqueueItemInfo(&$p, $ItemID)
     {
-        if ($p['SendItemInfo']) {
-            foreach ($p['SendItemInfo'] as $k => $v) {
+        if ($p['send_item_info']) {
+            foreach ($p['send_item_info'] as $k => $v) {
                 if ($v['id'] == $ItemID) {
                     return $p;
                 }
@@ -311,9 +311,9 @@ class PlayerObject extends AbstractController
             return false;
         }
 
-        $this->SendMsg->send($p['fd'], ['NEW_ITEM_INFO', ['Info' => $item]]);
+        $this->SendMsg->send($p['fd'], ['NEW_ITEM_INFO', ['info' => $item]]);
 
-        $p['SendItemInfo'][] = $item;
+        $p['send_item_info'][] = $item;
 
         return true;
     }
@@ -331,21 +331,21 @@ class PlayerObject extends AbstractController
 
         $this->enqueueQuestInfo($p); //任务
 
-        $mapInfo = $this->GameData->getMap($p['Map']['Info']['id']);
+        $mapInfo = $this->GameData->getMap($p['map']['info']['id']);
 
-        $this->SendMsg->send($p['fd'], ['MAP_INFORMATION', $mapInfo['Info']]);
+        $this->SendMsg->send($p['fd'], ['MAP_INFORMATION', $mapInfo['info']]);
 
         $this->SendMsg->send($p['fd'], ['USER_INFORMATION', $this->MsgFactory->userInformation($p)]);
 
-        $this->SendMsg->send($p['fd'], ['TIME_OF_DAY', ['Lights' => $this->Settings->lightSet()]]);
+        $this->SendMsg->send($p['fd'], ['TIME_OF_DAY', ['lights' => $this->Settings->lightSet()]]);
 
-        $this->SendMsg->send($p['fd'], $this->MsgFactory->changeAMode($p['AMode']));
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->changeAMode($p['a_mode']));
 
-        $this->SendMsg->send($p['fd'], $this->MsgFactory->changePMode($p['PMode']));
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->changePMode($p['p_mode']));
 
-        $this->SendMsg->send($p['fd'], ['SWITCH_GROUP', ['AllowGroup' => $p['AllowGroup'] ?: 0]]);
+        $this->SendMsg->send($p['fd'], ['SWITCH_GROUP', ['allow_group' => $p['allow_group'] ?: 0]]);
 
-        $this->enqueueAreaObjects($p, null, $this->getCell($mapInfo, $p['CurrentLocation']));
+        $this->enqueueAreaObjects($p, null, $this->getCell($mapInfo, $p['current_location']));
 
         $this->broadcast($p, ['OBJECT_PLAYER', $this->MsgFactory->objectPlayer($p)]);
 
@@ -362,36 +362,36 @@ class PlayerObject extends AbstractController
     {
         $itemInfos = [];
 
-        if ($p['Inventory']['Items']) {
-            foreach ($p['Inventory']['Items'] as $k => $v) {
+        if ($p['inventory']['items']) {
+            foreach ($p['inventory']['items'] as $k => $v) {
                 if ($v) {
-                    $p['Inventory']['Items'][$k]['isset'] = true;
+                    $p['inventory']['items'][$k]['isset'] = true;
                     $itemInfos[]                          = $this->GameData->getItemInfoByID($v['item_id']);
                 } else {
-                    $p['Inventory']['Items'][$k]['isset'] = false;
+                    $p['inventory']['items'][$k]['isset'] = false;
                 }
 
             }
         }
 
-        if ($p['Equipment']['Items']) {
-            foreach ($p['Equipment']['Items'] as $k => $v) {
+        if ($p['equipment']['items']) {
+            foreach ($p['equipment']['items'] as $k => $v) {
                 if ($v) {
-                    $p['Equipment']['Items'][$k]['isset'] = true;
+                    $p['equipment']['items'][$k]['isset'] = true;
                     $itemInfos[]                          = $this->GameData->getItemInfoByID($v['item_id']);
                 } else {
-                    $p['Equipment']['Items'][$k]['isset'] = false;
+                    $p['equipment']['items'][$k]['isset'] = false;
                 }
             }
         }
 
-        if ($p['QuestInventory']['Items']) {
-            foreach ($p['QuestInventory']['Items'] as $k => $v) {
+        if ($p['quest_inventory']['items']) {
+            foreach ($p['quest_inventory']['items'] as $k => $v) {
                 if ($v) {
-                    $p['QuestInventory']['Items'][$k]['isset'] = true;
-                    $itemInfos[]                               = $this->GameData->getItemInfoByID($v['item_id']);
+                    $p['quest_inventory']['items'][$k]['isset'] = true;
+                    $itemInfos[]                                = $this->GameData->getItemInfoByID($v['item_id']);
                 } else {
-                    $p['QuestInventory']['Items'][$k]['isset'] = false;
+                    $p['quest_inventory']['items'][$k]['isset'] = false;
                 }
             }
         }
@@ -422,185 +422,185 @@ class PlayerObject extends AbstractController
     //刷新级别状态
     public function refreshLevelStats(&$p)
     {
-        $baseStats = $this->Settings->getBaseStats($p['Class']); //职业属性
+        $baseStats = $this->Settings->getBaseStats($p['class']); //职业属性
 
-        $p['Accuracy']       = $baseStats['StartAccuracy'];
-        $p['Agility']        = $baseStats['StartAgility'];
-        $p['CriticalRate']   = $baseStats['StartCriticalRate'];
-        $p['CriticalDamage'] = $baseStats['StartCriticalDamage'];
+        $p['accuracy']        = $baseStats['start_accuracy'];
+        $p['agility']         = $baseStats['start_agility'];
+        $p['critical_rate']   = $baseStats['start_critical_rate'];
+        $p['critical_damage'] = $baseStats['start_critical_damage'];
 
         $ExpList = $this->GameData->getExpList();
 
-        if ($p['Level'] < count($ExpList)) {
-            $p['MaxExperience'] = $ExpList[$p['Level'] - 1];
+        if ($p['level'] < count($ExpList)) {
+            $p['max_experience'] = $ExpList[$p['level'] - 1];
         } else {
-            $p['MaxExperience'] = 0;
+            $p['max_experience'] = 0;
         }
 
-        $p['MaxHP'] = intval(14 + ($p['Level'] / $baseStats['HpGain'] + $baseStats['HpGainRate']) * $p['Level']);
+        $p['max_hp'] = intval(14 + ($p['level'] / $baseStats['hp_gain'] + $baseStats['hp_gain_rate']) * $p['level']);
 
-        $p['MinAC'] = 0;
-        if ($baseStats['MinAc'] > 0) {
-            $p['MinAC'] = intval($p['Level'] / $baseStats['MinAc']);
+        $p['min_ac'] = 0;
+        if ($baseStats['min_ac'] > 0) {
+            $p['min_ac'] = intval($p['level'] / $baseStats['min_ac']);
         }
 
-        $p['MaxAC'] = 0;
-        if ($baseStats['MaxAc'] > 0) {
-            $p['MaxAC'] = intval($p['Level'] / $baseStats['MaxAc']);
+        $p['max_ac'] = 0;
+        if ($baseStats['max_ac'] > 0) {
+            $p['max_ac'] = intval($p['level'] / $baseStats['max_ac']);
         }
 
-        $p['MinMAC'] = 0;
-        if ($baseStats['MinMac'] > 0) {
-            $p['MinMAC'] = intval($p['Level'] / $baseStats['MinMac']);
+        $p['min_mac'] = 0;
+        if ($baseStats['min_mac'] > 0) {
+            $p['min_mac'] = intval($p['level'] / $baseStats['min_mac']);
         }
 
-        $p['MaxMAC'] = 0;
-        if ($baseStats['MaxMac'] > 0) {
-            $p['MaxMAC'] = intval($p['Level'] / $baseStats['MaxMac']);
+        $p['max_mac'] = 0;
+        if ($baseStats['max_mac'] > 0) {
+            $p['max_mac'] = intval($p['level'] / $baseStats['max_mac']);
         }
 
-        $p['MinDC'] = 0;
-        if ($baseStats['MinDc'] > 0) {
-            $p['MinDC'] = intval($p['Level'] / $baseStats['MinDc']);
+        $p['min_dc'] = 0;
+        if ($baseStats['min_dc'] > 0) {
+            $p['min_dc'] = intval($p['level'] / $baseStats['min_dc']);
         }
 
-        $p['MaxDC'] = 0;
-        if ($baseStats['MaxDc'] > 0) {
-            $p['MaxDC'] = intval($p['Level'] / $baseStats['MaxDc']);
+        $p['max_dc'] = 0;
+        if ($baseStats['max_dc'] > 0) {
+            $p['max_dc'] = intval($p['level'] / $baseStats['max_dc']);
         }
 
-        $p['MinMC'] = 0;
-        if ($baseStats['MinMc'] > 0) {
-            $p['MinMC'] = intval($p['Level'] / $baseStats['MinMc']);
+        $p['min_mc'] = 0;
+        if ($baseStats['min_mc'] > 0) {
+            $p['min_mc'] = intval($p['level'] / $baseStats['min_mc']);
         }
 
-        $p['MaxMC'] = 0;
-        if ($baseStats['MaxMc'] > 0) {
-            $p['MaxMC'] = intval($p['Level'] / $baseStats['MaxMc']);
+        $p['max_mc'] = 0;
+        if ($baseStats['max_mc'] > 0) {
+            $p['max_mc'] = intval($p['level'] / $baseStats['max_mc']);
         }
 
-        $p['MinSC'] = 0;
-        if ($baseStats['MinSc'] > 0) {
-            $p['MinSC'] = intval($p['Level'] / $baseStats['MinSc']);
+        $p['min_sc'] = 0;
+        if ($baseStats['min_sc'] > 0) {
+            $p['min_sc'] = intval($p['level'] / $baseStats['min_sc']);
         }
 
-        $p['MaxSC'] = 0;
-        if ($baseStats['MaxSc'] > 0) {
-            $p['MaxSC'] = intval($p['Level'] / $baseStats['MaxSc']);
+        $p['max_sc'] = 0;
+        if ($baseStats['max_sc'] > 0) {
+            $p['max_sc'] = intval($p['level'] / $baseStats['max_sc']);
         }
 
-        $p['CriticalRate'] = 0;
-        if ($baseStats['CritialRateGain'] > 0) {
-            $p['CriticalRate'] = intval($p['CriticalRate'] + ($p['Level'] / $baseStats['CritialRateGain']));
+        $p['critical_rate'] = 0;
+        if ($baseStats['critial_rate_gain'] > 0) {
+            $p['critical_rate'] = intval($p['critical_rate'] + ($p['level'] / $baseStats['critial_rate_gain']));
         }
 
-        $p['CriticalDamage'] = 0;
-        if ($baseStats['CriticalDamageGain'] > 0) {
-            $p['CriticalDamage'] = intval($p['CriticalDamage'] + ($p['Level'] / $baseStats['CriticalDamageGain']));
+        $p['critical_damage'] = 0;
+        if ($baseStats['critical_damage_gain'] > 0) {
+            $p['critical_damage'] = intval($p['critical_damage'] + ($p['level'] / $baseStats['critical_damage_gain']));
         }
 
-        $p['MaxBagWeight']  = intval(50.0 + $p['Level'] / $baseStats['BagWeightGain'] * $p['Level']);
-        $p['MaxWearWeight'] = intval(15.0 + $p['Level'] / $baseStats['WearWeightGain'] * $p['Level']);
-        $p['MaxHandWeight'] = intval(12.0 + $p['Level'] / $baseStats['HandWeightGain'] * $p['Level']);
+        $p['max_bag_weight']  = intval(50.0 + $p['level'] / $baseStats['bag_weight_gain'] * $p['level']);
+        $p['max_wear_weight'] = intval(15.0 + $p['level'] / $baseStats['wear_weight_gain'] * $p['level']);
+        $p['max_hand_weight'] = intval(12.0 + $p['level'] / $baseStats['hand_weight_gain'] * $p['level']);
 
-        switch ($p['Class']) {
+        switch ($p['class']) {
             case $this->Enum::MirClassWarrior:
-                $p['MaxHP'] = intval(14.0 + ($p['Level'] / $baseStats['HpGain'] + $baseStats['HpGainRate'] + $p['Level'] / 20.0) * $p['Level']);
-                $p['MaxMP'] = intval(11.0 + ($p['Level'] * 3.5) + ($p['Level'] * $baseStats['MpGainRate']));
+                $p['max_hp'] = intval(14.0 + ($p['level'] / $baseStats['hp_gain'] + $baseStats['hp_gain_rate'] + $p['level'] / 20.0) * $p['level']);
+                $p['max_mp'] = intval(11.0 + ($p['level'] * 3.5) + ($p['level'] * $baseStats['mp_gain_rate']));
                 break;
 
             case $this->Enum::MirClassWizard:
-                $p['MaxMP'] = intval(13.0 + (($p['Level'] / 5.0 + 2.0) * 2.2 * $p['Level']) + ($p['Level'] * $baseStats['MpGainRate']));
+                $p['max_mp'] = intval(13.0 + (($p['level'] / 5.0 + 2.0) * 2.2 * $p['level']) + ($p['level'] * $baseStats['mp_gain_rate']));
                 break;
 
             case $this->Enum::MirClassTaoist:
-                $p['MaxMP'] = intval((13 + $p['Level'] / 8.0 * 2.2 * $p['Level']) + ($p['Level'] * $baseStats['MpGainRate']));
+                $p['max_mp'] = intval((13 + $p['level'] / 8.0 * 2.2 * $p['level']) + ($p['level'] * $baseStats['mp_gain_rate']));
                 break;
         }
     }
 
     public function refreshBagWeight(&$p)
     {
-        $p['CurrentBagWeight'] = 0;
+        $p['current_bag_weight'] = 0;
 
-        foreach ($p['Inventory']['Items'] as $k => $v) {
+        foreach ($p['inventory']['items'] as $k => $v) {
             if ($v && $v['isset']) {
-                $item = $this->GameData->getItemInfoByID($v['Info']['id']);
-                $p['CurrentBagWeight'] += $item['weight'];
+                $item = $this->GameData->getItemInfoByID($v['info']['id']);
+                $p['current_bag_weight'] += $item['weight'];
             }
         }
     }
 
     public function refreshEquipmentStats(&$p)
     {
-        $oldLooksWeapon       = $p['LooksWeapon'];
-        $oldLooksWeaponEffect = $p['LooksWeaponEffect'];
-        $oldLooksArmour       = $p['LooksArmour'];
-        $oldLooksWings        = $p['LooksWings'];
-        $oldLight             = $p['Light'];
+        $oldLooksWeapon       = $p['looks_weapon'];
+        $oldLooksWeaponEffect = $p['looks_weapon_effect'];
+        $oldLooksArmour       = $p['looks_armour'];
+        $oldLooksWings        = $p['looks_wings'];
+        $oldLight             = $p['light'];
 
-        $p['LooksArmour']       = 0;
-        $p['LooksWeapon']       = -1;
-        $p['LooksWeaponEffect'] = 0;
-        $p['LooksWings']        = 0;
+        $p['looks_armour']        = 0;
+        $p['looks_weapon']        = -1;
+        $p['looks_weapon_effect'] = 0;
+        $p['looks_wings']         = 0;
 
         $ItemInfos = $this->GameData->getItemInfos();
-        foreach ($p['Equipment']['Items'] as $temp) {
+        foreach ($p['equipment']['items'] as $temp) {
             if (!$temp || !$temp['isset']) {
                 continue;
             }
 
-            $RealItem = $this->GameData->getRealItem($temp['Info'], $p['Level'], $p['Class'], $ItemInfos);
+            $RealItem = $this->GameData->getRealItem($temp['info'], $p['level'], $p['class'], $ItemInfos);
 
-            $p['MinAC']  = toUint16(intval($p['MinAC']) + intval($RealItem['min_ac']));
-            $p['MaxAC']  = toUint16(intval($p['MaxAC']) + intval($RealItem['max_ac']) + intval($temp['ac']));
-            $p['MinMAC'] = toUint16(intval($p['MinMAC']) + intval($RealItem['min_mac']));
-            $p['MaxMAC'] = toUint16(intval($p['MaxMAC']) + intval($RealItem['max_mac']) + intval($temp['mac']));
-            $p['MinDC']  = toUint16(intval($p['MinDC']) + intval($RealItem['min_dc']));
-            $p['MaxDC']  = toUint16(intval($p['MaxDC']) + intval($RealItem['max_dc']) + intval($temp['dc']));
-            $p['MinMC']  = toUint16(intval($p['MinMC']) + intval($RealItem['min_mc']));
-            $p['MaxMC']  = toUint16(intval($p['MaxMC']) + intval($RealItem['max_mc']) + intval($temp['mc']));
-            $p['MinSC']  = toUint16(intval($p['MinSC']) + intval($RealItem['min_sc']));
-            $p['MaxSC']  = toUint16(intval($p['MaxSC']) + intval($RealItem['max_sc']) + intval($temp['sc']));
-            $p['MaxHP']  = toUint16(intval($p['MaxHP']) + intval($RealItem['hp']) + intval($temp['hp']));
-            $p['MaxMP']  = toUint16(intval($p['MaxMP']) + intval($RealItem['mp']) + intval($temp['mp']));
+            $p['min_ac']  = toUint16(intval($p['min_ac']) + intval($RealItem['min_ac']));
+            $p['max_ac']  = toUint16(intval($p['max_ac']) + intval($RealItem['max_ac']) + intval($temp['ac']));
+            $p['min_mac'] = toUint16(intval($p['min_mac']) + intval($RealItem['min_mac']));
+            $p['max_mac'] = toUint16(intval($p['max_mac']) + intval($RealItem['max_mac']) + intval($temp['mac']));
+            $p['min_dc']  = toUint16(intval($p['min_dc']) + intval($RealItem['min_dc']));
+            $p['max_dc']  = toUint16(intval($p['max_dc']) + intval($RealItem['max_dc']) + intval($temp['dc']));
+            $p['min_mc']  = toUint16(intval($p['min_mc']) + intval($RealItem['min_mc']));
+            $p['max_mc']  = toUint16(intval($p['max_mc']) + intval($RealItem['max_mc']) + intval($temp['mc']));
+            $p['min_sc']  = toUint16(intval($p['min_sc']) + intval($RealItem['min_sc']));
+            $p['max_sc']  = toUint16(intval($p['max_sc']) + intval($RealItem['max_sc']) + intval($temp['sc']));
+            $p['max_hp']  = toUint16(intval($p['max_hp']) + intval($RealItem['hp']) + intval($temp['hp']));
+            $p['max_mp']  = toUint16(intval($p['max_mp']) + intval($RealItem['mp']) + intval($temp['mp']));
 
-            $p['MaxBagWeight']  = toUint16(intval($p['MaxBagWeight']) + intval($RealItem['bag_weight']));
-            $p['MaxWearWeight'] = toUint16(intval($p['MaxWearWeight']) + intval($RealItem['wear_weight']));
-            $p['MaxHandWeight'] = toUint16(intval($p['MaxHandWeight']) + intval($RealItem['hand_weight']));
+            $p['max_bag_weight']  = toUint16(intval($p['max_bag_weight']) + intval($RealItem['bag_weight']));
+            $p['max_wear_weight'] = toUint16(intval($p['max_wear_weight']) + intval($RealItem['wear_weight']));
+            $p['max_hand_weight'] = toUint16(intval($p['max_hand_weight']) + intval($RealItem['hand_weight']));
 
-            $p['ASpeed']   = toInt8(intval($p['ASpeed']) + intval($temp['attack_speed']) + intval($RealItem['attack_speed']));
-            $p['Luck']     = toInt8(intval($p['Luck']) + intval($temp['luck']) + intval($RealItem['luck']));
-            $p['Accuracy'] = toUint8(intval($p['Accuracy']) + intval($RealItem['accuracy']) + intval($temp['accuracy']));
-            $p['Agility']  = toUint8(intval($p['Agility']) + intval($RealItem['agility']) + intval($temp['agility']));
+            $p['a_speed']  = toInt8(intval($p['a_speed']) + intval($temp['attack_speed']) + intval($RealItem['attack_speed']));
+            $p['luck']     = toInt8(intval($p['luck']) + intval($temp['luck']) + intval($RealItem['luck']));
+            $p['accuracy'] = toUint8(intval($p['accuracy']) + intval($RealItem['accuracy']) + intval($temp['accuracy']));
+            $p['agility']  = toUint8(intval($p['agility']) + intval($RealItem['agility']) + intval($temp['agility']));
 
-            $p['MagicResist']    = toUint8(intval($p['MagicResist']) + intval($temp['magic_resist']) + intval($RealItem['magic_resist']));
-            $p['PoisonResist']   = toUint8(intval($p['PoisonResist']) + intval($temp['poison_resist']) + intval($RealItem['poison_resist']));
-            $p['HealthRecovery'] = toUint8(intval($p['HealthRecovery']) + intval($temp['health_recovery']) + intval($RealItem['health_recovery']));
-            $p['SpellRecovery']  = toUint8(intval($p['SpellRecovery']) + intval($temp['mana_recovery']) + intval($RealItem['spell_recovery']));
-            $p['PoisonRecovery'] = toUint8(intval($p['PoisonRecovery']) + intval($temp['poison_recovery']) + intval($RealItem['poison_recovery']));
-            $p['CriticalRate']   = toUint8(intval($p['CriticalRate']) + intval($temp['critical_rate']) + intval($RealItem['critical_rate']));
-            $p['CriticalDamage'] = toUint8(intval($p['CriticalDamage']) + intval($temp['critical_damage']) + intval($RealItem['critical_damage']));
-            $p['Holy']           = toUint8(intval($p['Holy']) + intval($RealItem['holy']));
-            $p['Freezing']       = toUint8(intval($p['Freezing']) + intval($temp['freezing']) + intval($RealItem['freezing']));
-            $p['PoisonAttack']   = toUint8(intval($p['PoisonAttack']) + intval($temp['poison_attack']) + intval($RealItem['poison_attack']));
-            $p['Reflect']        = toUint8(intval($p['Reflect']) + intval($RealItem['reflect']));
-            $p['HpDrainRate']    = toUint8(intval($p['HpDrainRate']) + intval($RealItem['hp_drain_rate']));
+            $p['magic_resist']    = toUint8(intval($p['magic_resist']) + intval($temp['magic_resist']) + intval($RealItem['magic_resist']));
+            $p['poison_resist']   = toUint8(intval($p['poison_resist']) + intval($temp['poison_resist']) + intval($RealItem['poison_resist']));
+            $p['health_recovery'] = toUint8(intval($p['health_recovery']) + intval($temp['health_recovery']) + intval($RealItem['health_recovery']));
+            $p['spell_recovery']  = toUint8(intval($p['spell_recovery']) + intval($temp['mana_recovery']) + intval($RealItem['spell_recovery']));
+            $p['poison_recovery'] = toUint8(intval($p['poison_recovery']) + intval($temp['poison_recovery']) + intval($RealItem['poison_recovery']));
+            $p['critical_rate']   = toUint8(intval($p['critical_rate']) + intval($temp['critical_rate']) + intval($RealItem['critical_rate']));
+            $p['critical_damage'] = toUint8(intval($p['critical_damage']) + intval($temp['critical_damage']) + intval($RealItem['critical_damage']));
+            $p['holy']            = toUint8(intval($p['holy']) + intval($RealItem['holy']));
+            $p['freezing']        = toUint8(intval($p['freezing']) + intval($temp['freezing']) + intval($RealItem['freezing']));
+            $p['poison_attack']   = toUint8(intval($p['poison_attack']) + intval($temp['poison_attack']) + intval($RealItem['poison_attack']));
+            $p['reflect']         = toUint8(intval($p['reflect']) + intval($RealItem['reflect']));
+            $p['hp_drain_rate']   = toUint8(intval($p['hp_drain_rate']) + intval($RealItem['hp_drain_rate']));
 
             switch ($RealItem['type']) {
                 case $this->Enum::ItemTypeArmour:
-                    $p['LooksArmour'] = intval($RealItem['shape']);
-                    $p['LooksWings']  = intval($RealItem['effect']);
+                    $p['looks_armour'] = intval($RealItem['shape']);
+                    $p['looks_wings']  = intval($RealItem['effect']);
                     break;
 
                 case $this->Enum::ItemTypeWeapon:
-                    $p['LooksWeapon']       = intval($RealItem['shape']);
-                    $p['LooksWeaponEffect'] = intval($RealItem['effect']);
+                    $p['looks_weapon']        = intval($RealItem['shape']);
+                    $p['looks_weapon_effect'] = intval($RealItem['effect']);
                     break;
             }
         }
 
-        if ($oldLooksArmour != $p['LooksArmour'] || $oldLooksWeapon != $p['LooksWeapon'] || $oldLooksWeaponEffect != $p['LooksWeaponEffect'] || $oldLooksWings != $p['LooksWings'] || $oldLight != $p['Light']) {
+        if ($oldLooksArmour != $p['looks_armour'] || $oldLooksWeapon != $p['looks_weapon'] || $oldLooksWeaponEffect != $p['looks_weapon_effect'] || $oldLooksWings != $p['looks_wings'] || $oldLight != $p['light']) {
             $this->broadcast($p, $this->getUpdateInfo($p));
         }
     }
@@ -612,25 +612,25 @@ class PlayerObject extends AbstractController
         return [
             'PLAYER_UPDATE',
             [
-                'ObjectID'     => $p['ID'],
-                'Weapon'       => $p['LooksWeapon'],
-                'WeaponEffect' => $p['LooksWeaponEffect'],
-                'Armour'       => $p['LooksArmour'],
-                'Light'        => $p['Light'],
-                'WingEffect'   => $p['LooksWings'],
+                'object_id'     => $p['id'],
+                'weapon'        => $p['looks_weapon'],
+                'weapon_effect' => $p['looks_weapon_effect'],
+                'armour'        => $p['looks_armour'],
+                'light'         => $p['light'],
+                'wing_effect'   => $p['looks_wings'],
             ],
         ];
     }
 
     public function updateConcentration($p)
     {
-        $this->SendMsg->send($p['fd'], ['SET_CONCENTRATION', ['ObjectID' => $p['AccountID'], 'Enabled' => 0, 'Interrupted' => 0]]);
-        $this->broadcast($p, ['SET_OBJECT_CONCENTRATION', ['ObjectID' => $p['AccountID'], 'Enabled' => 0, 'Interrupted' => 0]]);
+        $this->SendMsg->send($p['fd'], ['SET_CONCENTRATION', ['object_id' => $p['account_id'], 'enabled' => 0, 'interrupted' => 0]]);
+        $this->broadcast($p, ['SET_OBJECT_CONCENTRATION', ['object_id' => $p['account_id'], 'enabled' => 0, 'interrupted' => 0]]);
     }
 
     public function broadcast($p, $msg)
     {
-        $this->Map->broadcastP($p['CurrentLocation'], $msg, $p);
+        $this->Map->broadcastP($p['current_location'], $msg, $p);
     }
 
     public function refreshItemSetStats(&$p)
@@ -645,20 +645,20 @@ class PlayerObject extends AbstractController
 
     public function refreshSkills(&$p)
     {
-        if (!empty($p['Magics'])) {
-            foreach ($p['Magics'] as $k => $magic) {
-                switch ($magic['Spell']) {
+        if (!empty($p['magics'])) {
+            foreach ($p['magics'] as $k => $magic) {
+                switch ($magic['spell']) {
                     case $this->Enum::SpellFencing: // 基本剑术
-                        $p['Accuracy'] = toUint8(intval($p['Accuracy']) + $magic['Level'] * 3);
-                        $p['MaxAC']    = toUint16(intval($p['MaxAC']) + ($magic['Level'] + 1) * 3);
+                        $p['accuracy'] = toUint8(intval($p['accuracy']) + $magic['level'] * 3);
+                        $p['max_ac']   = toUint16(intval($p['max_ac']) + ($magic['level'] + 1) * 3);
                         break;
 
                     case $this->Enum::SpellFatalSword: // 刺客的技能 忽略
                         break;
 
                     case $this->Enum::SpellSpiritSword: // 精神力战法
-                        $p['Accuracy'] = toUint8(intval($p['Accuracy']) + $magic['Level']);
-                        $p['MaxAC']    = toUint16(intval($p['MaxDC']) + intval($p['MaxSC'] * $magic['Level'] + 1 * 0.1));
+                        $p['accuracy'] = toUint8(intval($p['accuracy']) + $magic['level']);
+                        $p['max_ac']   = toUint16(intval($p['max_dc']) + intval($p['max_sc'] * $magic['level'] + 1 * 0.1));
                         break;
 
                 }
@@ -715,14 +715,14 @@ class PlayerObject extends AbstractController
         $maps = $this->GameData->getMap();
 
         foreach ($movementInfos as $k => $v) {
-            if ($v['source_map'] == $p['Map']['Info']['id']) {
-                if ($point['X'] == $v['source_x'] && $point['Y'] == $v['source_y']) {
+            if ($v['source_map'] == $p['map']['info']['id']) {
+                if ($point['x'] == $v['source_x'] && $point['y'] == $v['source_y']) {
                     $m = $maps[$v['destination_map']] ?? null;
                     if (!$m) {
                         EchoLog(sprintf('未知的地图ID: %s', $maps[$v['destination_map']]), 'e');
                     }
 
-                    $this->teleport($p, $m, ['X' => $v['destination_x'], 'Y' => $v['destination_y']]);
+                    $this->teleport($p, $m, ['x' => $v['destination_x'], 'y' => $v['destination_y']]);
                     return true;
                 }
             }
@@ -733,44 +733,51 @@ class PlayerObject extends AbstractController
 
     public function teleport(&$p, $m, $point)
     {
-        $oldMap = $p['Map'];
+        $oldMap = $p['map'];
 
-        if (!$this->Map->inMap($m, $point['X'], $point['Y'])) {
+        if (!$this->Map->inMap($m, $point['x'], $point['y'])) {
             return false;
         }
 
         $this->Map->deleteObject($p, $this->Enum::ObjectTypePlayer);
 
-        $this->broadcast($p, ['OBJECT_TELEPORT_OUT', ['ObjectID' => $p['ID'], 'Type' => 0]]);
+        $this->broadcast($p, ['OBJECT_TELEPORT_OUT', ['object_id' => $p['id'], 'type' => 0]]);
         $this->broadcast($p, $this->MsgFactory->objectRemove($p));
 
-        $p['Map']['Info']['id'] = $m['Info']['id'];
-        $p['CurrentLocation']   = $point;
+        $p['map']['info']['id'] = $m['info']['id'];
+        $p['current_location']  = $point;
 
         $this->Map->addObject($p, $this->Enum::ObjectTypePlayer);
 
         $this->broadcastInfo($p); //广播人物
 
-        $this->broadcast($p, ['OBJECT_TELEPORT_OUT', ['ObjectID' => $p['ID'], 'Type' => 0]]);
-        $this->broadcast($p, ['OBJECT_TELEPORT_IN', ['ObjectID' => $p['ID'], 'Type' => 0]]);
+        $this->broadcast($p, ['OBJECT_TELEPORT_IN', ['object_id' => $p['id'], 'type' => 0]]);
 
         $this->broadcastHealthChange($p);
 
-        $this->SendMsg->send($p['fd'], ['MAP_CHANGED', [
-            'FileName'     => $m['Info']['file_name'],
-            'Title'        => $m['Info']['title'],
-            'MiniMap'      => $m['Info']['mini_map'],
-            'BigMap'       => $m['Info']['big_map'],
-            'Lights'       => $m['Info']['light'],
-            'Location'     => $p['CurrentLocation'],
-            'Direction'    => $p['CurrentDirection'],
-            'MapDarkLight' => $m['Info']['map_dark_light'],
-            'Music'        => $m['Info']['music'],
-        ]]);
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->mapChange($m, $p['current_location'], $p['current_direction']));
 
-        $this->enqueueAreaObjects($p, null, $this->getCell($m, $p['CurrentLocation']));
+        $this->enqueueAreaObjects($p, null, $this->getCell($m, $p['current_location']));
 
-        $this->SendMsg->send($p['fd'], ['OBJECT_TELEPORT_IN', ['ObjectID' => $p['ID'], 'Type' => 0]]);
+        $this->SendMsg->send($p['fd'], ['OBJECT_TELEPORT_IN', ['object_id' => $p['id'], 'type' => 0]]);
+
+        return true;
+    }
+
+    public function teleportRandom(&$p, $attempts, $distance, $m)
+    {
+        if (!$m) {
+            $m = $this->GameData->getMap($p['map']['info']['id']);
+        }
+
+        for ($i = 0; $i < $attempts; $i++) {
+            $loc = ['x' => rand(0, $m['width'] - 1), 'y' => rand(0, $m['height'] - 1)];
+            if ($this->teleport($p, $m, $loc)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function broadcastInfo($p)
@@ -789,9 +796,9 @@ class PlayerObject extends AbstractController
     //开门
     public function openDoor($p, $doorIndex)
     {
-        if ($this->Map->openDoor($p['Map']['Info']['id'], $doorIndex)) {
-            $this->SendMsg->send($p['fd'], ['OPENDOOR', ['DoorIndex' => $doorIndex, 'Close' => false]]);
-            $this->broadcast($p, ['OPENDOOR', ['DoorIndex' => $doorIndex, 'Close' => false]]);
+        if ($this->Map->openDoor($p['map']['info']['id'], $doorIndex)) {
+            $this->SendMsg->send($p['fd'], ['OPENDOOR', ['door_index' => $doorIndex, 'close' => false]]);
+            $this->broadcast($p, ['OPENDOOR', ['door_index' => $doorIndex, 'close' => false]]);
         }
     }
 
@@ -802,15 +809,15 @@ class PlayerObject extends AbstractController
 
         switch ($mirGridType) {
             case $this->Enum::MirGridTypeInventory:
-                $Items = $p['Inventory']['Items'];
+                $Items = $p['inventory']['items'];
                 break;
 
             case $this->Enum::MirGridTypeEquipment:
-                $Items = $p['Equipment']['Items'];
+                $Items = $p['equipment']['items'];
                 break;
 
             case $this->Enum::MirGridTypeStorage:
-                $Items = $p['Storage']['Items'];
+                $Items = $p['storage']['items'];
                 break;
 
             default:
@@ -833,11 +840,11 @@ class PlayerObject extends AbstractController
         $say = $this->Npc->callScript($p, $npc, $key);
 
         if (!$say) {
-            EchoLog(sprintf('NPC脚本执行失败 ID: %s  key: %s', $npc['ID'], $key), 'w');
+            EchoLog(sprintf('NPC脚本执行失败 ID: %s  key: %s', $npc['id'], $key), 'w');
         }
 
-        $p['CallingNPC']     = $npc['ID'];
-        $p['CallingNPCPage'] = $key;
+        $p['calling_npc']      = $npc['id'];
+        $p['calling_npc_page'] = $key;
 
         $this->SendMsg->send($p['fd'], $this->MsgFactory->npcResponse($this->NpcScript->replaceTemplates($npc, $p, $say)));
 
@@ -880,22 +887,22 @@ class PlayerObject extends AbstractController
 
     public function sendNpcGoods($p, $npc)
     {
-        if (!empty($npc['Goods'])) {
-            foreach ($npc['Goods'] as $key => $item) {
+        if (!empty($npc['goods'])) {
+            foreach ($npc['goods'] as $key => $item) {
                 $this->enqueueItemInfo($p, $item['item_id']);
             }
-            $this->SendMsg->send($p['fd'], $this->MsgFactory->npcGoods($npc['Goods'], 1.0, $this->Enum::PanelTypeBuy));
+            $this->SendMsg->send($p['fd'], $this->MsgFactory->npcGoods($npc['goods'], 1.0, $this->Enum::PanelTypeBuy));
         }
     }
 
     public function sendStorage($p, $npc)
     {
-        if (!empty($p['Storage']['Items'])) {
-            foreach ($p['Storage']['Items'] as $key => $item) {
+        if (!empty($p['storage']['items'])) {
+            foreach ($p['storage']['items'] as $key => $item) {
                 $this->enqueueItemInfo($p, $item['item_id']);
             }
 
-            $this->SendMsg->send($p['fd'], $this->MsgFactory->userStorage($p['Storage']['Items']));
+            $this->SendMsg->send($p['fd'], $this->MsgFactory->userStorage($p['storage']['items']));
         }
     }
 
@@ -914,20 +921,25 @@ class PlayerObject extends AbstractController
 
     public function takeGold($p, $gold)
     {
-        if ($gold > $p['Gold']) {
-            EchoLog(sprintf('没有足够的金币 余额: %s  需要: %s', $p['Gold'], $gold), 'w');
-            $p['Gold'] = 0;
+        if ($gold > $p['gold']) {
+            EchoLog(sprintf('没有足够的金币 余额: %s  需要: %s', $p['gold'], $gold), 'w');
+            $p['gold'] = 0;
         } else {
-            $p['Gold'] -= $gold;
+            $p['gold'] -= $gold;
         }
 
         co(function () use ($p) {
             $this->setPlayer($p['fd'], $p);
 
-            $this->PlayersList->saveGold($p['ID'], $p['Gold']);
+            $this->PlayersList->saveGold($p['id'], $p['gold']);
         });
 
         $this->SendMsg->send($p['fd'], $this->MsgFactory->loseGold($gold));
+    }
+
+    public function canUseItem($p, $item)
+    {
+        return true;
     }
 
     # 药水是消耗品，可以治愈或增强玩家的生命。
@@ -937,26 +949,166 @@ class PlayerObject extends AbstractController
     #   神秘水 2 没有允许玩家取消装备被诅咒的物品（仅适用于官方神秘物品）。
     #   Buff 药剂 3 DC / MC / SC / ASpeed / HP / MP / MaxAC / MaxMAC /Durability 为玩家提供相对的增益 抛光时间的长短取决于药水的耐久性。 1 dura = 1分钟。
     #   经验值 4 运气/耐力通过运气统计数据增加玩家获得的经验值百分比。 抛光时间的长短取决于药水的耐久性。 1 dura = 1分钟。
-    public function userItemPotion($p, $item)
+    public function userItemPotion(&$p, $item)
     {
-        $info = $item['Info'];
+        $info = $item['info'];
 
         switch ($info['shape']) {
+            //一般药水
             case 0:
-                # code...
+                $ph = &$p['health'];
+                if ($info['hp'] > 0) {
+                    $ph['hp_pot_value']     = $info['hp']; // 回复总值
+                    $ph['hp_pot_per_value'] = $info['hp'] / 3; // 一次回复多少
+                    $ph['hp_pot_next_time'] = time(); // 下次生效时间
+                    $ph['hp_pot_tick_num']  = 3; // 总共跳几次
+                    $ph['hp_pot_tick_time'] = 0; // 当前第几跳
+                }
+
+                if ($info['mp'] > 0) {
+                    $ph['mp_pot_value']     = $info['mp'];
+                    $ph['mp_pot_per_value'] = $info['mp'] / 3;
+                    $ph['mp_pot_next_time'] = time();
+                    $ph['mp_pot_tick_num']  = 3;
+                    $ph['mp_pot_tick_time'] = 0;
+                }
+
                 break;
 
-            default:
-                # code...
+            //太阳水
+            case 1:
+                $this->changeHp($p, $info['hp']);
+                $this->changeMp($p, $info['mp']);
+                break;
+
+            //神秘药剂 TODO
+            case 2:
+                break;
+
+            // Buff
+            case 3:
+                $expireTime = $info['durability'];
+
+                if ($info['max_dc'] + $item['dc'] > 0) {
+                    $this->addBuff($p, $this->Buff->newBuff($this->Enum::BuffTypeImpact, $p, $expireTime, $info['max_dc'] + $item['dc']));
+                }
+
+                if ($info['max_mc'] + $item['mc'] > 0) {
+                    $this->addBuff($p, $this->Buff->newBuff($this->Enum::BuffTypeMagic, $p, $expireTime, $info['max_mc'] + $item['mc']));
+                }
+
+                if ($info['max_sc'] + $item['sc'] > 0) {
+                    $this->addBuff($p, $this->Buff->newBuff($this->Enum::BuffTypeTaoist, $p, $expireTime, $info['max_sc'] + $item['sc']));
+                }
+
+                if ($info['attack_speed'] + $item['attack_speed'] > 0) {
+                    $this->addBuff($p, $this->Buff->newBuff($this->Enum::BuffTypeStorm, $p, $expireTime, $info['attack_speed'] + $item['attack_speed']));
+                }
+
+                if ($info['hp'] + $item['hp'] > 0) {
+                    $this->addBuff($p, $this->Buff->newBuff($this->Enum::BuffTypeHealthAid, $p, $expireTime, $info['hp'] + $item['hp']));
+                }
+
+                if ($info['mp'] + $item['mp'] > 0) {
+                    $this->addBuff($p, $this->Buff->newBuff($this->Enum::BuffTypeManaAid, $p, $expireTime, $info['mp'] + $item['mp']));
+                }
+
+                if ($info['max_ac'] + $item['ac'] > 0) {
+                    $this->addBuff($p, $this->Buff->newBuff($this->Enum::BuffTypeDefence, $p, $expireTime, $info['max_ac'] + $item['ac']));
+                }
+
+                if ($info['max_mac'] + $item['mac'] > 0) {
+                    $this->addBuff($p, $this->Buff->newBuff($this->Enum::BuffTypeMagicDefence, $p, $expireTime, $info['max_mac'] + $item['mac']));
+                }
+
+                break;
+
+            // Exp 经验
+            case 4:
+                $expireTime = $info['durability'];
+                $this->addBuff($p, $this->Buff->newBuff($this->Enum::BuffTypeExp, $p, $expireTime, $info['luck'] + $item['luck']));
+        }
+
+        return true;
+    }
+
+    public function addBuff(&$p, $b)
+    {
+        if ($this->Buff->has($p['buff_list'], $b, function ($b, $temp) {return $temp['infinite'] && $b['type'] == $temp['type'];})) {
+            return false;
+        }
+
+        $this->Buff->addBuff($p['buff_list'], $b);
+
+        $caster = '';
+        if ($b['caster']) {
+            $caster = $b['caster']['name'];
+        }
+
+        $msg = $this->MsgFactory->addBuff($b);
+
+        $this->SendMsg->send($p['fd'], $msg);
+
+        if ($b['visible']) {
+            $this->broadcast($p, $msg);
+        }
+
+        $this->refreshStats($p);
+    }
+
+    //卷轴是各种用途的消耗品。
+    //常用名称 Shape    使用了stats描述
+    //副本逃脱  0   将玩家传送到他们最后保存的地图上的任意位置。
+    //城镇传送  1   传送玩家到他们最后保存的安全区域。
+    //随机传送  2   随机传送玩家到同一地图上的一个新坐标。
+    //祝福油    3   装备武器的玩家幸运的机会。
+    //修理石油  4   修理装备武器耐久性5，同时减少其最大耐久性。
+    //战神石油  5   修理装备的武器耐久性到最大。
+    //复活卷轴  6   使玩家恢复100%的HP和MP。
+    //积分卷轴      7   价格给玩家x数量的游戏商店积分。
+    //地图喊话滚动    8   允许一个单一的特殊喊话横跨玩家当前的地图。
+    //服务器喊  9   允许一个特殊的喊过服务器。
+    //公会技能卷轴    10  增加一个技能到玩家公会。只能由公会领袖使用。由效果号选择的技能。
+    public function useItemScroll(&$p, $item)
+    {
+        switch ($item['info']['shape']) {
+            case 0: //DE
+                $temp = $this->GameData->getMap($p['bind_map_index']);
+
+                for ($i = 0; $i < 20; $i++) {
+                    $x   = $p['bind_location']['x'] + rand(-100, 100);
+                    $y   = $p['bind_location']['y'] + rand(-100, 100);
+                    $loc = ['x' => $x, 'y' => $y];
+                    if ($this->teleport($p, $temp, $loc)) {
+                        return true;
+                    }
+                }
+
+                break;
+            case 1: //TT
+                $temp = $this->GameData->getMap($p['bind_map_index']);
+
+                if (!$this->teleport($p, $temp, $p['bind_location'])) {
+                    return false;
+                }
+
+                break;
+            case 2: //RT
+                $mapInfo = $this->GameData->getMap($p['map']['info']['id']);
+                if (!$this->teleportRandom($p, 200, $item['info']['durability'], $mapInfo)) {
+                    return true;
+                }
+                
                 break;
         }
+
+        return true;
     }
 
     public function process($p)
     {
         $p = $this->getPlayer($p['fd']);
-        if(!$p || $p == 'null')
-        {
+        if (!$p || $p == 'null') {
             return;
         }
 
@@ -964,38 +1116,73 @@ class PlayerObject extends AbstractController
         $this->processBuffs($p);
         $this->processPoison($p);
 
-        $ch = &$p['Health'];
+        $ch = &$p['health'];
 
-        if ($ch['HPPotValue'] != 0 && $ch['HPPotNextTime'] < $now) {
-            $this->changeHp($p, $ch['HPPotPerValue']);
-            $ch['HPPotTickTime'] += 1;
+        if ($ch['hp_pot_value'] != 0 && $ch['hp_pot_next_time'] < $now) {
+            $this->changeHp($p, $ch['hp_pot_per_value']);
+            $ch['hp_pot_tick_time'] += 1;
 
-            if ($ch['HPPotTickTime'] >= $ch['HPPotTickNum']) {
-                $ch['HPPotValue'] = 0; //回复总值
+            if ($ch['hp_pot_tick_time'] >= $ch['hp_pot_tick_num']) {
+                $ch['hp_pot_value'] = 0; //回复总值
             } else {
-                $ch['HPPotNextTime'] = $now; //下次生效时间
+                $ch['hp_pot_next_time'] = $now; //下次生效时间
             }
         }
 
-        if ($ch['MPPotValue'] != 0 && $ch['MPPotNextTime'] < $now) {
-            $this->changeMp($p, $ch['MPPotPerValue']);
-            $ch['MPPotTickTime'] += 1;
+        if ($ch['mp_pot_value'] != 0 && $ch['mp_pot_next_time'] < $now) {
+            $this->changeMp($p, $ch['mp_pot_per_value']);
+            $ch['mp_pot_tick_time'] += 1;
 
-            if ($ch['MPPotTickTime'] >= $ch['MPPotTickNum']) {
-                $ch['MPPotValue'] = 0; //回复总值
+            if ($ch['mp_pot_tick_time'] >= $ch['mp_pot_tick_num']) {
+                $ch['mp_pot_value'] = 0; //回复总值
             } else {
-                $ch['MPPotNextTime'] = $now; //下次生效时间
+                $ch['mp_pot_next_time'] = $now; //下次生效时间
             }
         }
 
-        if ($ch['HealNextTime'] < $now) {
-            $ch['HealNextTime'] = $now;
+        if ($ch['heal_next_time'] < $now) {
+            $ch['heal_next_time'] = $now;
 
-            $this->changeHp($p, intval($p['MaxHP'] * 0.03) + 1);
-            $this->changeMp($p, intval($p['MaxMP'] * 0.03) + 1);
+            $this->changeHp($p, intval($p['max_hp'] * 0.03) + 1);
+            $this->changeMp($p, intval($p['max_mp'] * 0.03) + 1);
         }
 
         $this->setPlayer($p['fd'], $p);
+    }
+
+    public function giveSkill(&$p, $spell, $level)
+    {
+        $info = $this->GameData->getMagicInfoBySpell($spell);
+
+        if ($info) {
+            foreach ($p['magics'] as $key => $v) {
+                if ($v['spell'] == $spell) {
+                    $this->receiveChat($p, '你已经学习该技能', $this->Enum::ChatTypeSystem);
+                    return true;
+                }
+            }
+
+            $magic = [
+                'level'        => $Level,
+                'character_id' => $p['id'],
+                'magic_id'     => $info['id'],
+                'spell'        => $spell,
+            ];
+
+            $this->PlayersList->addSkill($magic);
+
+            $magic['info'] = $info;
+
+            $p['magics'] = $magic;
+
+            $this->SendMsg->send($p['fd'], $this->MsgFactory->newMagic($this->MsgFactory->getClientMagic($magic)));
+
+            $this->refreshStats($p);
+
+            return true;
+        }
+
+        return false;
     }
 
     public function processBuffs($p)
@@ -1010,11 +1197,11 @@ class PlayerObject extends AbstractController
 
     public function changeHp(&$p, $amount)
     {
-        if ($amount == 0 || $p['Dead'] || $p['HP'] >= $p['MaxHP']) {
+        if ($amount == 0 || $p['dead'] || $p['hp'] >= $p['max_hp']) {
             return false;
         }
 
-        $hp = intval($p['HP'] + $amount);
+        $hp = intval($p['hp'] + $amount);
 
         if ($hp <= 0) {
             $hp = 0;
@@ -1025,11 +1212,11 @@ class PlayerObject extends AbstractController
 
     public function changeMp(&$p, $amount)
     {
-        if ($amount == 0 || $p['Dead'] || $p['MP'] >= $p['MaxMP']) {
+        if ($amount == 0 || $p['dead'] || $p['mp'] >= $p['max_mp']) {
             return;
         }
 
-        $mp = intval($p['MP'] + $amount);
+        $mp = intval($p['mp'] + $amount);
 
         if ($mp <= 0) {
             $mp = 0;
@@ -1040,17 +1227,17 @@ class PlayerObject extends AbstractController
 
     public function setHp(&$p, $amount)
     {
-        if ($p['HP'] == $amount) {
+        if ($p['hp'] == $amount) {
             return;
         }
 
-        if ($amount >= $p['MaxHP']) {
-            $amount = $p['MaxHP'];
+        if ($amount >= $p['max_hp']) {
+            $amount = $p['max_hp'];
         }
 
-        $p['HP'] = $amount;
+        $p['hp'] = $amount;
 
-        if (!$p['Dead'] && $p['HP'] == 0) {
+        if (!$p['dead'] && $p['hp'] == 0) {
             $this->die($p);
         }
 
@@ -1061,11 +1248,11 @@ class PlayerObject extends AbstractController
 
     public function setMp(&$p, $amount)
     {
-        if ($p['MP'] == $amount) {
+        if ($p['mp'] == $amount) {
             return false;
         }
 
-        $p['MP'] = $amount;
+        $p['mp'] = $amount;
 
         $this->SendMsg->send($p['fd'], $this->MsgFactory->healthChanged($p));
 
@@ -1073,8 +1260,8 @@ class PlayerObject extends AbstractController
     }
 
     function die(&$p) {
-        $p['HP']   = 0;
-        $p['Dead'] = true;
+        $p['hp']   = 0;
+        $p['dead'] = true;
 
         $this->SendMsg->send($p['fd'], $this->MsgFactory->death($p));
         $this->broadcast($p, $this->MsgFactory->objectDied($p));
@@ -1087,28 +1274,28 @@ class PlayerObject extends AbstractController
         $key = '';
         switch ($calltype) {
             case $this->Enum::DefaultNPCTypeDie:
-                $key = 'UseItem('.$args[0].')';
+                $key = 'UseItem(' . $args[0] . ')';
                 break;
         }
 
-        $key = '[@_'.$key.']';
+        $key = '[@_' . $key . ']';
     }
 
-    // func (p *Player) CallDefaultNPC(calltype DefaultNPCType, args ...interface{}) {
+// func (p *Player) CallDefaultNPC(calltype DefaultNPCType, args ...interface{}) {
     //     var key string
 
-    //     switch calltype {
+//     switch calltype {
     //     case DefaultNPCTypeUseItem:
     //         key = fmt.Sprintf("UseItem(%v)", args[0])
     //     }
 
-    //     key = fmt.Sprintf("[@_%s]", key)
+//     key = fmt.Sprintf("[@_%s]", key)
 
-    //     p.ActionList.PushAction(DelayedTypeNPC, func() {
+//     p.ActionList.PushAction(DelayedTypeNPC, func() {
     //         p.CallNPC1(env.DefaultNPC, key)
     //     })
 
-    //     p.Enqueue(&server.NPCUpdate{NPCID: env.DefaultNPC.GetID()})
+//     p.Enqueue(&server.NPCUpdate{NPCID: env.DefaultNPC.GetID()})
     // }
 
 }

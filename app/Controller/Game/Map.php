@@ -13,32 +13,32 @@ class Map extends AbstractController
     public function NewMap($w, $h, $version)
     {
         return [
-            'Width'          => $w,
-            'Height'         => $h,
-            'Version'        => $version,
-            'Info'           => [], //地图详情
-            'SafeZoneInfos'  => [], //安全区
-            'Respawns'       => [], //怪物刷新
+            'width'          => $w,
+            'height'         => $h,
+            'version'        => $version,
+            'info'           => [], //地图详情
+            'safe_zone_infos'  => [], //安全区
+            'respawns'       => [], //怪物刷新
             'cells'          => [], //地图格子
-            'doorsMap'       => $this->Door->NewGrid($w, $h),
+            'doors_map'       => $this->Door->NewGrid($w, $h),
             'doors'          => [],
             'players'        => [],
             'monsters'       => [],
             'npcs'           => [],
-            'activedObjects' => [],
-            'ActionList'     => [],
+            'actived_objects' => [],
+            'actionList'     => [],
         ];
     }
 
     public function SetCell($m, $Point, $c)
     {
-        $m = $this->SetCellXY($m, $Point['X'], $Point['Y'], $c);
+        $m = $this->SetCellXY($m, $Point['x'], $Point['y'], $c);
         return $m;
     }
 
     public function SetCellXY($m, $x, $y, $c)
     {
-        $m['cells'][$x + $y * $m['Width']] = $c;
+        $m['cells'][$x + $y * $m['width']] = $c;
 
         return $m;
     }
@@ -47,7 +47,7 @@ class Map extends AbstractController
     {
         if (!empty($m['doors'])) {
             foreach ($m['doors'] as $d) {
-                if ($d['Index'] == $doorindex) {
+                if ($d['index'] == $doorindex) {
                     return $d;
                 }
             }
@@ -56,12 +56,12 @@ class Map extends AbstractController
         }
 
         $door                   = $this->Door->newDoor();
-        $door['Map']            = $m;
-        $door['Index']          = $doorindex;
-        $door['Location']       = $loc;
+        $door['map']            = $m;
+        $door['index']          = $doorindex;
+        $door['location']       = $loc;
         $m['doors'][$doorindex] = $door;
 
-        $m['doorsMap'] = $this->Door->Set($m, $loc, $door);
+        $m['doors_map'] = $this->Door->Set($m, $loc, $door);
 
     }
 
@@ -69,18 +69,18 @@ class Map extends AbstractController
     {
         $npc = [];
         foreach ($npcInfos as $npcInfo) {
-            if ($npcInfo['map_id'] == $map['Info']['id']) {
+            if ($npcInfo['map_id'] == $map['info']['id']) {
                 $n         = $this->Npc->newNpc($npcInfo['map_id'], $this->Atomic->newObjectID(), $npcInfo);
-                $n['Info'] = $npcInfo;
+                $n['info'] = $npcInfo;
 
-                if (!empty($n['ID'])) {
-                    $npc[$n['ID']] = $n;
+                if (!empty($n['id'])) {
+                    $npc[$n['id']] = $n;
                 }
             }
         }
 
         // foreach ($respawnInfos as $respawnInfo) {
-        //     if ($respawnInfo['map_id'] == $map['Info']['id']) {
+        //     if ($respawnInfo['map_id'] == $map['info']['id']) {
 
         //     }
         // }
@@ -90,17 +90,17 @@ class Map extends AbstractController
 
     public function addObject($object, $type)
     {
-        if (empty($object['ID'])) {
+        if (empty($object['id'])) {
             return false;
         }
 
         switch ($type) {
             case $this->Enum::ObjectTypePlayer:
-                $this->GameData->setMapPlayers($object['Map']['Info']['id'], $object);
+                $this->GameData->setMapPlayers($object['map']['info']['id'], $object);
                 break;
 
             case $this->Enum::ObjectTypeItem:
-                $this->GameData->setMapItem($object['Map']['Info']['id'], $object);
+                $this->GameData->setMapItem($object['map']['info']['id'], $object);
                 break;
 
             case $this->Enum::ObjectTypeMonster:
@@ -115,16 +115,16 @@ class Map extends AbstractController
 
     public function getObjectByPoint($object, $type)
     {
-        if (empty($object['ID'])) {
+        if (empty($object['id'])) {
             return false;
         }
 
         switch ($type) {
             case $this->Enum::ObjectTypePlayer:
-                $players = $this->GameData->getMapPlayers($object['Map']['Info']['id']);
+                $players = $this->GameData->getMapPlayers($object['map']['info']['id']);
 
                 foreach ($players as $k => $v) {
-                    if ($v['CurrentLocation']['X'] == $object['CurrentLocation']['X'] && $v['CurrentLocation']['Y'] == $object['CurrentLocation']['Y']) {
+                    if ($v['current_location']['x'] == $object['current_location']['x'] && $v['current_location']['y'] == $object['current_location']['y']) {
                         return $v;
                     }
                 }
@@ -132,7 +132,7 @@ class Map extends AbstractController
                 break;
 
             case $this->Enum::ObjectTypeItem:
-                return $this->GameData->getMapItem($object['Map']['Info']['id'], $object['CurrentLocation']);
+                return $this->GameData->getMapItem($object['map']['info']['id'], $object['current_location']);
                 break;
 
             case $this->Enum::ObjectTypeMonster:
@@ -147,17 +147,17 @@ class Map extends AbstractController
 
     public function deleteObject($object, $type)
     {
-        if (empty($object['ID'])) {
+        if (empty($object['id'])) {
             return false;
         }
 
         switch ($type) {
             case $this->Enum::ObjectTypePlayer:
-                $this->GameData->delMapPlayers($object['Map']['Info']['id'], $object);
+                $this->GameData->delMapPlayers($object['map']['info']['id'], $object);
                 break;
 
             case $this->Enum::ObjectTypeItem:
-                $this->GameData->delMapItem($object['Map']['Info']['id'], $object['CurrentLocation']);
+                $this->GameData->delMapItem($object['map']['info']['id'], $object['current_location']);
                 break;
 
             case $this->Enum::ObjectTypeMonster:
@@ -172,7 +172,7 @@ class Map extends AbstractController
 
     public function getCell($m, $point)
     {
-        return $this->getCellXY($m, $point['X'], $point['Y']);
+        return $this->getCellXY($m, $point['x'], $point['y']);
     }
 
     public function getCellXY($m, $x, $y)
@@ -189,11 +189,11 @@ class Map extends AbstractController
         $CellAttributeWalk = $this->Enum::CellAttributeWalk;
 
         $cell = [
-            'Point'     => [
-                'X' => $x,
-                'Y' => $y,
+            'point'     => [
+                'x' => $x,
+                'y' => $y,
             ],
-            'Attribute' => $CellAttributeWalk,
+            'attribute' => $CellAttributeWalk,
             'objects'   => [],
         ];
 
@@ -202,17 +202,17 @@ class Map extends AbstractController
 
     public function inMap($m, $x, $y)
     {
-        return $x >= 0 && $x < $m['Width'] && $y >= 0 && $y < $m['Height'];
+        return $x >= 0 && $x < $m['width'] && $y >= 0 && $y < $m['height'];
     }
 
     public function broadcastP($currentPoint, $msg, $object)
     {
-        $players = $this->GameData->getMapPlayers($object['Map']['Info']['id']);
+        $players = $this->GameData->getMapPlayers($object['map']['info']['id']);
 
         foreach ($players as $k => $v) {
-            $player = $this->PlayerObject->getIdPlayer($v['ID']);
-            if ($this->Point->inRange($currentPoint, $player['CurrentLocation'], $this->DataRange)) {
-                if ($player['ID'] != $object['ID']) {
+            $player = $this->PlayerObject->getIdPlayer($v['id']);
+            if ($this->Point->inRange($currentPoint, $player['current_location'], $this->DataRange)) {
+                if ($player['id'] != $object['id']) {
                     $this->SendMsg->send($player['fd'], $msg);
                 }
             }
@@ -222,11 +222,11 @@ class Map extends AbstractController
     public function broadcastN($object)
     {
         //同步npc
-        $npcs = $this->GameData->getMapNpc($object['Map']['Info']['id']);
+        $npcs = $this->GameData->getMapNpc($object['map']['info']['id']);
         if ($npcs) {
             foreach ($npcs as $k => $v) {
-                if (!empty($v['CurrentLocation'])) {
-                    // if ($this->Point->inRange($object['CurrentLocation'], $v['CurrentLocation'], $this->DataRange)) {
+                if (!empty($v['current_location'])) {
+                    // if ($this->Point->inRange($object['current_location'], $v['current_location'], $this->DataRange)) {
                     $this->SendMsg->send($object['fd'], ['OBJECT_NPC', $this->MsgFactory->objectNPC($v)]);
                     // }
                 }
@@ -247,8 +247,8 @@ class Map extends AbstractController
             case $this->Enum::ObjectTypePlayer:
                 $this->PlayerObject->broadcast($object, ['OBJECT_PLAYER', $this->MsgFactory->objectPlayer($object)]);
 
-                $mapInfo = $this->GameData->getMap($object['Map']['Info']['id']);
-                $this->PlayerObject->enqueueAreaObjects($object, $this->getCell($mapInfo, $object['CurrentLocation']), null);
+                $mapInfo = $this->GameData->getMap($object['map']['info']['id']);
+                $this->PlayerObject->enqueueAreaObjects($object, $this->getCell($mapInfo, $object['current_location']), null);
                 break;
 
             case $this->Enum::ObjectTypeMonster:
@@ -264,7 +264,7 @@ class Map extends AbstractController
     {
         $mapInfo = $this->GameData->getMap($map_id);
 
-        $door = $this->Door->get($mapInfo['doorsMap'], $point);
+        $door = $this->Door->get($mapInfo['doors_map'], $point);
         if (!$door) {
             return true;
         }
@@ -303,8 +303,8 @@ class Map extends AbstractController
 
     public function rangeCell($object, $m, $p, $depth, $fun)
     {
-        $px = $p['X'];
-        $py = $p['Y'];
+        $px = $p['x'];
+        $py = $p['y'];
 
         for ($d = 0; $d <= $depth; $d++) {
             for ($y = $py - $d; $y <= $py + $d; $y++) {
@@ -312,18 +312,18 @@ class Map extends AbstractController
                     continue;
                 }
 
-                if ($y >= $m['Height']) {
+                if ($y >= $m['height']) {
                     break;
                 }
 
                 for ($x = $px - $d; $x <= $px + $d;) {
 
-                    if ($x >= $m['Width']) {
+                    if ($x >= $m['width']) {
                         break;
                     }
 
                     if ($x >= 0) {
-                        if (!call_user_func_array($fun, [$object, $m['Info']['id'], $x, $y])) {
+                        if (!call_user_func_array($fun, [$object, $m['info']['id'], $x, $y])) {
                             return true;
                         }
                     }

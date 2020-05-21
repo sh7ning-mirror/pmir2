@@ -41,6 +41,7 @@ class ObjectService
         'Atomic'        => 'App\Controller\Common\Atomic',
         'Util'          => 'App\Controller\Game\Util\Util',
         'Item'          => 'App\Controller\Game\Item',
+        'Buff'          => 'App\Controller\Game\Buff',
     ];
 
     public static function getObject($objectName = null)

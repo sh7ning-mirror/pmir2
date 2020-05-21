@@ -30,15 +30,15 @@ class NpcScript extends AbstractController
 
                 switch ($s) {
                     case "USERNAME":
-                        $str = str_replace($v, $p['Name'], $str);
+                        $str = str_replace($v, $p['name'], $str);
                         break;
 
                     case "NPCNAME":
-                        $str = str_replace($v, $npc['Name'], $str);
+                        $str = str_replace($v, $npc['name'], $str);
                         break;
 
                     case "PKPOINT":
-                        $str = str_replace($v, $p['PKPoints'], $str);
+                        $str = str_replace($v, $p['pk_points'], $str);
                         break;
 
                     case "ARMOUR":
@@ -78,27 +78,27 @@ class NpcScript extends AbstractController
                         break;
 
                     case "GAMEGOLD":
-                        $str = str_replace($v, $p['Gold'], $str);
+                        $str = str_replace($v, $p['gold'], $str);
                         break;
 
                     case "HP":
-                        $str = str_replace($v, $p['HP'], $str);
+                        $str = str_replace($v, $p['hp'], $str);
                         break;
 
                     case "MP":
-                        $str = str_replace($v, $p['MP'], $str);
+                        $str = str_replace($v, $p['mp'], $str);
                         break;
 
                     case "MAXHP":
-                        $str = str_replace($v, $p['MaxHP'], $str);
+                        $str = str_replace($v, $p['max_hp'], $str);
                         break;
 
                     case "MAXMP":
-                        $str = str_replace($v, $p['MaxMP'], $str);
+                        $str = str_replace($v, $p['max_mp'], $str);
                         break;
 
                     case "LEVEL":
-                        $str = str_replace($v, $p['Level'], $str);
+                        $str = str_replace($v, $p['level'], $str);
                         break;
 
                     case "DATE":
@@ -106,7 +106,7 @@ class NpcScript extends AbstractController
                         break;
 
                     default:
-                        EchoLog(sprintf('NPC脚本缺少替换文本 Name: %s  %s', $npc['Name'], $v), 'w');
+                        EchoLog(sprintf('NPC脚本缺少替换文本 Name: %s  %s', $npc['name'], $v), 'w');
                         break;
                 }
             }
@@ -117,7 +117,7 @@ class NpcScript extends AbstractController
 
     public function getEquipmentName($p, $slot)
     {
-        return !empty($p['Equipment']['Items'][$slot]) ? $p['Equipment']['Items'][$slot]['Info']['Name'] : '无';
+        return !empty($p['equipment']['items'][$slot]) ? $p['equipment']['items'][$slot]['info']['name'] : '无';
     }
 
     public function compareInt($op, $a, $b)
@@ -151,12 +151,12 @@ class NpcScript extends AbstractController
 
     public function CHECKPKPOINT($param, $p)
     {
-        return $this->compareInt($param[0], $p['PKPoints'], $param[1]);
+        return $this->compareInt($param[0], $p['pk_points'], $param[1]);
     }
 
     public function LEVEL($param, $p)
     {
-        return $this->compareInt($param[0], $p['PKPoints'], $param[1]);
+        return $this->compareInt($param[0], $p['pk_points'], $param[1]);
     }
 
     public function INGUILD($param, $p)
@@ -166,6 +166,6 @@ class NpcScript extends AbstractController
 
     public function CHECKGOLD($param, $p)
     {
-        return $this->compareInt($param[0], $p['Gold'], $param[1]);
+        return $this->compareInt($param[0], $p['gold'], $param[1]);
     }
 }

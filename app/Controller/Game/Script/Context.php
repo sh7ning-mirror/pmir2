@@ -137,19 +137,19 @@ class Context
         'CHECKBUFF',
         'CHECK',
         'DAYOFWEEK',
-        'CHECKLEVEL'
+        'CHECKLEVEL',
     ];
 
     public $argParser = [
-        'Fun'  => null,
-        'Skip' => false,
+        'fun'  => null,
+        'skip' => false,
     ];
 
     public $scriptFunc = [
-        'Name'       => '',
-        'Func'       => '',
-        'ArgsParser' => [],
-        'OptionArgs' => [],
+        'name'        => '',
+        'func'        => '',
+        'args_parser' => [],
+        'option_args' => [],
     ];
 
     public function __construct()
@@ -160,8 +160,8 @@ class Context
     public function newContext()
     {
         $data = [
-            'Checks'  => $this->checks(array_merge($this->scriptFunc, ['ArgsParser' => $this->argParser])),
-            'Actions' => $this->action(array_merge($this->scriptFunc, ['ArgsParser' => $this->argParser])),
+            'checks'  => $this->checks(array_merge($this->scriptFunc, ['args_parser' => $this->argParser])),
+            'actions' => $this->action(array_merge($this->scriptFunc, ['args_parser' => $this->argParser])),
             'parsers' => $this->argParser,
         ];
 
@@ -171,11 +171,10 @@ class Context
     public function checks($param)
     {
         $data = [];
-        foreach ($this->CheckType as $k => $v)
-        {
-            $param['Func'] = $v;
-            $param['ArgsParser']['Fun'] = $v;
-            $data[$v] = $param;
+        foreach ($this->CheckType as $k => $v) {
+            $param['func']               = $v;
+            $param['args_parser']['Fun'] = $v;
+            $data[$v]                    = $param;
         }
 
         return $data;
@@ -184,11 +183,10 @@ class Context
     public function action($param)
     {
         $data = [];
-        foreach ($this->ActionType as $k => $v)
-        {
-            $param['Func'] = $v;
-            $param['ArgsParser']['Fun'] = $v;
-            $data[$v] = $param;
+        foreach ($this->ActionType as $k => $v) {
+            $param['func']               = $v;
+            $param['args_parser']['fun'] = $v;
+            $data[$v]                    = $param;
         }
 
         return $data;

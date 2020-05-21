@@ -949,10 +949,10 @@ class Enum
     const PearlBuyKey       = "[@PEARLBUY]";
     const BuyUsedKey        = "[@BUYUSED]";
 
-    const ColorWhite       = ['R' => 255, 'G' => 255, 'B' => 255];
-    const ColorDeepSkyBlue = ['R' => 0, 'G' => 0, 'B' => 255];
-    const ColorDarkOrange  = ['R' => 255, 'G' => 135, 'B' => 0];
-    const ColorPlum        = ['R' => 100, 'G' => 0, 'B' => 150];
+    const ColorWhite       = ['r' => 255, 'g' => 255, 'b' => 255];
+    const ColorDeepSkyBlue = ['r' => 0, 'g' => 0, 'b' => 255];
+    const ColorDarkOrange  = ['r' => 255, 'g' => 135, 'b' => 0];
+    const ColorPlum        = ['r' => 100, 'g' => 0, 'b' => 150];
 
     const DefaultNPCType              = 0;
     const DefaultNPCTypeLogin         = 0;

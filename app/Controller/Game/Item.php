@@ -11,40 +11,40 @@ class Item extends AbstractController
     public function newGold($map, $gold)
     {
         return [
-            'ID'   => $this->Atomic->newObjectID(),
-            'Map'  => $map,
-            'Gold' => $gold,
+            'id'   => $this->Atomic->newObjectID(),
+            'map'  => $map,
+            'gold' => $gold,
         ];
     }
 
     public function newItem($map, $item)
     {
         $newItem = [
-            'Gold'     => 0,
-            'UserItem' => $item,
-            'Name'     => $item['Info']['name'],
-            'ID'       => $this->Atomic->newObjectID(),
-            'Map'      => $map,
+            'gold'     => 0,
+            'user_item' => $item,
+            'name'     => $item['info']['name'],
+            'id'       => $this->Atomic->newObjectID(),
+            'map'      => $map,
         ];
 
-        if ($item['Info']['grade'] == $this->Enum::ItemGradeNone) {
-            $newItem['NameColor'] = $this->Enum::ColorWhite;
+        if ($item['info']['grade'] == $this->Enum::ItemGradeNone) {
+            $newItem['name_color'] = $this->Enum::ColorWhite;
         }
 
-        if ($item['Info']['grade'] == $this->Enum::ItemGradeCommon) {
-            $newItem['NameColor'] = $this->Enum::ColorWhite;
+        if ($item['info']['grade'] == $this->Enum::ItemGradeCommon) {
+            $newItem['name_color'] = $this->Enum::ColorWhite;
         }
 
-        if ($item['Info']['grade'] == $this->Enum::ItemGradeRare) {
-            $newItem['NameColor'] = $this->Enum::ColorDeepSkyBlue;
+        if ($item['info']['grade'] == $this->Enum::ItemGradeRare) {
+            $newItem['name_color'] = $this->Enum::ColorDeepSkyBlue;
         }
 
-        if ($item['Info']['grade'] == $this->Enum::ItemGradeLegendary) {
-            $newItem['NameColor'] = $this->Enum::ColorDarkOrange;
+        if ($item['info']['grade'] == $this->Enum::ItemGradeLegendary) {
+            $newItem['name_color'] = $this->Enum::ColorDarkOrange;
         }
 
-        if ($item['Info']['grade'] == $this->Enum::ItemGradeMythical) {
-            $newItem['NameColor'] = $this->Enum::ColorPlum;
+        if ($item['info']['grade'] == $this->Enum::ItemGradeMythical) {
+            $newItem['name_color'] = $this->Enum::ColorPlum;
         }
 
         return $newItem;
@@ -52,17 +52,17 @@ class Item extends AbstractController
 
     public function drop($item, $center, $distance)
     {
-        $mapInfo = $this->GameData->getMap($item['Map']['Info']['id']);
+        $mapInfo = $this->GameData->getMap($item['map']['info']['id']);
         $ok      = $this->Map->rangeCell($item, $mapInfo, $center, $distance, function ($item, $map_id, $x, $y) {
 
-            $point = ['X' => $x, 'Y' => $y];
+            $point = ['x' => $x, 'y' => $y];
             $ishas = $this->GameData->getMapItem($map_id, $point);
 
             if ($ishas) {
                 return true;
             }
 
-            $item['CurrentLocation'] = $point;
+            $item['current_location'] = $point;
             $this->Map->addObject($item, $this->Enum::ObjectTypeItem);
 
             $this->Item->broadcastInfo($item);
@@ -75,7 +75,7 @@ class Item extends AbstractController
 
     public function broadcastInfo($item)
     {
-        if (!empty($item['UserItem'])) {
+        if (!empty($item['user_item'])) {
             $this->broadcast($item, $this->MsgFactory->objectItem($item));
         } else {
             $this->broadcast($item, $this->MsgFactory->objectGold($item));
@@ -84,42 +84,42 @@ class Item extends AbstractController
 
     public function broadcast($item, $msg)
     {
-        $this->Map->broadcastP($item['CurrentLocation'], $msg, $item);
+        $this->Map->broadcastP($item['current_location'], $msg, $item);
     }
 
     public function getImage($item)
     {
-        $info = $item['UserItem']['Info'];
+        $info = $item['user_item']['info'];
 
         switch ($info['type']) {
             case $this->Enum::ItemTypeAmulet:
                 if ($info['stack_size'] > 0) {
                     switch ($info['shape']) {
                         case 0:
-                            if ($item['UserItem']['count'] >= 300) {
+                            if ($item['user_item']['count'] >= 300) {
                                 return 3662;
                             }
 
-                            if ($item['UserItem']['count'] >= 200) {
+                            if ($item['user_item']['count'] >= 200) {
                                 return 3661;
                             }
 
-                            if ($item['UserItem']['count'] >= 100) {
+                            if ($item['user_item']['count'] >= 100) {
                                 return 3660;
                             }
 
                             return 3660;
                             break;
                         case 1:
-                            if ($item['UserItem']['count'] >= 150) {
+                            if ($item['user_item']['count'] >= 150) {
                                 return 3675;
                             }
 
-                            if ($item['UserItem']['count'] >= 100) {
+                            if ($item['user_item']['count'] >= 100) {
                                 return 2960;
                             }
 
-                            if ($item['UserItem']['count'] >= 50) {
+                            if ($item['user_item']['count'] >= 50) {
                                 return 3674;
                             }
 
@@ -127,15 +127,15 @@ class Item extends AbstractController
                             break;
 
                         case 2:
-                            if ($item['UserItem']['count'] >= 150) {
+                            if ($item['user_item']['count'] >= 150) {
                                 return 3672;
                             }
 
-                            if ($item['UserItem']['count'] >= 100) {
+                            if ($item['user_item']['count'] >= 100) {
                                 return 2961;
                             }
 
-                            if ($item['UserItem']['count'] >= 50) {
+                            if ($item['user_item']['count'] >= 50) {
                                 return 3671;
                             }
 
@@ -151,14 +151,14 @@ class Item extends AbstractController
 
     public function price($item)
     {
-        if (empty($item['Info'])) {
+        if (empty($item['info'])) {
             return 0;
         }
 
-        $p = $item['Info']['price'];
+        $p = $item['info']['price'];
 
-        if ($item['Info']['durability'] > 0) {
-            $r = $item['Info']['price'] / 2 / $item['Info']['durability'];
+        if ($item['info']['durability'] > 0) {
+            $r = $item['info']['price'] / 2 / $item['info']['durability'];
             $p = $item['max_dura'] * $r;
 
             if ($item['max_dura'] > 0) {
@@ -167,7 +167,7 @@ class Item extends AbstractController
                 $r = 0;
             }
 
-            $p = $p / 2 + ($p / 2) * $r + $item['Info']['price'] / 2;
+            $p = $p / 2 + ($p / 2) * $r + $item['info']['price'] / 2;
         }
 
         $v = $item['ac'] + $item['mac'] + $item['dc'] + $item['mc'] + $item['sc'] + $item['accuracy'] + $item['agility'] + $item['hp'] + $item['mp'];

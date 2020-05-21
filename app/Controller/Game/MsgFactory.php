@@ -12,47 +12,47 @@ class MsgFactory extends AbstractController
     public function userInformation($p)
     {
         $data = [
-            'ObjectID'                  => $p['ID'],
-            'RealID'                    => $p['ID'],
-            'Name'                      => $p['Name'],
-            'GuildName'                 => $p['GuildName'],
-            'GuildRank'                 => $p['GuildRankName'],
-            'NameColor'                 => Int32(pack('c4', $p['NameColor']['R'], $p['NameColor']['G'], $p['NameColor']['B'], 255)),
-            'Class'                     => $p['Class'],
-            'Gender'                    => $p['Gender'],
-            'Level'                     => $p['Level'],
-            'Location'                  => $p['CurrentLocation'],
-            'Direction'                 => $p['CurrentDirection'],
-            'Hair'                      => $p['Hair'],
-            'HP'                        => $p['HP'],
-            'MP'                        => $p['MP'],
-            'Experience'                => $p['Experience'],
-            'MaxExperience'             => $p['MaxExperience'],
-            'LevelEffect'               => $this->Enum::LevelEffectsNone,
-            'InventoryBool'             => $p['Inventory']['Items'] ? true : false,
-            'Inventory'                 => $p['Inventory']['Items'],
-            'EquipmentBool'             => $p['Equipment']['Items'] ? true : false,
-            'Equipment'                 => $p['Equipment']['Items'],
-            'QuestInventoryBool'        => $p['QuestInventory']['Items'] ? true : false,
-            'QuestInventory'            => $p['QuestInventory']['Items'],
-            'Gold'                      => $p['Gold'] ?: 0,
-            'Credit'                    => 100, // TODO
-            'HasExpandedStorage'        => false, // TODO
-            'ExpandedStorageExpiryTime' => 0, // TODO
-            'test'                      => 0, // 未知
-            'ClientMagics'              => [], // TODO,
+            'object_id'                    => $p['id'],
+            'real_id'                      => $p['id'],
+            'name'                         => $p['name'],
+            'guild_name'                   => $p['guild_name'],
+            'guild_rank'                   => $p['guild_rank_name'],
+            'name_color'                   => Int32(pack('c4', $p['name_color']['r'], $p['name_color']['g'], $p['name_color']['b'], 255)),
+            'class'                        => $p['class'],
+            'gender'                       => $p['gender'],
+            'level'                        => $p['level'],
+            'location'                     => $p['current_location'],
+            'direction'                    => $p['current_direction'],
+            'hair'                         => $p['hair'],
+            'hp'                           => $p['hp'],
+            'mp'                           => $p['mp'],
+            'experience'                   => $p['experience'],
+            'max_experience'               => $p['max_experience'],
+            'level_effect'                 => $this->Enum::LevelEffectsNone,
+            'inventory_bool'               => $p['inventory']['items'] ? true : false,
+            'inventory'                    => $p['inventory']['items'],
+            'equipment_bool'               => $p['equipment']['items'] ? true : false,
+            'equipment'                    => $p['equipment']['items'],
+            'quest_inventory_bool'         => $p['quest_inventory']['items'] ? true : false,
+            'quest_inventory'              => $p['quest_inventory']['items'],
+            'gold'                         => $p['gold'] ?: 0,
+            'credit'                       => 100, // TODO
+            'has_expanded_storage'         => false, // TODO
+            'expanded_storage_expiry_time' => 0, // TODO
+            'test'                         => 0, // 未知
+            'client_magics'                => [], // TODO,
         ];
 
-        if ($data['InventoryBool']) {
-            $data['InventoryCount'] = count($p['Inventory']['Items']);
+        if ($data['inventory_bool']) {
+            $data['inventory_count'] = count($p['inventory']['items']);
         }
 
-        if ($data['EquipmentBool']) {
-            $data['EquipmentCount'] = count($p['Equipment']['Items']);
+        if ($data['equipment_bool']) {
+            $data['equipment_count'] = count($p['equipment']['items']);
         }
 
-        if ($data['QuestInventoryBool']) {
-            $data['QuestInventoryCount'] = count($p['QuestInventory']['Items']);
+        if ($data['quest_inventory_bool']) {
+            $data['quest_inventory_count'] = count($p['quest_inventory']['items']);
         }
 
         return $data;
@@ -62,36 +62,36 @@ class MsgFactory extends AbstractController
     public function objectPlayer($p)
     {
         $data = [
-            'ObjectID'         => $p['ID'],
-            'Name'             => $p['Name'],
-            'GuildName'        => $p['GuildName'],
-            'GuildRankName'    => $p['GuildRankName'],
-            'NameColor'        => Int32(pack('c4', $p['NameColor']['R'], $p['NameColor']['G'], $p['NameColor']['B'], 255)),
-            'Class'            => $p['Class'],
-            'Gender'           => $p['Gender'],
-            'Level'            => $p['Level'],
-            'Location'         => $p['CurrentLocation'],
-            'Direction'        => $p['CurrentDirection'],
-            'Hair'             => $p['Hair'],
-            'Light'            => $p['Light'] ?: 0,
-            'Weapon'           => $p['LooksWeapon'],
-            'WeaponEffect'     => $p['LooksWeaponEffect'],
-            'Armour'           => $p['LooksArmour'],
-            'Poison'           => $this->Enum::PoisonTypeNone, //TODO
-            'Dead'             => $p['Dead'],
-            'Hidden'           => false,
-            'Effect'           => $this->Enum::SpellEffectNone, //TODO
-            'WingEffect'       => $p['LooksWings'],
-            'Extra'            => false, //TODO
-            'MountType'        => -1, //TODO
-            'RidingMount'      => false, //TODO
-            'Fishing'          => false, //TODO
-            'TransformType'    => -1, //TODO
-            'ElementOrbEffect' => 0, //TODO
-            'ElementOrbLvl'    => 0, //TODO
-            'ElementOrbMax'    => 200, //TODO
-            'Buffs'            => [0, 0, 0, 0], //TODO
-            'LevelEffects'     => $this->Enum::LevelEffectsNone, //TODO
+            'object_id'          => $p['id'],
+            'name'               => $p['name'],
+            'guild_name'         => $p['guild_name'],
+            'guild_rank_name'    => $p['guild_rank_name'],
+            'name_color'         => Int32(pack('c4', $p['name_color']['r'], $p['name_color']['g'], $p['name_color']['b'], 255)),
+            'class'              => $p['class'],
+            'gender'             => $p['gender'],
+            'level'              => $p['level'],
+            'location'           => $p['current_location'],
+            'direction'          => $p['current_direction'],
+            'hair'               => $p['hair'],
+            'light'              => $p['light'] ?: 0,
+            'weapon'             => $p['looks_weapon'],
+            'weapon_effect'      => $p['looks_weapon_effect'],
+            'armour'             => $p['looks_armour'],
+            'poison'             => $this->Enum::PoisonTypeNone, //TODO
+            'dead'               => $p['dead'],
+            'hidden'             => false,
+            'effect'             => $this->Enum::SpellEffectNone, //TODO
+            'wing_effect'        => $p['looks_wings'],
+            'extra'              => false, //TODO
+            'mount_type'         => -1, //TODO
+            'riding_mount'       => false, //TODO
+            'fishing'            => false, //TODO
+            'transform_type'     => -1, //TODO
+            'element_orb_effect' => 0, //TODO
+            'element_orb_lv_l'   => 0, //TODO
+            'element_orb_max'    => 200, //TODO
+            'buffs'              => [0, 0, 0, 0], //TODO
+            'level_effects'      => $this->Enum::LevelEffectsNone, //TODO
         ];
 
         return $data;
@@ -100,73 +100,73 @@ class MsgFactory extends AbstractController
     public function objectTurn($object)
     {
         return [
-            'ObjectID'  => $object['ID'],
-            'Location'  => $object['CurrentLocation'],
-            'Direction' => $object['CurrentDirection'],
+            'object_id' => $object['id'],
+            'location'  => $object['current_location'],
+            'direction' => $object['current_direction'],
         ];
     }
 
     public function objectWalk($object)
     {
         return [
-            'ObjectID'  => $object['ID'],
-            'Location'  => $object['CurrentLocation'],
-            'Direction' => $object['CurrentDirection'],
+            'object_id' => $object['id'],
+            'location'  => $object['current_location'],
+            'direction' => $object['current_direction'],
         ];
     }
 
     public function objectRun($object)
     {
         return [
-            'ObjectID'  => $object['ID'],
-            'Location'  => $object['CurrentLocation'],
-            'Direction' => $object['CurrentDirection'],
+            'object_id' => $object['id'],
+            'location'  => $object['current_location'],
+            'direction' => $object['current_direction'],
         ];
     }
 
     public function objectMonster($m)
     {
         return [
-            'ObjectID'          => $m['ID'],
-            'Name'              => $m['Name'],
-            'NameColor'         => Int32(pack('c4', $m['NameColor']['R'], $m['NameColor']['G'], $m['NameColor']['B'], 255)),
-            'Location'          => $m['CurrentLocation'],
-            'Image'             => $m['Image'],
-            'Direction'         => $m['CurrentDirection'],
-            'Effect'            => $m['Effect'],
-            'AI'                => $m['AI'],
-            'Light'             => $m['Light'],
-            'Dead'              => $m['Dead'],
-            'Skeleton'          => false,
-            'Poison'            => $m['Poison'],
-            'Hidden'            => false,
-            'ShockTime'         => 0,
-            'BindingShotCenter' => false,
-            'Extra'             => false,
-            'ExtraByte'         => 0,
+            'object_id'           => $m['id'],
+            'name'                => $m['name'],
+            'name_color'          => Int32(pack('c4', $m['name_color']['r'], $m['name_color']['g'], $m['name_color']['b'], 255)),
+            'location'            => $m['current_location'],
+            'image'               => $m['image'],
+            'direction'           => $m['current_direction'],
+            'effect'              => $m['effect'],
+            'ai'                  => $m['ai'],
+            'light'               => $m['light'],
+            'dead'                => $m['dead'],
+            'skeleton'            => false,
+            'poison'              => $m['poison'],
+            'hidden'              => false,
+            'shockTime'           => 0,
+            'binding_shot_center' => false,
+            'extra'               => false,
+            'extra_byte'          => 0,
         ];
     }
 
     public function objectChat($p, $msg, $chatType)
     {
         return [
-            'ObjectID' => $p['ID'],
-            'Text'     => $p['Name'] . ':' . $msg,
-            'Type'     => $chatType,
+            'object_id' => $p['id'],
+            'text'      => $p['name'] . ':' . $msg,
+            'type'      => $chatType,
         ];
     }
 
     public function objectNPC($object)
     {
         return [
-            'ObjectID'  => $object['ID'],
-            'Name'      => $object['Name'],
-            'NameColor' => Int32(pack('c4', $object['NameColor']['R'], $object['NameColor']['G'], $object['NameColor']['B'], 255)),
-            'Image'     => $object['Image'],
-            'Color'     => 0,
-            'Location'  => $object['CurrentLocation'],
-            'Direction' => $object['Direction'],
-            'QuestIDs'  => [0],
+            'object_id'  => $object['id'],
+            'name'       => $object['name'],
+            'name_color' => Int32(pack('c4', $object['name_color']['r'], $object['name_color']['g'], $object['name_color']['b'], 255)),
+            'image'      => $object['image'],
+            'color'      => 0,
+            'location'   => $object['current_location'],
+            'direction'  => $object['direction'],
+            'quest_ids'  => [0],
         ];
     }
 
@@ -201,7 +201,7 @@ class MsgFactory extends AbstractController
             'critical_damage' => 0,
             'freezing'        => 0,
             'poison_attack'   => 0,
-            'Info'            => $itemInfo,
+            'info'            => $itemInfo,
         ];
     }
 
@@ -210,7 +210,7 @@ class MsgFactory extends AbstractController
         return [
             'GAINED_ITEM',
             [
-                'Item' => $this->newUserItem($itemInfo, $this->Atomic->newObjectID()),
+                'item' => $this->newUserItem($itemInfo, $this->Atomic->newObjectID()),
             ],
         ];
     }
@@ -218,27 +218,27 @@ class MsgFactory extends AbstractController
     public function playerUpdate($p)
     {
         return [
-            'ObjectID'     => $p['ID'],
-            'Light'        => $p['Light'],
-            'Weapon'       => $p['LooksWeapon'],
-            'WeaponEffect' => $p['LooksWeaponEffect'],
-            'Armour'       => $p['LooksArmour'],
-            'WingEffect'   => $p['LooksWings'],
+            'object_id'     => $p['id'],
+            'light'         => $p['light'],
+            'weapon'        => $p['looks_weapon'],
+            'weapon_effect' => $p['looks_weapon_effect'],
+            'armour'        => $p['looks_armour'],
+            'wing_effect'   => $p['looks_wings'],
         ];
     }
 
     public function npcResponse($page)
     {
-        return ['NPC_RESPONSE', ['Count' => count($page), 'Page' => $page]];
+        return ['NPC_RESPONSE', ['count' => count($page), 'page' => $page]];
     }
 
     public function npcGoods($goods, $rate, $type)
     {
         return ['NPC_GOODS', [
-            'Count' => !empty($goods) ? count($goods) : 0,
-            'Goods' => $goods,
-            'Rate'  => $rate,
-            'Type'  => $type,
+            'count' => !empty($goods) ? count($goods) : 0,
+            'goods' => $goods,
+            'rate'  => $rate,
+            'type'  => $type,
         ]];
     }
 
@@ -255,8 +255,8 @@ class MsgFactory extends AbstractController
 
         if ($data) {
             $pack['isset']   = true;
-            $pack['Count']   = count($data);
-            $pack['Storage'] = $data;
+            $pack['count']   = count($data);
+            $pack['storage'] = $data;
         } else {
             $pack['isset'] = false;
         }
@@ -268,7 +268,7 @@ class MsgFactory extends AbstractController
     {
         return [
             'NPC_REPAIR', [
-                'Rate' => $npc['Info']['rate'] / 100,
+                'rate' => $npc['info']['rate'] / 100,
             ],
         ];
     }
@@ -284,7 +284,7 @@ class MsgFactory extends AbstractController
     {
         return [
             'LOSE_GOLD',
-            ['Gold' => $gold],
+            ['gold' => $gold],
         ];
     }
 
@@ -292,9 +292,9 @@ class MsgFactory extends AbstractController
     {
         return [
             'DROP_ITEM', [
-                'UniqueID' => $id,
-                'Count'    => $count,
-                'Success'  => $status,
+                'unique_id' => $id,
+                'count'     => $count,
+                'success'   => $status,
             ],
         ];
     }
@@ -303,9 +303,9 @@ class MsgFactory extends AbstractController
     {
         return [
             'SELL_ITEM', [
-                'UniqueID' => $id,
-                'Count'    => $count,
-                'Success'  => $status,
+                'unique_id' => $id,
+                'count'     => $count,
+                'success'   => $status,
             ],
         ];
     }
@@ -314,13 +314,13 @@ class MsgFactory extends AbstractController
     {
         return [
             'OBJECT_ITEM', [
-                'ObjectID'  => $item['ID'],
-                'Name'      => $item['Name'],
-                'NameColor' => Int32(pack('c4', $item['NameColor']['R'], $item['NameColor']['G'], $item['NameColor']['B'], 255)),
-                'LocationX' => $item['CurrentLocation']['X'],
-                'LocationY' => $item['CurrentLocation']['Y'],
-                'Image'     => $this->Item->getImage($item),
-                'Grade'     => $this->Enum::ItemGradeNone,
+                'object_id'  => $item['id'],
+                'name'       => $item['name'],
+                'name_color' => Int32(pack('c4', $item['name_color']['r'], $item['name_color']['g'], $item['name_color']['b'], 255)),
+                'location_x' => $item['current_location']['x'],
+                'location_y' => $item['current_location']['y'],
+                'image'      => $this->Item->getImage($item),
+                'grade'      => $this->Enum::ItemGradeNone,
             ],
         ];
     }
@@ -329,10 +329,10 @@ class MsgFactory extends AbstractController
     {
         return [
             'OBJECT_GOLD', [
-                'ObjectID'  => $item['ID'],
-                'Gold'      => $item['Gold'],
-                'LocationX' => $item['CurrentLocation']['X'],
-                'LocationY' => $item['CurrentLocation']['Y'],
+                'object_id'  => $item['id'],
+                'gold'       => $item['gold'],
+                'location_x' => $item['current_location']['x'],
+                'location_y' => $item['current_location']['y'],
             ],
         ];
     }
@@ -341,7 +341,7 @@ class MsgFactory extends AbstractController
     {
         return [
             'GAINED_GOLD', [
-                'Gold' => $gold,
+                'gold' => $gold,
             ],
         ];
     }
@@ -351,7 +351,7 @@ class MsgFactory extends AbstractController
         return [
             'OBJECT_REMOVE',
             [
-                'ObjectID' => $item['ID'],
+                'object_id' => $item['id'],
             ],
         ];
     }
@@ -361,7 +361,7 @@ class MsgFactory extends AbstractController
         return [
             'CHANGE_A_MODE',
             [
-                'Mode' => $mode,
+                'mode' => $mode,
             ],
         ];
     }
@@ -371,7 +371,7 @@ class MsgFactory extends AbstractController
         return [
             'CHANGE_P_MODE',
             [
-                'Mode' => $mode,
+                'mode' => $mode,
             ],
         ];
     }
@@ -381,8 +381,8 @@ class MsgFactory extends AbstractController
         return [
             'USE_ITEM',
             [
-                'UniqueID' => $id,
-                'Success'  => $status,
+                'unique_id' => $id,
+                'success'   => $status,
             ],
         ];
     }
@@ -391,9 +391,9 @@ class MsgFactory extends AbstractController
     {
         return [
             'DEATH', [
-                'LocationX' => $p['CurrentLocation']['X'],
-                'LocationY' => $p['CurrentLocation']['Y'],
-                'Direction' => $p['CurrentDirection'],
+                'location_x' => $p['current_location']['x'],
+                'location_y' => $p['current_location']['y'],
+                'direction'  => $p['current_direction'],
             ],
         ];
     }
@@ -402,11 +402,11 @@ class MsgFactory extends AbstractController
     {
         return [
             'OBJECT_DIED', [
-                'ObjectID'  => $p['ID'],
-                'LocationX' => $p['CurrentLocation']['X'],
-                'LocationY' => $p['CurrentLocation']['Y'],
-                'Direction' => $p['CurrentDirection'],
-                'Type'      => 0,
+                'object_id'  => $p['id'],
+                'location_x' => $p['current_location']['x'],
+                'location_y' => $p['current_location']['y'],
+                'direction'  => $p['current_direction'],
+                'type'       => 0,
             ],
         ];
     }
@@ -415,8 +415,8 @@ class MsgFactory extends AbstractController
     {
         return [
             'HEALTH_CHANGED', [
-                'HP' => $p['HP'],
-                'MP' => $p['MP'],
+                'hp' => $p['hp'],
+                'mp' => $p['mp'],
             ],
         ];
     }
@@ -425,24 +425,93 @@ class MsgFactory extends AbstractController
     {
         $newHealth = [
             // 生命药水回复
-            'HPPotValue'    => null, // 回复总值
-            'HPPotPerValue' => null, // 一次回复多少
-            'HPPotNextTime' => null, // 下次生效时间
-            'HPPotDuration' => null, // 两次生效时间间隔
-            'HPPotTickNum'  => null, // 总共跳几次
-            'HPPotTickTime' => null, // 当前第几跳
+            'hp_pot_value'     => null, // 回复总值
+            'hp_pot_per_value' => null, // 一次回复多少
+            'hp_pot_next_time' => null, // 下次生效时间
+            'hp_pot_duration'  => null, // 两次生效时间间隔
+            'hp_pot_tick_num'  => null, // 总共跳几次
+            'hp_pot_tick_time' => null, // 当前第几跳
             // 魔法药水回复
-            'MPPotValue'    => null,
-            'MPPotPerValue' => null,
-            'MPPotNextTime' => null,
-            'MPPotDuration' => null,
-            'MPPotTickNum'  => null,
-            'MPPotTickTime' => null,
+            'mp_pot_value'     => null,
+            'mp_pot_per_value' => null,
+            'mp_pot_next_time' => null,
+            'mp_pot_duration'  => null,
+            'mp_pot_tick_num'  => null,
+            'mp_pot_tick_time' => null,
             // 角色生命/魔法回复
-            'HealNextTime'  => null,
-            'HealDuration'  => null,
+            'heal_next_time'   => null,
+            'heal_duration'    => null,
         ];
 
         return array_merge($newHealth, $health);
+    }
+
+    public function addBuff($buff)
+    {
+        return [
+            'ADD_BUFF', [
+                'type'      => $buff['type'],
+                'caster'    => $buff['caster'],
+                'object_id' => $buff['caster']['id'],
+                'visible'   => $buff['visible'],
+                'expire'    => 10000,
+                'values'    => $buff['values'],
+                'infinite'  => $buff['infinite'],
+            ],
+        ];
+    }
+
+    public function newMagic($clientMagic)
+    {
+        return [
+            'NEW_MAGIC', [
+                'magic' => $clientMagic,
+            ],
+        ];
+    }
+
+    public function getClientMagic($magic)
+    {
+        $info  = $magic['info'];
+        $delay = $info['delay_base'] - ($magic['level'] * $info['delay_reduction']);
+
+        $castTime = 0;
+
+        return [
+            'name'       => $info['name'],
+            'spell'      => $magic['spell'],
+            'base_cost'  => $info['base_cost'],
+            'level_cost' => $info['level_cost'],
+            'icon'       => $info['icon'],
+            'level_1'    => $info['level_1'],
+            'level_2'    => $info['level_2'],
+            'level_3'    => $info['level_3'],
+            'need_1'     => $info['need_1'],
+            'need_2'     => $info['need_2'],
+            'need_3'     => $info['need_3'],
+            'level'      => $magic['level'],
+            'key'        => !empty($magic['magic_key']) ? $magic['magic_key'] : 0,
+            'experience' => !empty($magic['experience']) ? $magic['experience'] : 0,
+            'delay'      => $delay,
+            'range'      => $info['magic_range'],
+            'cast_time'  => $info['cast_time'],
+        ];
+    }
+
+    public function mapChange($m, $location, $direction)
+    {
+        return [
+            'MAP_CHANGED', [
+                'file_name'      => $m['info']['file_name'],
+                'title'          => $m['info']['title'],
+                'mini_map'       => $m['info']['mini_map'],
+                'big_map'        => $m['info']['big_map'],
+                'lights'         => $m['info']['light'],
+                'location'       => $location,
+                'direction'      => $direction,
+                'map_dark_light' => $m['info']['map_dark_light'],
+                'music'          => $m['info']['music'],
+            ],
+        ];
     }
 }

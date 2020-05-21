@@ -214,17 +214,17 @@ class MapLoader extends AbstractController
 
                 // if ($cell == null) {
                 //     $cell = [
-                //         'Point'     => [],
-                //         'Attribute' => $CellAttributeWalk,
+                //         'point'     => [],
+                //         'attribute' => $CellAttributeWalk,
                 //         'objects'   => [],
                 //     ];
                 // }
 
-                $point = ['X' => $x, 'Y' => $y];
+                $point = ['x' => $x, 'y' => $y];
 
-                // if ($cell['Attribute'] == $CellAttributeWalk) {
-                //     $cell['Point'] = $point;
-                //     $m['cells'][$point['X'] + $point['Y'] * $m['Width']] = $cell;
+                // if ($cell['attribute'] == $CellAttributeWalk) {
+                //     $cell['point'] = $point;
+                //     $m['cells'][$point['x'] + $point['y'] * $m['width']] = $cell;
                 // }
 
                 $offset += 2;
@@ -252,15 +252,15 @@ class MapLoader extends AbstractController
     public function AddDoor(&$m, $doorindex, $loc)
     {
         $door = [
-            'Index'    => $doorindex,
-            'State'    => 0,
-            'LastTick' => null,
-            'Location' => $loc,
+            'index'    => $doorindex,
+            'state'    => 0,
+            'last_tick' => null,
+            'location' => $loc,
         ];
 
         $m['doors'][$doorindex] = $door;
 
-        $m['doorsMap'] = $this->Door->Set($m, $loc, $door);
+        $m['doors_map'] = $this->Door->Set($m, $loc, $door);
     }
 
     public function GetMapV2($fileBytes)

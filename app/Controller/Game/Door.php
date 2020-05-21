@@ -17,54 +17,54 @@ class Door extends AbstractController
     public function NewGrid($w, $h)
     {
         return [
-            'W'    => $w,
-            'H'    => $h,
-            'Grid' => [],
+            'w'    => $w,
+            'h'    => $h,
+            'grid' => [],
         ];
     }
 
     public function newDoor()
     {
         return [
-            'Map'      => [],
-            'Index'    => null,
-            'State'    => 0,
-            'LastTick' => null,
-            'Location' => [],
+            'map'       => [],
+            'index'     => null,
+            'state'     => 0,
+            'last_tick' => null,
+            'location'  => [],
         ];
     }
 
     public function In($m, $loc)
     {
-        return $loc['X'] < $m['doorsMap']['W'] && $loc['Y'] < $m['doorsMap']['H'];
+        return $loc['x'] < $m['doors_map']['w'] && $loc['y'] < $m['doors_map']['h'];
     }
 
     public function Set($m, $loc, $d)
     {
         if ($this->In($m, $loc)) {
 
-            if (empty($m['doorsMap']['Grid'][$loc['X']])) {
-                $m['doorsMap']['Grid'][$loc['X']] = [];
+            if (empty($m['doors_map']['grid'][$loc['x']])) {
+                $m['doors_map']['grid'][$loc['x']] = [];
             }
 
-            $m['doorsMap']['Grid'][$loc['X']][$loc['Y']] = $d;
+            $m['doors_map']['grid'][$loc['x']][$loc['y']] = $d;
 
-            return $m['doorsMap'];
+            return $m['doors_map'];
         }
     }
 
     public function get($doorsMap, $point)
     {
-        if (empty($doorsMap['Grid'][$point['X']][$point['Y']])) {
+        if (empty($doorsMap['grid'][$point['x']][$point['y']])) {
             return null;
         }
 
-        return $doorsMap['Grid'][$point['X']][$point['Y']];
+        return $doorsMap['grid'][$point['x']][$point['y']];
     }
 
     public function isOpen($door)
     {
-        return $door['State'] == 2;
+        return $door['state'] == 2;
     }
 
     public function setOpen($map_id, $doorindex, $open)

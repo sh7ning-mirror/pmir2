@@ -15,9 +15,9 @@ class Bag extends AbstractController
         }
 
         $bag = [
-            'Player' => null,
-            'Type'   => $type,
-            'Items'  => $Items,
+            'player' => null,
+            'type'   => $type,
+            'items'  => $Items,
         ];
 
         $where = [
@@ -52,9 +52,9 @@ class Bag extends AbstractController
 
             if ($res['list']) {
                 foreach ($res['list'] as $k => $v) {
-                    $v['Info']                           = $this->GameData->getItemInfoByID($v['item_id']);
+                    $v['info']                           = $this->GameData->getItemInfoByID($v['item_id']);
                     $v['dura_changed']                   = false;
-                    $bag['Items'][$uItemIndex[$v['id']]] = $v;
+                    $bag['items'][$uItemIndex[$v['id']]] = $v;
                 }
             }
         }
@@ -64,7 +64,7 @@ class Bag extends AbstractController
 
     public function useCount($Inventory, $i, $count)
     {
-        return $this->setCount($Inventory, $i, $Inventory['Items'][$i]['count'] - $count);
+        return $this->setCount($Inventory, $i, $Inventory['items'][$i]['count'] - $count);
     }
 
     public function setCount($Inventory, $i, $count)
@@ -76,7 +76,7 @@ class Bag extends AbstractController
             $where = [
                 'whereInfo' => [
                     'where' => [
-                        'id' => $Inventory['Items'][$i]['id'],
+                        'id' => $Inventory['items'][$i]['id'],
                     ],
                 ],
             ];
@@ -87,7 +87,7 @@ class Bag extends AbstractController
 
             $this->CommonService->upField('user_item', $where, $data);
 
-            $Inventory['Items'][$i]['count'] = $count;
+            $Inventory['items'][$i]['count'] = $count;
         }
 
         return $Inventory;
@@ -96,43 +96,42 @@ class Bag extends AbstractController
     public function set($character_id, $Inventory, $i, $item = null)
     {
         if ($item) {
-            if ($Inventory['Items'][$i]['isset']) {
+            if ($Inventory['items'][$i]['isset']) {
                 EchoLog('该位置有物品了', 'w');
             }
 
-            if(empty($item['Info']['id']))
-            {
+            if (empty($item['info']['id'])) {
                 return false;
             }
 
             $info = [
-                'item_id'         => $item['Info']['id'],
+                'item_id'         => $item['info']['id'],
                 'current_dura'    => 100,
                 'max_dura'        => 100,
                 'count'           => !empty($item['count']) ? $item['count'] : 1,
-                'ac'              => $item['Info']['min_ac'],
-                'mac'             => $item['Info']['min_mac'],
-                'dc'              => $item['Info']['min_dc'],
-                'mc'              => $item['Info']['min_mc'],
-                'sc'              => $item['Info']['min_sc'],
-                'accuracy'        => $item['Info']['accuracy'],
-                'agility'         => $item['Info']['agility'],
-                'hp'              => $item['Info']['hp'],
-                'mp'              => $item['Info']['mp'],
-                'attack_speed'    => $item['Info']['attack_speed'],
-                'luck'            => $item['Info']['luck'],
+                'ac'              => $item['info']['min_ac'],
+                'mac'             => $item['info']['min_mac'],
+                'dc'              => $item['info']['min_dc'],
+                'mc'              => $item['info']['min_mc'],
+                'sc'              => $item['info']['min_sc'],
+                'accuracy'        => $item['info']['accuracy'],
+                'agility'         => $item['info']['agility'],
+                'hp'              => $item['info']['hp'],
+                'mp'              => $item['info']['mp'],
+                'attack_speed'    => $item['info']['attack_speed'],
+                'luck'            => $item['info']['luck'],
                 'soul_bound_id'   => $character_id,
-                'bools'           => $item['Info']['bools'],
-                'strong'          => $item['Info']['strong'],
-                'magic_resist'    => $item['Info']['magic_resist'],
-                'poison_resist'   => $item['Info']['poison_resist'],
-                'health_recovery' => $item['Info']['health_recovery'],
+                'bools'           => $item['info']['bools'],
+                'strong'          => $item['info']['strong'],
+                'magic_resist'    => $item['info']['magic_resist'],
+                'poison_resist'   => $item['info']['poison_resist'],
+                'health_recovery' => $item['info']['health_recovery'],
                 'mana_recovery'   => 0,
-                'poison_recovery' => $item['Info']['poison_recovery'],
-                'critical_rate'   => $item['Info']['critical_rate'],
-                'critical_damage' => $item['Info']['critical_damage'],
-                'freezing'        => $item['Info']['freezing'],
-                'poison_attack'   => $item['Info']['poison_attack'],
+                'poison_recovery' => $item['info']['poison_recovery'],
+                'critical_rate'   => $item['info']['critical_rate'],
+                'critical_damage' => $item['info']['critical_damage'],
+                'freezing'        => $item['info']['freezing'],
+                'poison_attack'   => $item['info']['poison_attack'],
             ];
 
             $res = $this->CommonService->save('user_item', $info);
@@ -148,12 +147,12 @@ class Bag extends AbstractController
                 $this->CommonService->save('character_user_item', $info);
             }
 
-            $Inventory['Items'][$i]          = $item;
-            $Inventory['Items'][$i]['isset'] = true;
+            $Inventory['items'][$i]          = $item;
+            $Inventory['items'][$i]['isset'] = true;
 
             return $Inventory;
         } else {
-            $item = $Inventory['Items'][$i];
+            $item = $Inventory['items'][$i];
 
             if ($item) {
                 $where = [
@@ -180,7 +179,7 @@ class Bag extends AbstractController
                 EchoLog('尝试删除空位置的物品', 'w');
             }
 
-            $Inventory['Items'][$i] = ['isset' => false];
+            $Inventory['items'][$i] = ['isset' => false];
 
             return $Inventory;
         }
@@ -188,12 +187,12 @@ class Bag extends AbstractController
 
     public function moveTo(&$bag, $from, $to, &$tobag)
     {
-        if ($from < 0 || $to < 0 || $from > count($bag['Items']) || $to > count($tobag['Items'])) {
+        if ($from < 0 || $to < 0 || $from > count($bag['items']) || $to > count($tobag['items'])) {
             EchoLog(sprintf('移动装备位置不存在: from=%s to=%s', $from, $to), 'e');
             return false;
         }
 
-        $item = $bag['Items'][$from] ?? [];
+        $item = $bag['items'][$from] ?? [];
 
         if (!$item) {
             EchoLog(sprintf('背包格子 %s 没有物品', $from), 'e');
@@ -210,13 +209,13 @@ class Bag extends AbstractController
             ];
 
             $data = [
-                'type'  => $tobag['Type'],
+                'type'  => $tobag['type'],
                 'index' => $to,
             ];
 
             $this->CommonService->upField('character_user_item', $where, $data);
 
-            $toItem = $tobag['Items'][$to] ?? [];
+            $toItem = $tobag['items'][$to] ?? [];
             if (!$toItem) {
                 $where = [
                     'whereInfo' => [
@@ -227,7 +226,7 @@ class Bag extends AbstractController
                 ];
 
                 $data = [
-                    'type'  => $bag['Type'],
+                    'type'  => $bag['type'],
                     'index' => $from,
                 ];
 
@@ -235,7 +234,7 @@ class Bag extends AbstractController
             }
         });
 
-        list($bag['Items'][$from], $tobag['Items'][$to]) = [$tobag['Items'][$to], $bag['Items'][$from]];
+        list($bag['items'][$from], $tobag['items'][$to]) = [$tobag['items'][$to], $bag['items'][$from]];
 
         return true;
     }

@@ -15,12 +15,12 @@ class MapObject extends AbstractController
             return false;
         }
 
-        $percent = $m['HP'] / $m['MaxHP'] * 100;
+        $percent = $m['hp'] / $m['max_hp'] * 100;
 
         $msg = [
-            'ObjectID' => $m['ID'],
-            'Percent'  => $percent,
-            'Expire'   => 5,
+            'object_id' => $m['id'],
+            'percent'   => $percent,
+            'expire'    => 5,
         ];
 
         return $msg;

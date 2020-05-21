@@ -68,12 +68,12 @@ class Character extends AbstractController
         if ($res['list']) {
             foreach ($res['list'] as $k => $v) {
                 $info = [
-                    'Index'      => $v['character_id'],
-                    'Name'       => $v['name'],
-                    'Level'      => $v['level'],
-                    'Class'      => $v['class'],
-                    'Gender'     => $v['gender'],
-                    'LastAccess' => $v['login_date'],
+                    'index'       => $v['character_id'],
+                    'name'        => $v['name'],
+                    'level'       => $v['level'],
+                    'class'       => $v['class'],
+                    'gender'      => $v['gender'],
+                    'last_access' => $v['login_date'],
                 ];
 
                 $data[] = $info;

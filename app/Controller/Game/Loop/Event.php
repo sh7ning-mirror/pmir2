@@ -47,7 +47,7 @@ class Event extends AbstractController
             if ($nowHour != self::$hour) {
                 self::$hour = $nowHour;
 
-                $this->sendQuery(['TIME_OF_DAY', ['Lights' => $this->Settings->lightSet()]]);
+                $this->sendQuery(['TIME_OF_DAY', ['lights' => $this->Settings->lightSet()]]);
             }
         });
     }
@@ -77,9 +77,8 @@ class Event extends AbstractController
     public function goPlayer($map)
     {
         co(function () use ($map) {
-            $players = $this->GameData->getMapPlayers($map['Info']['id']);
-            if($players)
-            {
+            $players = $this->GameData->getMapPlayers($map['info']['id']);
+            if ($players) {
                 foreach ($players as $player) {
                     $this->PlayerObject->process($player);
                 }

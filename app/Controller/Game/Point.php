@@ -10,8 +10,8 @@ class Point extends AbstractController
 {
     public function NextPoint($Point, $direction, $step)
     {
-        $x = $Point['X'];
-        $y = $Point['Y'];
+        $x = $Point['x'];
+        $y = $Point['y'];
 
         switch ($direction) {
             case $this->Enum::MirDirectionUp:
@@ -56,13 +56,13 @@ class Point extends AbstractController
 
     public function NewPoint($x, $y)
     {
-        return ['X' => $x, 'Y' => $y];
+        return ['x' => $x, 'y' => $y];
     }
 
     public function inRange($currentPoint, $point, $dataRange)
     {
-        // var_dump('---------------'.$currentPoint['X'].'_'.$point['X'].'___________'.$currentPoint['Y'].'_'.$point['Y']);
+        // var_dump('---------------'.$currentPoint['x'].'_'.$point['x'].'___________'.$currentPoint['y'].'_'.$point['y']);
 
-        return AbsInt($currentPoint['X'] - intval($point['X'])) <= $dataRange && AbsInt(intval($currentPoint['Y']) - intval($point['Y'])) <= $dataRange;
+        return AbsInt($currentPoint['x'] - intval($point['x'])) <= $dataRange && AbsInt(intval($currentPoint['y']) - intval($point['y'])) <= $dataRange;
     }
 }

@@ -160,7 +160,7 @@ class GameData extends AbstractController
                 //加载地图数据
                 $m              = $this->MapLoader->loadMap($uppercaseNameRealNameMap[strtoupper(trim($v['file_name']) . ".map")]);
                 $v['file_name'] = strtoupper(trim($v['file_name']));
-                $m['Info']      = $v;
+                $m['info']      = $v;
 
                 $Maps[$v['id']] = $m;
 
@@ -345,19 +345,19 @@ class GameData extends AbstractController
             }
 
             $info = [
-                'Low'           => $dropRate[0],
-                'High'          => $dropRate[1],
-                'ItemName'      => $content[1],
-                'QuestRequired' => false,
-                'Count'         => 1,
+                'low'            => $dropRate[0],
+                'high'           => $dropRate[1],
+                'item_name'      => $content[1],
+                'quest_required' => false,
+                'count'          => 1,
             ];
 
             if (count($content) == 3) {
                 if (strtoupper($content[2]) == 'Q') {
-                    $info['QuestRequired'] = true;
+                    $info['quest_required'] = true;
                 } else {
-                    $info['Count'] = intval($content[2]);
-                    if (!$info['Count']) {
+                    $info['count'] = intval($content[2]);
+                    if (!$info['count']) {
                         EchoLog(sprintf('掉落数量错误 content: %s; %s line: %s; ', $txt, $file, $num), 'e');
                         return false;
                     }
@@ -427,7 +427,20 @@ class GameData extends AbstractController
     {
         $magicIDInfoMap = json_decode($this->Redis->get('magicIDInfoMap'));
 
-        return $magicIDInfoMap[$magic_id] ?: [];
+        return !empty($magicIDInfoMap[$magic_id]) ? $magicIDInfoMap[$magic_id] : [];
+    }
+
+    public function getMagicInfoBySpell($spell)
+    {
+        $magicIDInfoMap = json_decode($this->Redis->get('magicIDInfoMap'), true);
+
+        foreach ($magicIDInfoMap as $k => $v) {
+            if ($v['spell'] == $spell) {
+                return $v;
+            }
+        }
+
+        return false;
     }
 
     public function getExpList($level = null)
@@ -484,7 +497,7 @@ class GameData extends AbstractController
 
         for ($i = 0; $i < count($itemList); $i++) {
             $info = $itemList[$i];
-            if (strpos($info['Name'], $origin['Name']) === 0) {
+            if (strpos($info['name'], $origin['name']) === 0) {
 
                 if ($info['required_class'] == (1 << $job)) {
                     if ($info['required_type'] == $this->Enum::RequiredTypeLevel && $info['required_amount'] <= $level && $output['required_amount'] <= $info['required_amount'] && $origin['required_gender'] == $info['required_gender']) {
@@ -500,7 +513,7 @@ class GameData extends AbstractController
     {
         for ($i = 0; $i < count($itemList); $i++) {
             $info = $itemList[$i];
-            if (strpos($info['Name'], $origin['Name']) === 0) {
+            if (strpos($info['name'], $origin['name']) === 0) {
                 if ($info['required_class'] == (1 << $job) && $origin['required_gender'] == $info['required_gender']) {
                     return $info;
                 }
@@ -515,8 +528,8 @@ class GameData extends AbstractController
 
         for ($i = 0; $i < count($itemList); $i++) {
             $info = $itemList[$i];
-            if (strpos($info['Name'], $origin['Name']) === 0) {
-                if ($info['RequiredType'] == $this->Enum::RequiredTypeLevel && $info['RequiredAmount'] <= $level && $output['RequiredAmount'] < $info['RequiredAmount'] && $origin['RequiredGender'] == $info['RequiredGender']) {
+            if (strpos($info['name'], $origin['name']) === 0) {
+                if ($info['required_type'] == $this->Enum::RequiredTypeLevel && $info['required_amount'] <= $level && $output['required_amount'] < $info['required_amount'] && $origin['required_gender'] == $info['required_gender']) {
                     $output = $info;
                 }
             }
@@ -544,10 +557,10 @@ class GameData extends AbstractController
         $key = 'map:players_' . $map_id;
 
         $mapPlayers           = $this->getMapPlayers($map_id) ?: [];
-        $mapPlayers[$p['ID']] = [
+        $mapPlayers[$p['id']] = [
             'fd'   => $p['fd'],
-            'ID'   => $p['ID'],
-            'Name' => $p['Name'],
+            'id'   => $p['id'],
+            'name' => $p['name'],
         ];
 
         $this->Redis->set($key, json_encode($mapPlayers, JSON_UNESCAPED_UNICODE));
@@ -557,7 +570,7 @@ class GameData extends AbstractController
     {
         $key             = 'map:item_' . $map_id;
         $mapItem         = $this->getMapItem($map_id) ?: [];
-        $point           = $object['CurrentLocation']['X'] . '_' . $object['CurrentLocation']['Y'];
+        $point           = $object['current_location']['x'] . '_' . $object['current_location']['y'];
         $mapItem[$point] = $object;
 
         $this->Redis->set($key, json_encode($mapItem, JSON_UNESCAPED_UNICODE));
@@ -569,7 +582,7 @@ class GameData extends AbstractController
         $items = json_decode($this->Redis->get($key), true);
 
         if ($point) {
-            return !empty($items[$point['X'] . '_' . $point['Y']]) ? $items[$point['X'] . '_' . $point['Y']] : '';
+            return !empty($items[$point['x'] . '_' . $point['y']]) ? $items[$point['x'] . '_' . $point['y']] : '';
         } else {
             return $items;
         }
@@ -584,8 +597,8 @@ class GameData extends AbstractController
         $key   = 'map:item_' . $map_id;
         $items = json_decode($this->Redis->get($key), true);
 
-        if (!empty($items[$point['X'] . '_' . $point['Y']])) {
-            unset($items[$point['X'] . '_' . $point['Y']]);
+        if (!empty($items[$point['x'] . '_' . $point['y']])) {
+            unset($items[$point['x'] . '_' . $point['y']]);
             $this->Redis->set($key, json_encode($items, JSON_UNESCAPED_UNICODE));
         }
     }
@@ -596,8 +609,8 @@ class GameData extends AbstractController
         $key        = 'map:players_' . $map_id;
         $mapPlayers = $this->getMapPlayers($map_id);
 
-        $mapPlayers[$p['ID']] = null;
-        unset($mapPlayers[$p['ID']]);
+        $mapPlayers[$p['id']] = null;
+        unset($mapPlayers[$p['id']]);
 
         $this->Redis->set($key, json_encode($mapPlayers, JSON_UNESCAPED_UNICODE));
     }

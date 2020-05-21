@@ -14,11 +14,11 @@ class Atomic extends AbstractController
 
     public function getNum()
     {
-        $ObjectId = $this->Redis->get('ObjectId');
+        $ObjectId = $this->Redis->get('object_id');
 
         if (!$ObjectId) {
             $ObjectId = 100000;
-            $this->Redis->set('ObjectId', $ObjectId);
+            $this->Redis->set('object_id', $ObjectId);
         }
 
         return $ObjectId;
@@ -38,7 +38,7 @@ class Atomic extends AbstractController
         $ObjectId = $this->get()->add(1);
 
         co(function () use ($ObjectId) {
-            $this->Redis->set('ObjectId', $ObjectId);
+            $this->Redis->set('object_id', $ObjectId);
         });
 
         return $ObjectId;
