@@ -22,12 +22,13 @@ return [
             // LogLevel::DEBUG,
             LogLevel::EMERGENCY,
             LogLevel::ERROR,
-            LogLevel::INFO,
+            // LogLevel::INFO,
             LogLevel::NOTICE,
             LogLevel::WARNING,
         ],
     ],
 
-    'settings_path' => BASE_PATH . '/storage',
-    'dataRange' => 20,//视野范围
+    'settings_path'              => BASE_PATH . '/storage',
+    'dataRange'                  => 20, //视野范围,正常屏幕大小
+    'respawn_time'               => 2 * 60, //怪物刷新间隔时间
 ];

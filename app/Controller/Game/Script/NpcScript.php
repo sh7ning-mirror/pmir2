@@ -168,4 +168,22 @@ class NpcScript extends AbstractController
     {
         return $this->compareInt($param[0], $p['gold'], $param[1]);
     }
+
+    public function MOVE($param, &$p)
+    {
+        $file_name = $param[0];
+        $x         = $param[1];
+        $y         = $param[2];
+
+        $map = $this->GameData->getMapByName($file_name);
+
+        if ($map && $x >= 0 && $y >= 0) {
+            $this->PlayerObject->teleport($p, $map, ['x' => $x, 'y' => $y]);
+        }
+    }
+
+    public function TAKEGOLD($param, &$p)
+    {
+        $this->PlayerObject->takeGold($p, intval($param[0]));
+    }
 }

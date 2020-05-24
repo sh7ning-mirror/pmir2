@@ -71,14 +71,14 @@ class Npc extends AbstractController
         return $npc;
     }
 
-    public function callScript($p, $npc, $key)
+    public function callScript(&$p, $npc, $key)
     {
         return $this->Script->call($key, $npc, $p);
     }
 
     public function priceRate($p, $npc, $baseRate)
     {
-        # code...
+        return $npc['info']['rate'] / 100;
     }
 
     public function getPlayerBuyBack($p, $npc)

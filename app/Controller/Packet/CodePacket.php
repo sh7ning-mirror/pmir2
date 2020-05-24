@@ -10,7 +10,7 @@ use App\Controller\AbstractController;
  */
 class CodePacket extends AbstractController
 {
-    private $clientPacketStruct = [
+    public $clientPacketStruct = [
         'CLIENT_VERSION'   => [
             'count'        => 'uint32',
             'version_hash' => '[]int8',
@@ -112,9 +112,12 @@ class CodePacket extends AbstractController
         'DROP_GOLD'        => [
             'amount' => 'uint32',
         ],
+        'REPAIR_ITEM'      => [
+            'unique_id' => 'uint64',
+        ],
     ];
 
-    private $serverPacketStruct = [
+    public $serverPacketStruct = [
         'CLIENT_VERSION'           => [
             'result' => 'uint8',
         ],
@@ -309,10 +312,10 @@ class CodePacket extends AbstractController
         ],
         'PLAYER_UPDATE'            => [
             'object_id'     => 'uint32',
+            'light'         => 'uint8',
             'weapon'        => 'int16',
             'weapon_effect' => 'int16',
             'armour'        => 'int16',
-            'light'         => 'uint8',
             'wing_effect'   => 'uint8',
         ],
         'MAP_INFORMATION'          => [
@@ -326,29 +329,29 @@ class CodePacket extends AbstractController
             'music'          => 'uint16',
         ],
         'USER_INFORMATION'         => [
-            'object_id'                   => 'uint32',
-            'real_id'                     => 'uint32',
-            'name'                        => 'string',
-            'guild_name'                  => 'string',
-            'guild_rank'                  => 'string',
-            'name_color'                  => 'int32',
-            'class'                       => 'uint8',
-            'gender'                      => 'uint8',
-            'level'                       => 'uint16',
-            'location'                    => [
+            'object_id'                    => 'uint32',
+            'real_id'                      => 'uint32',
+            'name'                         => 'string',
+            'guild_name'                   => 'string',
+            'guild_rank'                   => 'string',
+            'name_color'                   => 'int32',
+            'class'                        => 'uint8',
+            'gender'                       => 'uint8',
+            'level'                        => 'uint16',
+            'location'                     => [
                 'x' => 'uint32',
                 'y' => 'uint32',
             ],
-            'direction'                   => 'uint8',
-            'hair'                        => 'uint8',
-            'hp'                          => 'uint16',
-            'mp'                          => 'uint16',
-            'experience'                  => 'int64',
-            'max_experience'              => 'int64',
-            'level_effect'                => 'uint8',
-            'inventory_bool'              => 'bool',
-            'inventory_count'             => 'uint32',
-            'inventory'                   => [
+            'direction'                    => 'uint8',
+            'hair'                         => 'uint8',
+            'hp'                           => 'uint16',
+            'mp'                           => 'uint16',
+            'experience'                   => 'int64',
+            'max_experience'               => 'int64',
+            'level_effect'                 => 'uint8',
+            'inventory_bool'               => 'bool',
+            'inventory_count'              => 'uint32',
+            'inventory'                    => [
                 'isset'           => 'bool',
                 'id'              => 'uint64',
                 'item_id'         => 'int32',
@@ -380,9 +383,9 @@ class CodePacket extends AbstractController
                 'freezing'        => 'uint8',
                 'poison_attack'   => 'uint8',
             ],
-            'equipment_bool'              => 'bool',
-            'equipment_count'             => 'uint32',
-            'equipment'                   => [
+            'equipment_bool'               => 'bool',
+            'equipment_count'              => 'uint32',
+            'equipment'                    => [
                 'isset'           => 'bool',
                 'id'              => 'uint64',
                 'item_id'         => 'int32',
@@ -414,9 +417,9 @@ class CodePacket extends AbstractController
                 'freezing'        => 'uint8',
                 'poison_attack'   => 'uint8',
             ],
-            'quest_inventory_bool'        => 'bool',
-            'quest_inventory_count'       => 'uint32',
-            'quest_inventory'             => [
+            'quest_inventory_bool'         => 'bool',
+            'quest_inventory_count'        => 'uint32',
+            'quest_inventory'              => [
                 'isset'           => 'bool',
                 'id'              => 'uint64',
                 'item_id'         => 'int32',
@@ -448,11 +451,11 @@ class CodePacket extends AbstractController
                 'freezing'        => 'uint8',
                 'poison_attack'   => 'uint8',
             ],
-            'gold'                        => 'uint32',
-            'credit'                      => 'uint32',
-            'has_expanded_storage'        => 'bool',
+            'gold'                         => 'uint32',
+            'credit'                       => 'uint32',
+            'has_expanded_storage'         => 'bool',
             'expanded_storage_expiry_time' => 'int64',
-            'test'                        => 'uint32', //未知
+            'test'                         => 'uint32', //未知
             ////TODO
             // 'ClientMagics'              => [
             //     'name'       => 'string',
@@ -550,7 +553,7 @@ class CodePacket extends AbstractController
             'expire'    => 'uint8',
         ],
         'MAP_CHANGED'              => [
-            'file_name'       => 'string',
+            'file_name'      => 'string',
             'title'          => 'string',
             'mini_map'       => 'uint16',
             'big_map'        => 'uint16',
@@ -776,8 +779,24 @@ class CodePacket extends AbstractController
                 'experience' => 'uint16',
                 'delay'      => 'int64',
                 'range'      => 'uint8',
-                'cast_time'   => 'int64',
+                'cast_time'  => 'int64',
             ],
+        ],
+        'SET_OBJECT_CONCENTRATION' => [
+            'object_id'   => 'uint32',
+            'enabled'     => 'bool',
+            'interrupted' => 'bool',
+        ],
+        'NPC_REPAIR'               => [
+            'rate' => 'float32',
+        ],
+        'REPAIR_ITEM'              => [
+            'unique_id' => 'uint64',
+        ],
+        'ITEM_REPAIRED'            => [
+            'unique_id'    => 'uint64',
+            'max_dura'     => 'uint16',
+            'current_dura' => 'uint16',
         ],
     ];
 

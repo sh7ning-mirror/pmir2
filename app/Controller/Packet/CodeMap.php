@@ -417,4 +417,10 @@ class CodeMap
         $packCmdList = $this->serverPack();
         return !empty($packCmdList[$cmdName]) ? $packCmdList[$cmdName] - 2000 : 0;
     }
+
+    public function getClinetPackCmd(string $cmdName): int
+    {
+        $packCmdList = $this->clinetPack();
+        return !empty($packCmdList[$cmdName]) ? $packCmdList[$cmdName] - 1000 : 0;
+    }
 }

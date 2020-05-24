@@ -156,6 +156,7 @@ class PlayerObject extends AbstractController
         $p['hair']            = $accountCharacter['hair'];
         $p['send_item_info']  = [];
         $p['max_experience']  = $this->GameData->getExpList($accountCharacter['level']);
+        $p['object_type']     = $this->Enum::ObjectTypePlayer;
 
         if ($user_magic) {
             foreach ($user_magic as $k => $v) {
@@ -209,34 +210,34 @@ class PlayerObject extends AbstractController
         if ($itemInfo['info']['stack_size'] > 1) {
             foreach ($p['inventory']['items'] as $k => $v) {
 
-                if (empty($v['isset']) || $itemInfo['info']['id'] != $v['info']['id'] || $v['count'] > $itemInfo['info']['stack_size']) {
+                if (empty($v['isset']) || $itemInfo['info']['id'] != $v['info']['id'] || $v['count'] > $v['info']['stack_size']) {
                     continue;
                 }
 
                 if ($itemInfo['count'] + $v['count'] <= $v['info']['stack_size']) {
 
-                    $p['inventory'] = $this->Bag->setCount($p['inventory'], $k, $v['count'] + $itemInfo['count']);
+                    $this->Bag->setCount($p['inventory'], $k, $v['count'] + $itemInfo['count']);
 
                     $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['info']));
                     $this->setPlayer($p['fd'], $p);
                     return true;
                 }
 
-                $p['inventory'] = $this->Bag->setCount($p['inventory'], $k, $v['count'] + $itemInfo['count']);
-                $itemInfo['count'] -= $itemInfo['info']['stack_size'] - $v['count'];
+                $this->Bag->setCount($p['inventory'], $k, $v['count'] + $itemInfo['count']);
+                $itemInfo['count'] -= $v['info']['stack_size'] - $v['count'];
             }
         }
 
         $i = 0;
         $j = 46;
 
-        if ($itemInfo['info']['type'] == $this->Enum::ItemTypePotion
-            || $itemInfo['info']['type'] == $this->Enum::ItemTypeScroll
-            || ($itemInfo['info']['type'] == $this->Enum::ItemTypeScript && $itemInfo['info']['effect'])
-        ) {
+        $type = $itemInfo['info']['type'];
+
+        if ($type == $this->Enum::ItemTypePotion || $type == $this->Enum::ItemTypeScroll
+            || ($type == $this->Enum::ItemTypeScript && $itemInfo['info']['effect'] == 1)) {
             $i = 0;
             $j = 4;
-        } elseif ($itemInfo['info']['type'] == $this->Enum::ItemTypeAmulet) {
+        } elseif ($type == $this->Enum::ItemTypeAmulet) {
             $i = 4;
             $j = 6;
         } else {
@@ -246,24 +247,24 @@ class PlayerObject extends AbstractController
 
         for ($i = $i; $i < $j; $i++) {
 
-            if ($p['inventory']['items'][$i]['isset'] == true) {
+            if (!empty($p['inventory']['items'][$i]['isset'])) {
                 continue;
             }
 
-            $p['inventory'] = $this->Bag->set($p['id'], $p['inventory'], $i, $itemInfo);
+            $this->Bag->set($p['id'], $p['inventory'], $i, $itemInfo);
             $this->enqueueItemInfo($p, $itemInfo['item_id']);
             $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['info']));
             $this->refreshBagWeight($p);
             $this->setPlayer($p['fd'], $p);
-            return $p;
+            return true;
         }
 
         for ($i = 0; $i < 46; $i++) {
-            if ($p['inventory']['items'][$i]['isset'] == true) {
+            if (!empty($p['inventory']['items'][$i]['isset'])) {
                 continue;
             }
 
-            $p['inventory'] = $this->Bag->set($p['id'], $p['inventory'], $i, $itemInfo);
+            $this->Bag->set($p['id'], $p['inventory'], $i, $itemInfo);
             $this->enqueueItemInfo($p, $itemInfo['item_id']);
             $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['info']));
             $this->refreshBagWeight($p);
@@ -347,7 +348,7 @@ class PlayerObject extends AbstractController
 
         $this->enqueueAreaObjects($p, null, $this->getCell($mapInfo, $p['current_location']));
 
-        $this->broadcast($p, ['OBJECT_PLAYER', $this->MsgFactory->objectPlayer($p)]);
+        $this->broadcast($p, $this->MsgFactory->objectPlayer($p));
 
         $this->setPlayer($p['fd'], $p);
     }
@@ -613,10 +614,10 @@ class PlayerObject extends AbstractController
             'PLAYER_UPDATE',
             [
                 'object_id'     => $p['id'],
+                'light'         => !empty($p['light']) ? $p['light'] : 0,
                 'weapon'        => $p['looks_weapon'],
                 'weapon_effect' => $p['looks_weapon_effect'],
                 'armour'        => $p['looks_armour'],
-                'light'         => $p['light'],
                 'wing_effect'   => $p['looks_wings'],
             ],
         ];
@@ -695,11 +696,21 @@ class PlayerObject extends AbstractController
         # code...
     }
 
-    public function enqueueAreaObjects($p, $oldCell, $newCell)
+    //更新角色周边对象
+    public function enqueueAreaObjects($p, $oldCell = null, $newCell = null)
     {
         if ($oldCell == null) {
-            $this->Map->rangeObject($p);
+            $this->Map->rangeObject($p, $p['current_location'], 20, function ($p, $obejct) {
+                if ($obejct['id'] != $p['id']) {
+                    $this->SendMsg->send($p['fd'], $this->MsgFactory->obejct($obejct));
+                }
+                return true;
+            });
+
+            return false;
         }
+
+        //移动后 删除原有格子对象,新格子对象加入 TODO
     }
 
     public function getCell($map, $CurrentLocation)
@@ -782,7 +793,7 @@ class PlayerObject extends AbstractController
 
     public function broadcastInfo($p)
     {
-        $this->broadcast($p, ['OBJECT_PLAYER', $this->MsgFactory->objectPlayer($p)]);
+        $this->broadcast($p, $this->MsgFactory->objectPlayer($p));
     }
 
     //广播血值状态
@@ -839,12 +850,12 @@ class PlayerObject extends AbstractController
     {
         $say = $this->Npc->callScript($p, $npc, $key);
 
-        if (!$say) {
-            EchoLog(sprintf('NPC脚本执行失败 ID: %s  key: %s', $npc['id'], $key), 'w');
-        }
-
         $p['calling_npc']      = $npc['id'];
         $p['calling_npc_page'] = $key;
+
+        if ($say === false) {
+            EchoLog(sprintf('NPC脚本执行失败 ID: %s  key: %s', $npc['id'], $key), 'w');
+        }
 
         $this->SendMsg->send($p['fd'], $this->MsgFactory->npcResponse($this->NpcScript->replaceTemplates($npc, $p, $say)));
 
@@ -919,7 +930,7 @@ class PlayerObject extends AbstractController
         $this->SendMsg->send($p['fd'], $this->MsgFactory->npcGoods($goods, 1, $this->Enum::PanelTypeBuy));
     }
 
-    public function takeGold($p, $gold)
+    public function takeGold(&$p, $gold)
     {
         if ($gold > $p['gold']) {
             EchoLog(sprintf('没有足够的金币 余额: %s  需要: %s', $p['gold'], $gold), 'w');
@@ -1098,7 +1109,7 @@ class PlayerObject extends AbstractController
                 if (!$this->teleportRandom($p, 200, $item['info']['durability'], $mapInfo)) {
                     return true;
                 }
-                
+
                 break;
         }
 
@@ -1125,7 +1136,7 @@ class PlayerObject extends AbstractController
             if ($ch['hp_pot_tick_time'] >= $ch['hp_pot_tick_num']) {
                 $ch['hp_pot_value'] = 0; //回复总值
             } else {
-                $ch['hp_pot_next_time'] = $now; //下次生效时间
+                $ch['hp_pot_next_time'] = $now + 5; //下次生效时间
             }
         }
 
@@ -1136,7 +1147,7 @@ class PlayerObject extends AbstractController
             if ($ch['mp_pot_tick_time'] >= $ch['mp_pot_tick_num']) {
                 $ch['mp_pot_value'] = 0; //回复总值
             } else {
-                $ch['mp_pot_next_time'] = $now; //下次生效时间
+                $ch['mp_pot_next_time'] = $now + 5; //下次生效时间
             }
         }
 
@@ -1298,4 +1309,69 @@ class PlayerObject extends AbstractController
 //     p.Enqueue(&server.NPCUpdate{NPCID: env.DefaultNPC.GetID()})
     // }
 
+    public function repairItem($p, $unique_id, $special)
+    {
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->repairItem($unique_id));
+
+        if ($p['dead']) {
+            return false;
+        }
+
+        if (!$p['calling_npc']
+            // ||
+            // (!$this->Util->stringEqualFold($p['calling_npc_page'], $this->Enum::StorageKey) && !$special) ||
+            // (!$this->Util->stringEqualFold($p['calling_npc_page'], $this->Enum::SRepairKey) && $special)
+        ) {
+            return false;
+        }
+
+        $index = -1;
+
+        foreach ($p['inventory']['items'] as $k => $temp) {
+            if (!empty($temp['id']) && $temp['id'] == $unique_id) {
+                $index = $k;
+                break;
+            }
+        }
+
+        if (!$temp || empty($temp['isset']) || $index == -1) {
+            $this->PlayerObject->receiveChat($p['fd'], '当前物品位置错误', $this->Enum::ChatTypeSystem);
+            return false;
+        }
+
+        $npc = $this->Map->getNpc($p['map']['info']['id'], $p['calling_npc']);
+        if (!$this->Npc->hasType($npc, $temp['info']['type'])) {
+            $this->PlayerObject->receiveChat($p['fd'], '您不能修理这个物品。', $this->Enum::ChatTypeSystem);
+            return false;
+        }
+
+        $cost = $this->Item->repairPrice($temp) * $this->Npc->priceRate($p, $npc, true);
+
+        if ($cost > $p['gold']) {
+            $this->PlayerObject->receiveChat($p['fd'], '您没有足够的金币修复物品', $this->Enum::ChatTypeSystem);
+            return;
+        }
+
+        $p['gold'] -= $cost;
+
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->loseGold($cost));
+
+        if (!$special) {
+            $temp['max_dura'] = intval($temp['max_dura'] - ($temp['max_dura'] - $temp['current_dura']) / 30);
+        }
+
+        $temp['current_dura'] = $temp['max_dura'];
+        $temp['dura_changed'] = false;
+
+        $p['inventory']['items'][$index] = $temp;
+
+        $this->PlayerObject->receiveChat($p['fd'], '您的武器被完全修复了', $this->Enum::ChatTypeSystem);
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->itemRepaired($unique_id, $temp['max_dura'], $temp['current_dura']));
+
+        co(function () use ($p, $temp) {
+            $this->setPlayer($p['fd'], $p);
+            $this->PlayersList->saveGold($p['id'], $p['gold']);
+            $this->PlayersList->saveItemDura($temp);
+        });
+    }
 }

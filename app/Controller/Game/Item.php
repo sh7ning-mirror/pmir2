@@ -20,11 +20,11 @@ class Item extends AbstractController
     public function newItem($map, $item)
     {
         $newItem = [
-            'gold'     => 0,
+            'gold'      => 0,
             'user_item' => $item,
-            'name'     => $item['info']['name'],
-            'id'       => $this->Atomic->newObjectID(),
-            'map'      => $map,
+            'name'      => $item['info']['name'],
+            'id'        => $this->Atomic->newObjectID(),
+            'map'       => $map,
         ];
 
         if ($item['info']['grade'] == $this->Enum::ItemGradeNone) {
@@ -149,6 +149,7 @@ class Item extends AbstractController
         return $info['image'];
     }
 
+    //物品价格
     public function price($item)
     {
         if (empty($item['info'])) {
@@ -177,5 +178,23 @@ class Item extends AbstractController
         $p = $p * $v;
 
         return intval($p * $item['count']);
+    }
+
+    //修理费
+    public function repairPrice($item)
+    {
+        if (empty($item['info']) || $item['info']['durability'] == 0) {
+            return 0;
+        }
+
+        $p = $item['info']['price'];
+
+        if ($item['info']['durability'] > 0) {
+            $p = $p * (($item['ac'] + $item['mac'] + $item['dc'] + $item['mc'] + $item['sc'] + $item['accuracy'] + $item['agility'] + $item['hp'] + $item['mp'] + $item['attack_speed'] + $item['luck'] + $item['strong'] + $item['magic_resist'] + $item['poison_resist'] + $item['health_recovery'] + $item['mana_recovery'] + $item['poison_recovery'] + $item['critical_rate'] + $item['critical_damage'] + $item['freezing'] + $item['poison_attack']) * 0.1 + 1.0);
+        }
+
+        $cost = $p * $item['count'] - $this->price($item);
+
+        return intval($cost * 2);
     }
 }

@@ -42,6 +42,8 @@ class ObjectService
         'Util'          => 'App\Controller\Game\Util\Util',
         'Item'          => 'App\Controller\Game\Item',
         'Buff'          => 'App\Controller\Game\Buff',
+        'Respawn'       => 'App\Controller\Game\Respawn',
+        'Monster'       => 'App\Controller\Game\Monster',
     ];
 
     public static function getObject($objectName = null)

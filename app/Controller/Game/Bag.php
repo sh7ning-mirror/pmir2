@@ -62,15 +62,15 @@ class Bag extends AbstractController
         return $bag;
     }
 
-    public function useCount($Inventory, $i, $count)
+    public function useCount(&$Inventory, $i, $count)
     {
-        return $this->setCount($Inventory, $i, $Inventory['items'][$i]['count'] - $count);
+        $this->setCount($Inventory, $i, $Inventory['items'][$i]['count'] - $count);
     }
 
-    public function setCount($Inventory, $i, $count)
+    public function setCount(&$Inventory, $i, $count)
     {
         if ($count == 0) {
-            $Inventory = $this->set($Inventory, $i, null);
+            $this->set($Inventory, $i, null);
         } else {
 
             $where = [
@@ -89,11 +89,9 @@ class Bag extends AbstractController
 
             $Inventory['items'][$i]['count'] = $count;
         }
-
-        return $Inventory;
     }
 
-    public function set($character_id, $Inventory, $i, $item = null)
+    public function set($character_id, &$Inventory, $i, $item = null)
     {
         if ($item) {
             if ($Inventory['items'][$i]['isset']) {
@@ -149,8 +147,6 @@ class Bag extends AbstractController
 
             $Inventory['items'][$i]          = $item;
             $Inventory['items'][$i]['isset'] = true;
-
-            return $Inventory;
         } else {
             $item = $Inventory['items'][$i];
 
@@ -180,8 +176,6 @@ class Bag extends AbstractController
             }
 
             $Inventory['items'][$i] = ['isset' => false];
-
-            return $Inventory;
         }
     }
 

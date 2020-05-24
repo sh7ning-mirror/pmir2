@@ -27,9 +27,9 @@ class AuthHandler extends AbstractController
     {
         co(function () use ($fd) {
 
-            $p              = $this->PlayerObject->playerInfo;
+            $p               = $this->PlayerObject->playerInfo;
             $p['game_stage'] = $this->Enum::LOGIN;
-            $p['fd']        = $fd;
+            $p['fd']         = $fd;
 
             $this->PlayerObject->setPlayer($fd, $p);
         });
@@ -166,21 +166,21 @@ class AuthHandler extends AbstractController
 
                 $Characters = $this->Character->getAccountCharacters($param['res']['account']);
 
-                co(function () use ($fd, $where, $res, $Characters, $p, $param) {
+                co(function () use ($fd, $where) {
                     $data = [
                         'login_date' => date('Y-m-d H:i:s'),
                         'login_ip'   => $this->Server->getClientInfo($fd)['remote_ip'],
                     ];
 
                     $this->CommonService->upField('account', $where, $data);
-
-                    $p['account_id']  = $res['data']['id'];
-                    $p['account']    = $param['res']['account'];
-                    $p['game_stage']  = $this->Enum::SELECT;
-                    $p['characters'] = $Characters;
-
-                    $this->PlayerObject->setPlayer($fd, $p);
                 });
+
+                $p['account_id'] = $res['data']['id'];
+                $p['account']    = $param['res']['account'];
+                $p['game_stage'] = $this->Enum::SELECT;
+                $p['characters'] = $Characters;
+
+                $this->PlayerObject->setPlayer($fd, $p);
 
                 return ['LOGIN_SUCCESS', ['count' => count($Characters), 'characters' => $Characters]];
             } else {
@@ -245,11 +245,11 @@ class AuthHandler extends AbstractController
                 $res = $this->CommonService->save('account_character', $data);
                 if ($res['code'] == 2000) {
                     $CharInfo = [
-                        'index'      => $data['character_id'],
-                        'name'       => $param['res']['name'],
-                        'level'      => $characterBase['level'],
-                        'class'      => $param['res']['class'],
-                        'gender'     => $param['res']['gender'],
+                        'index'       => $data['character_id'],
+                        'name'        => $param['res']['name'],
+                        'level'       => $characterBase['level'],
+                        'class'       => $param['res']['class'],
+                        'gender'      => $param['res']['gender'],
                         'last_access' => 0,
                     ];
 
@@ -264,8 +264,8 @@ class AuthHandler extends AbstractController
                         foreach ($startItems as $k => $v) {
                             $info = [
                                 'item_id'         => $v['id'],
-                                'current_dura'    => 100,
-                                'max_dura'        => 100,
+                                'current_dura'    => $v['durability'],
+                                'max_dura'        => $v['durability'],
                                 'count'           => 1,
                                 'ac'              => $v['min_ac'],
                                 'mac'             => $v['min_mac'],

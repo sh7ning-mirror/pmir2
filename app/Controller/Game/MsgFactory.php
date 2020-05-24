@@ -62,36 +62,38 @@ class MsgFactory extends AbstractController
     public function objectPlayer($p)
     {
         $data = [
-            'object_id'          => $p['id'],
-            'name'               => $p['name'],
-            'guild_name'         => $p['guild_name'],
-            'guild_rank_name'    => $p['guild_rank_name'],
-            'name_color'         => Int32(pack('c4', $p['name_color']['r'], $p['name_color']['g'], $p['name_color']['b'], 255)),
-            'class'              => $p['class'],
-            'gender'             => $p['gender'],
-            'level'              => $p['level'],
-            'location'           => $p['current_location'],
-            'direction'          => $p['current_direction'],
-            'hair'               => $p['hair'],
-            'light'              => $p['light'] ?: 0,
-            'weapon'             => $p['looks_weapon'],
-            'weapon_effect'      => $p['looks_weapon_effect'],
-            'armour'             => $p['looks_armour'],
-            'poison'             => $this->Enum::PoisonTypeNone, //TODO
-            'dead'               => $p['dead'],
-            'hidden'             => false,
-            'effect'             => $this->Enum::SpellEffectNone, //TODO
-            'wing_effect'        => $p['looks_wings'],
-            'extra'              => false, //TODO
-            'mount_type'         => -1, //TODO
-            'riding_mount'       => false, //TODO
-            'fishing'            => false, //TODO
-            'transform_type'     => -1, //TODO
-            'element_orb_effect' => 0, //TODO
-            'element_orb_lv_l'   => 0, //TODO
-            'element_orb_max'    => 200, //TODO
-            'buffs'              => [0, 0, 0, 0], //TODO
-            'level_effects'      => $this->Enum::LevelEffectsNone, //TODO
+            'OBJECT_PLAYER', [
+                'object_id'          => $p['id'],
+                'name'               => $p['name'],
+                'guild_name'         => $p['guild_name'],
+                'guild_rank_name'    => $p['guild_rank_name'],
+                'name_color'         => Int32(pack('c4', $p['name_color']['r'], $p['name_color']['g'], $p['name_color']['b'], 255)),
+                'class'              => $p['class'],
+                'gender'             => $p['gender'],
+                'level'              => $p['level'],
+                'location'           => $p['current_location'],
+                'direction'          => $p['current_direction'],
+                'hair'               => $p['hair'],
+                'light'              => $p['light'] ?: 0,
+                'weapon'             => $p['looks_weapon'],
+                'weapon_effect'      => $p['looks_weapon_effect'],
+                'armour'             => $p['looks_armour'],
+                'poison'             => $this->Enum::PoisonTypeNone, //TODO
+                'dead'               => $p['dead'],
+                'hidden'             => false,
+                'effect'             => $this->Enum::SpellEffectNone, //TODO
+                'wing_effect'        => $p['looks_wings'],
+                'extra'              => false, //TODO
+                'mount_type'         => -1, //TODO
+                'riding_mount'       => false, //TODO
+                'fishing'            => false, //TODO
+                'transform_type'     => -1, //TODO
+                'element_orb_effect' => 0, //TODO
+                'element_orb_lv_l'   => 0, //TODO
+                'element_orb_max'    => 200, //TODO
+                'buffs'              => [0, 0, 0, 0], //TODO
+                'level_effects'      => $this->Enum::LevelEffectsNone, //TODO
+            ],
         ];
 
         return $data;
@@ -127,23 +129,25 @@ class MsgFactory extends AbstractController
     public function objectMonster($m)
     {
         return [
-            'object_id'           => $m['id'],
-            'name'                => $m['name'],
-            'name_color'          => Int32(pack('c4', $m['name_color']['r'], $m['name_color']['g'], $m['name_color']['b'], 255)),
-            'location'            => $m['current_location'],
-            'image'               => $m['image'],
-            'direction'           => $m['current_direction'],
-            'effect'              => $m['effect'],
-            'ai'                  => $m['ai'],
-            'light'               => $m['light'],
-            'dead'                => $m['dead'],
-            'skeleton'            => false,
-            'poison'              => $m['poison'],
-            'hidden'              => false,
-            'shockTime'           => 0,
-            'binding_shot_center' => false,
-            'extra'               => false,
-            'extra_byte'          => 0,
+            'OBJECT_MONSTER', [
+                'object_id'           => $m['id'],
+                'name'                => $m['name'],
+                'name_color'          => Int32(pack('c4', $m['name_color']['r'], $m['name_color']['g'], $m['name_color']['b'], 255)),
+                'location'            => $m['current_location'],
+                'image'               => $m['image'],
+                'direction'           => $m['direction'],
+                'effect'              => $m['effect'],
+                'ai'                  => $m['ai'],
+                'light'               => $m['light'],
+                'dead'                => $m['dead'],
+                'skeleton'            => false,
+                'poison'              => $m['poison'],
+                'hidden'              => false,
+                'shock_time'          => 0,
+                'binding_shot_center' => false,
+                'extra'               => false,
+                'extra_byte'          => 0,
+            ],
         ];
     }
 
@@ -159,14 +163,16 @@ class MsgFactory extends AbstractController
     public function objectNPC($object)
     {
         return [
-            'object_id'  => $object['id'],
-            'name'       => $object['name'],
-            'name_color' => Int32(pack('c4', $object['name_color']['r'], $object['name_color']['g'], $object['name_color']['b'], 255)),
-            'image'      => $object['image'],
-            'color'      => 0,
-            'location'   => $object['current_location'],
-            'direction'  => $object['direction'],
-            'quest_ids'  => [0],
+            'OBJECT_NPC', [
+                'object_id'  => $object['id'],
+                'name'       => $object['name'],
+                'name_color' => Int32(pack('c4', $object['name_color']['r'], $object['name_color']['g'], $object['name_color']['b'], 255)),
+                'image'      => $object['image'],
+                'color'      => 0,
+                'location'   => $object['current_location'],
+                'direction'  => $object['direction'],
+                'quest_ids'  => [0],
+            ],
         ];
     }
 
@@ -175,8 +181,8 @@ class MsgFactory extends AbstractController
         return [
             'id'              => $ID,
             'item_id'         => $itemInfo['id'],
-            'current_dura'    => 100,
-            'max_dura'        => 100,
+            'current_dura'    => !empty($itemInfo['current_dura']) ? $itemInfo['current_dura'] : $itemInfo['durability'],
+            'max_dura'        => !empty($itemInfo['max_dura']) ? $itemInfo['max_dura'] : $itemInfo['durability'],
             'count'           => !empty($itemInfo['count']) ? $itemInfo['count'] : 1,
             'ac'              => $itemInfo['min_ac'],
             'mac'             => $itemInfo['max_ac'],
@@ -511,6 +517,59 @@ class MsgFactory extends AbstractController
                 'direction'      => $direction,
                 'map_dark_light' => $m['info']['map_dark_light'],
                 'music'          => $m['info']['music'],
+            ],
+        ];
+    }
+
+    public function obejct($object, $type = null)
+    {
+        if (empty($object['id'])) {
+            return false;
+        }
+
+        if ($type == null) {
+            $type = !empty($object['object_type']) ? $object['object_type'] : null;
+        }
+
+        switch ($type) {
+            case $this->Enum::ObjectTypePlayer:
+                return $this->objectPlayer($object);
+                break;
+
+            case $this->Enum::ObjectTypeItem:
+                return $this->objectItem($object);
+                break;
+
+            case $this->Enum::ObjectTypeMonster:
+                return $this->objectMonster($object);
+                break;
+
+            case $this->Enum::ObjectTypeNPC:
+                return $this->objectNPC($object);
+                break;
+
+            default:
+                EchoLog(sprintf('未知的对象: obejct[%s] type:[%s]', json_encode($object), $type), 'w');
+                break;
+        }
+    }
+
+    public function repairItem($unique_id)
+    {
+        return [
+            'REPAIR_ITEM', [
+                'unique_id' => $unique_id,
+            ],
+        ];
+    }
+
+    public function itemRepaired($unique_id, $max_dura, $current_dura)
+    {
+        return [
+            'ITEM_REPAIRED', [
+                'unique_id'    => $unique_id,
+                'max_dura'     => $max_dura,
+                'current_dura' => $current_dura,
             ],
         ];
     }

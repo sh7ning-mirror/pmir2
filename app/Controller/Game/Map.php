@@ -13,20 +13,20 @@ class Map extends AbstractController
     public function NewMap($w, $h, $version)
     {
         return [
-            'width'          => $w,
-            'height'         => $h,
-            'version'        => $version,
-            'info'           => [], //地图详情
-            'safe_zone_infos'  => [], //安全区
-            'respawns'       => [], //怪物刷新
-            'cells'          => [], //地图格子
+            'width'           => $w,
+            'height'          => $h,
+            'version'         => $version,
+            'info'            => [], //地图详情
+            'safe_zone_infos' => [], //安全区
+            'respawns'        => [], //怪物刷新
+            'cells'           => [], //地图格子
             'doors_map'       => $this->Door->NewGrid($w, $h),
-            'doors'          => [],
-            'players'        => [],
-            'monsters'       => [],
-            'npcs'           => [],
+            'doors'           => [],
+            'players'         => [],
+            'monsters'        => [],
+            'npcs'            => [],
             'actived_objects' => [],
-            'actionList'     => [],
+            'actionList'      => [],
         ];
     }
 
@@ -70,8 +70,9 @@ class Map extends AbstractController
         $npc = [];
         foreach ($npcInfos as $npcInfo) {
             if ($npcInfo['map_id'] == $map['info']['id']) {
-                $n         = $this->Npc->newNpc($npcInfo['map_id'], $this->Atomic->newObjectID(), $npcInfo);
-                $n['info'] = $npcInfo;
+                $n                = $this->Npc->newNpc($npcInfo['map_id'], $this->Atomic->newObjectID(), $npcInfo);
+                $n['info']        = $npcInfo;
+                $n['object_type'] = $this->Enum::ObjectTypeNPC;
 
                 if (!empty($n['id'])) {
                     $npc[$n['id']] = $n;
@@ -79,13 +80,20 @@ class Map extends AbstractController
             }
         }
 
-        // foreach ($respawnInfos as $respawnInfo) {
-        //     if ($respawnInfo['map_id'] == $map['info']['id']) {
+        $respawns = [];
+        $monsters = [];
+        foreach ($respawnInfos as $respawnInfo) {
+            if ($respawnInfo['map_id'] == $map['info']['id']) {
+                $respawn    = $this->Respawn->newRespawn($map, $respawnInfo);
+                $respawns[] = $respawn; //待生成信息
+                $monster    = $this->Respawn->spawn($respawn, false); //生成信息
+                if ($monster) {
+                    $monsters = array_merge($monsters, $monster);
+                }
+            }
+        }
 
-        //     }
-        // }
-
-        return ['npc' => $npc, 'monsters' => []];
+        return ['npc' => $npc, 'monsters' => $monsters, 'respawns' => $respawns];
     }
 
     public function addObject($object, $type)
@@ -104,7 +112,7 @@ class Map extends AbstractController
                 break;
 
             case $this->Enum::ObjectTypeMonster:
-                # code...
+                $this->GameData->setMapmonster($object['map']['info']['id'], $object);
                 break;
 
             case $this->Enum::ObjectTypeNPC:
@@ -113,10 +121,14 @@ class Map extends AbstractController
         }
     }
 
-    public function getObjectByPoint($object, $type)
+    public function getObjectByPoint($object, $type = null)
     {
         if (empty($object['id'])) {
             return false;
+        }
+
+        if ($type == null) {
+            $type = !empty($object['object_type']) ? $object['object_type'] : null;
         }
 
         switch ($type) {
@@ -149,6 +161,10 @@ class Map extends AbstractController
     {
         if (empty($object['id'])) {
             return false;
+        }
+
+        if ($type == null) {
+            $type = !empty($object['object_type']) ? $object['object_type'] : null;
         }
 
         switch ($type) {
@@ -207,13 +223,15 @@ class Map extends AbstractController
 
     public function broadcastP($currentPoint, $msg, $object)
     {
+        //给地图中人物同步登录玩家
         $players = $this->GameData->getMapPlayers($object['map']['info']['id']);
-
-        foreach ($players as $k => $v) {
-            $player = $this->PlayerObject->getIdPlayer($v['id']);
-            if ($this->Point->inRange($currentPoint, $player['current_location'], $this->DataRange)) {
-                if ($player['id'] != $object['id']) {
-                    $this->SendMsg->send($player['fd'], $msg);
+        if ($players) {
+            foreach ($players as $k => $v) {
+                $player = $this->PlayerObject->getIdPlayer($v['id']);
+                if ($this->Point->inRange($currentPoint, $player['current_location'], $this->DataRange)) {
+                    if ($player['id'] != $object['id']) {
+                        $this->SendMsg->send($player['fd'], $msg);
+                    }
                 }
             }
         }
@@ -221,34 +239,148 @@ class Map extends AbstractController
 
     public function broadcastN($object)
     {
-        //同步npc
+        //给登录玩家同步npc(未用暂留)
         $npcs = $this->GameData->getMapNpc($object['map']['info']['id']);
         if ($npcs) {
             foreach ($npcs as $k => $v) {
                 if (!empty($v['current_location'])) {
-                    // if ($this->Point->inRange($object['current_location'], $v['current_location'], $this->DataRange)) {
-                    $this->SendMsg->send($object['fd'], ['OBJECT_NPC', $this->MsgFactory->objectNPC($v)]);
-                    // }
+                    if ($this->Point->inRange($object['current_location'], $v['current_location'], $this->DataRange)) {
+                        $this->SendMsg->send($object['fd'], $this->MsgFactory->objectNPC($v));
+                    }
                 }
             }
         }
     }
 
-    public function rangeObject($object)
+    public function getCellPlayer($object, $depth)
     {
-        $this->PlayerObject->broadcast($object, ['OBJECT_PLAYER', $this->MsgFactory->objectPlayer($object)]);
+        $players    = $this->GameData->getMapPlayers($object['map']['info']['id']);
+        $palyerData = [];
+        if ($players) {
+            foreach ($players as $k => $v) {
+                $player = $this->PlayerObject->getIdPlayer($v['id']);
+                if (!empty($player['current_location'])) {
+                    if ($this->Point->inRange($object['current_location'], $player['current_location'], $depth)) {
+                        $palyerData[] = $player;
+                    }
+                }
+            }
+        }
 
-        $this->broadcastN($object);
+        return $palyerData;
     }
 
-    public function updateObject($object, $point, $type)
+    public function getCellNpc($object, $depth)
     {
+        $npcs = $this->GameData->getMapNpc($object['map']['info']['id']);
+
+        $npcData = [];
+        if ($npcs) {
+            foreach ($npcs as $k => $v) {
+                if (!empty($v['current_location'])) {
+                    if ($this->Point->inRange($object['current_location'], $v['current_location'], $depth)) {
+                        $npcData[] = $v;
+                    }
+                }
+            }
+        }
+
+        return $npcData;
+    }
+
+    public function getCellItem($object, $depth)
+    {
+        $items = $this->GameData->getMapItem($object['map']['info']['id']);
+
+        $itemData = [];
+        if ($items) {
+            foreach ($items as $k => $v) {
+                if (!empty($v['current_location'])) {
+                    if ($this->Point->inRange($object['current_location'], $v['current_location'], $depth)) {
+                        $itemData[] = $v;
+                    }
+                }
+            }
+        }
+
+        return $itemData;
+    }
+
+    public function getCellMonster($object, $depth)
+    {
+        $monsters    = $this->GameData->getMapMonster($object['map']['info']['id']);
+        $monsterData = [];
+        if ($monsters) {
+            foreach ($monsters as $k => $v) {
+                if (!empty($v['current_location'])) {
+                    if ($this->Point->inRange($object['current_location'], $v['current_location'], $depth)) {
+                        $monsterData[] = $v;
+                    }
+                }
+            }
+        }
+
+        return $monsterData;
+    }
+
+    //给玩家同步地图中的对象
+    public function rangeObject($p, $point, $depth, $fun)
+    {
+        //获取地图中邻近的人物
+        $palyers = $this->getCellPlayer($p, $depth);
+        if ($palyers) {
+            foreach ($palyers as $k => $v) {
+                if (!call_user_func_array($fun, [$p, $v])) {
+                    return false;
+                }
+            }
+        }
+
+        //获取地图中邻近的npc
+        $npcs = $this->getCellNpc($p, $depth);
+        if ($npcs) {
+            foreach ($npcs as $k => $v) {
+                if (!call_user_func_array($fun, [$p, $v])) {
+                    return false;
+                }
+            }
+        }
+
+        //获取地图中邻近的物品
+        $items = $this->getCellItem($p, $depth);
+        if ($items) {
+            foreach ($items as $k => $v) {
+                if (!call_user_func_array($fun, [$p, $v])) {
+                    return false;
+                }
+            }
+        }
+
+        //获取地图中邻近的怪物
+        $monsters = $this->getCellMonster($p, $depth);
+        if ($monsters) {
+            foreach ($monsters as $k => $v) {
+                if (!call_user_func_array($fun, [$p, $v])) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public function updateObject($object, $point, $type = null)
+    {
+        if ($type == null) {
+            $type = !empty($object['object_type']) ? $object['object_type'] : null;
+        }
+
         switch ($type) {
             case $this->Enum::ObjectTypePlayer:
-                $this->PlayerObject->broadcast($object, ['OBJECT_PLAYER', $this->MsgFactory->objectPlayer($object)]);
+                $this->PlayerObject->broadcast($object, $this->MsgFactory->objectPlayer($object));
 
                 $mapInfo = $this->GameData->getMap($object['map']['info']['id']);
-                $this->PlayerObject->enqueueAreaObjects($object, $this->getCell($mapInfo, $object['current_location']), null);
+                $this->PlayerObject->enqueueAreaObjects($object, $this->getCell($mapInfo, $object['current_location']), $point);
                 break;
 
             case $this->Enum::ObjectTypeMonster:

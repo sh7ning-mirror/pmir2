@@ -122,4 +122,28 @@ class PlayersList extends AbstractController
             $this->CommonService->save('user_magic', $magic);
         });
     }
+
+    public function saveItemDura($item)
+    {
+        if (!$item['id']) {
+            return false;
+        }
+
+        co(function () use ($item) {
+            $data = [
+                'current_dura' => $item['current_dura'],
+                'max_dura'     => $item['max_dura'],
+            ];
+
+            $where = [
+                'whereInfo' => [
+                    'where' => [
+                        ['id', '=', $item['id']],
+                    ],
+                ],
+            ];
+
+            $this->CommonService->upField('user_item', $where, $data);
+        });
+    }
 }

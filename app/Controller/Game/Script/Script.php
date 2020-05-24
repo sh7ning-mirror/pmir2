@@ -469,7 +469,7 @@ class Script extends AbstractController
         return false;
     }
 
-    public function call($page, $npc, $p)
+    public function call($page, $npc, &$p)
     {
         $page = strtoupper($page);
 
@@ -494,7 +494,6 @@ class Script extends AbstractController
         if ($acts) {
             foreach ($acts as $act) {
                 $shouldBreak = false;
-
                 switch ($act['func']) {
                     case 'BREAK':
                         $shouldBreak = true;
@@ -502,6 +501,11 @@ class Script extends AbstractController
 
                     case 'GOTO':
                         return $this->call('[' . $act['args'][0] . ']', $npc, $p);
+                        break;
+
+                    default:
+                        $func = $act['func'];
+                        $this->NpcScript->$func($act['args'], $p);
                         break;
                 }
 

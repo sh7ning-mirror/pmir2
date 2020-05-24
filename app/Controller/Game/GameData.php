@@ -11,6 +11,9 @@ class GameData extends AbstractController
     public $npcInfos;
     public $respawnInfos;
     public $safeZoneInfo;
+    public static $dataMonsters;
+    public static $monsters;
+    public static $maps;
 
     public function loadGameData()
     {
@@ -170,12 +173,28 @@ class GameData extends AbstractController
                 $players_key  = 'map:players_' . $v['id'];
                 $npcs_key     = 'map:npcs_' . $v['id'];
                 $monsters_key = 'map:monsters_' . $v['id'];
+                $respawns_key = 'map:respawns_' . $v['id'];
                 $item_key     = 'map:item_' . $v['id'];
 
-                $this->Redis->set($players_key, json_encode([], JSON_UNESCAPED_UNICODE));
-                $this->Redis->set($npcs_key, json_encode($map_data['npc'], JSON_UNESCAPED_UNICODE));
-                $this->Redis->set($monsters_key, json_encode($map_data['monsters'], JSON_UNESCAPED_UNICODE));
-                $this->Redis->set($item_key, json_encode([], JSON_UNESCAPED_UNICODE));
+                co(function () use ($players_key) {
+                    $this->Redis->set($players_key, json_encode([], JSON_UNESCAPED_UNICODE));
+                });
+
+                co(function () use ($npcs_key, $map_data) {
+                    $this->Redis->set($npcs_key, json_encode($map_data['npc'], JSON_UNESCAPED_UNICODE));
+                });
+
+                co(function () use ($monsters_key, $map_data) {
+                    $this->Redis->set($monsters_key, json_encode($map_data['monsters'], JSON_UNESCAPED_UNICODE));
+                });
+
+                co(function () use ($respawns_key, $map_data) {
+                    $this->Redis->set($respawns_key, json_encode($map_data['respawns'], JSON_UNESCAPED_UNICODE));
+                });
+
+                co(function () use ($item_key) {
+                    $this->Redis->set($item_key, json_encode([], JSON_UNESCAPED_UNICODE));
+                });
             }
 
             $etime = microtime(true);
@@ -460,15 +479,37 @@ class GameData extends AbstractController
         return $itemIDInfoMap[$ItemID] ?: null;
     }
 
+    public function getMaps()
+    {
+        if (!self::$maps) {
+            self::$maps = json_decode($this->Redis->get('Maps'), true);
+        }
+
+        return self::$maps;
+    }
+
     public function getMap($mapId = null)
     {
-        $Maps = json_decode($this->Redis->get('Maps'), true);
+        $Maps = $this->getMaps();
 
         if ($mapId == null) {
             return $Maps;
         }
 
         return $Maps[$mapId] ?: null;
+    }
+
+    public function getMapByName($file_name)
+    {
+        $Maps = $this->getMaps();
+
+        foreach ($Maps as $k => $v) {
+            if ($v['info']['file_name'] == strtoupper(trim($file_name))) {
+                return $v;
+            }
+        }
+
+        return false;
     }
 
     public function getItemInfos()
@@ -558,9 +599,10 @@ class GameData extends AbstractController
 
         $mapPlayers           = $this->getMapPlayers($map_id) ?: [];
         $mapPlayers[$p['id']] = [
-            'fd'   => $p['fd'],
-            'id'   => $p['id'],
-            'name' => $p['name'],
+            'fd'          => $p['fd'],
+            'id'          => $p['id'],
+            'name'        => $p['name'],
+            'object_type' => $this->Enum::ObjectTypePlayer,
         ];
 
         $this->Redis->set($key, json_encode($mapPlayers, JSON_UNESCAPED_UNICODE));
@@ -568,9 +610,12 @@ class GameData extends AbstractController
 
     public function setMapItem($map_id, $object)
     {
-        $key             = 'map:item_' . $map_id;
-        $mapItem         = $this->getMapItem($map_id) ?: [];
-        $point           = $object['current_location']['x'] . '_' . $object['current_location']['y'];
+        $key     = 'map:item_' . $map_id;
+        $mapItem = $this->getMapItem($map_id) ?: [];
+        $point   = $object['current_location']['x'] . '_' . $object['current_location']['y'];
+
+        $object['object_type'] = $this->Enum::ObjectTypeItem;
+
         $mapItem[$point] = $object;
 
         $this->Redis->set($key, json_encode($mapItem, JSON_UNESCAPED_UNICODE));
@@ -655,5 +700,43 @@ class GameData extends AbstractController
     public function getDefaultNPC()
     {
         return json_decode($this->Redis->get('defaultNPC'), true);
+    }
+
+    public function getMonsterIDInfoMap()
+    {
+        if (!self::$dataMonsters) {
+            self::$dataMonsters = json_decode($this->Redis->get('monsterIDInfoMap'), true);
+        }
+
+        return self::$dataMonsters;
+    }
+
+    public function getMonsterInfoByID($m_id)
+    {
+        $monsterList = $this->getMonsterIDInfoMap();
+
+        return !empty($monsterList[$m_id]) ? $monsterList[$m_id] : null;
+    }
+
+    public function getMapMonsters($map_id)
+    {
+        if (!self::$monsters) {
+            self::$monsters = json_decode($this->Redis->get('map:monsters_' . $map_id), true);
+        }
+
+        return self::$monsters;
+    }
+
+    public function setMapRespawnMonster($map_id, $monster)
+    {
+        $monsters_key  = 'map:monsters_' . $map_id;
+        $monsterList   = json_decode($this->Redis->get($monsters_key), true);
+        $monsterList[] = $monster;
+        $this->Redis->set($monsters_key, json_encode($monsterList, JSON_UNESCAPED_UNICODE));
+    }
+
+    public function getMapMonster($map_id)
+    {
+        return $this->getMapMonsters($map_id);
     }
 }

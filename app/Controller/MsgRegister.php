@@ -37,5 +37,6 @@ class MsgRegister
         'CHANGE_P_MODE'    => ['\App\Controller\World\Handler', 'changePMode'],
         'USE_ITEM'         => ['\App\Controller\World\Handler', 'useItem'],
         'DROP_GOLD'        => ['\App\Controller\World\Handler', 'dropGold'],
+        'REPAIR_ITEM'      => ['\App\Controller\World\Handler', 'repairItem'],
     ];
 }

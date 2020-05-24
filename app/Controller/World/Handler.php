@@ -447,9 +447,9 @@ class Handler extends AbstractController
         }
 
         if ($param['res']['count'] >= $res[1]['count']) {
-            $p['inventory'] = $this->Bag->set($p['id'], $p['inventory'], $res[0], null);
+            $this->Bag->set($p['id'], $p['inventory'], $res[0], null);
         } else {
-            $p['inventory'] = $this->Bag->useCount($p['inventory'], $res[0], $param['res']['count']);
+            $this->Bag->useCount($p['inventory'], $res[0], $param['res']['count']);
         }
 
         $this->PlayerObject->refreshBagWeight($p);
@@ -508,7 +508,7 @@ class Handler extends AbstractController
             $temp['count'] -= $param['res']['count'];
             $temp = $item;
         } else {
-            $p['inventory'] = $this->Bag->set($p['id'], $p['inventory'], $index, null);
+            $this->Bag->set($p['id'], $p['inventory'], $index, null);
         }
 
         $this->Npc->addBuyBack($npc, $p, $temp); //出售回购
@@ -633,9 +633,9 @@ class Handler extends AbstractController
 
         if ($msg[1]['success']) {
             if ($res[1]['count'] > 1) {
-                $p['inventory'] = $this->Bag->useCount($p['inventory'], $res[0], 1);
+                $this->Bag->useCount($p['inventory'], $res[0], 1);
             } else {
-                $p['inventory'] = $this->Bag->set($p['id'], $p['inventory'], $res[0], null);
+                $this->Bag->set($p['id'], $p['inventory'], $res[0], null);
             }
 
             $this->PlayerObject->refreshBagWeight($p);
@@ -667,5 +667,12 @@ class Handler extends AbstractController
         }
 
         $this->PlayerObject->takeGold($p, $param['res']['amount']);
+    }
+
+    public function repairItem($fd, $param)
+    {
+        $p = $this->PlayerObject->getPlayer($fd);
+
+        $this->PlayerObject->repairItem($p, $param['res']['unique_id'], false);
     }
 }
