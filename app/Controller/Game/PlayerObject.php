@@ -108,23 +108,17 @@ class PlayerObject extends AbstractController
 
     public function getPlayer($fd)
     {
-        return json_decode($this->Redis->get('player:_' . getClientId($fd)), true);
+        return $this->GameData->getPlayer($fd);
     }
 
     public function getIdPlayer($id)
     {
-        return json_decode($this->Redis->get('player:character_id_' . $id), true);
+        return $this->GameData->getIdPlayer($id);
     }
 
     public function setPlayer($fd, $data = null)
     {
-        co(function () use ($fd, $data) {
-            $this->Redis->set('player:_' . getClientId($fd), json_encode($data, JSON_UNESCAPED_UNICODE));
-
-            if (!empty($data['id'])) {
-                $this->Redis->set('player:character_id_' . $data['id'], json_encode($data, JSON_UNESCAPED_UNICODE));
-            }
-        });
+    	$this->GameData->setPlayer($fd, $data);
     }
 
     public function updatePlayerInfo(&$p, $accountCharacter, $user_magic)
@@ -171,12 +165,12 @@ class PlayerObject extends AbstractController
         $p['buff_list']   = [];
 
         $health = [
-            'hp_pot_next_time' => time(),
-            'hp_pot_duration'  => 1 * 60,
+            'hp_pot_next_time' => time(), //下次生效时间
+            'hp_pot_duration'  => 1, //两次生效时间间隔
             'mp_pot_next_time' => time(),
-            'mp_pot_duration'  => 1 * 60,
-            'heal_next_time'   => time() + 10,
-            'heal_duration'    => 10 * 60,
+            'mp_pot_duration'  => 1,
+            'heal_next_time'   => time(),
+            'heal_duration'    => config('heal_duration'), //自然恢复
         ];
 
         $p['health'] = $this->MsgFactory->health($health);
@@ -300,13 +294,13 @@ class PlayerObject extends AbstractController
     {
         if ($p['send_item_info']) {
             foreach ($p['send_item_info'] as $k => $v) {
-                if ($v['id'] == $ItemID) {
+                if (!empty($v['id']) && $v['id'] == $ItemID) {
                     return $p;
                 }
             }
         }
 
-        $item = $this->GameData->getItemInfoByID($ItemID);
+        $item = $this->GameData->getItemInfoById($ItemID);
 
         if (!$item) {
             return false;
@@ -346,7 +340,7 @@ class PlayerObject extends AbstractController
 
         $this->SendMsg->send($p['fd'], ['SWITCH_GROUP', ['allow_group' => $p['allow_group'] ?: 0]]);
 
-        $this->enqueueAreaObjects($p, null, $this->getCell($mapInfo, $p['current_location']));
+        $this->enqueueAreaObjects($p, null, $p['current_location'], $mapInfo);
 
         $this->broadcast($p, $this->MsgFactory->objectPlayer($p));
 
@@ -367,7 +361,7 @@ class PlayerObject extends AbstractController
             foreach ($p['inventory']['items'] as $k => $v) {
                 if ($v) {
                     $p['inventory']['items'][$k]['isset'] = true;
-                    $itemInfos[]                          = $this->GameData->getItemInfoByID($v['item_id']);
+                    $itemInfos[]                          = $this->GameData->getItemInfoById($v['item_id']);
                 } else {
                     $p['inventory']['items'][$k]['isset'] = false;
                 }
@@ -379,7 +373,7 @@ class PlayerObject extends AbstractController
             foreach ($p['equipment']['items'] as $k => $v) {
                 if ($v) {
                     $p['equipment']['items'][$k]['isset'] = true;
-                    $itemInfos[]                          = $this->GameData->getItemInfoByID($v['item_id']);
+                    $itemInfos[]                          = $this->GameData->getItemInfoById($v['item_id']);
                 } else {
                     $p['equipment']['items'][$k]['isset'] = false;
                 }
@@ -390,7 +384,7 @@ class PlayerObject extends AbstractController
             foreach ($p['quest_inventory']['items'] as $k => $v) {
                 if ($v) {
                     $p['quest_inventory']['items'][$k]['isset'] = true;
-                    $itemInfos[]                                = $this->GameData->getItemInfoByID($v['item_id']);
+                    $itemInfos[]                                = $this->GameData->getItemInfoById($v['item_id']);
                 } else {
                     $p['quest_inventory']['items'][$k]['isset'] = false;
                 }
@@ -526,7 +520,7 @@ class PlayerObject extends AbstractController
 
         foreach ($p['inventory']['items'] as $k => $v) {
             if ($v && $v['isset']) {
-                $item = $this->GameData->getItemInfoByID($v['info']['id']);
+                $item = $this->GameData->getItemInfoById($v['info']['id']);
                 $p['current_bag_weight'] += $item['weight'];
             }
         }
@@ -545,13 +539,13 @@ class PlayerObject extends AbstractController
         $p['looks_weapon_effect'] = 0;
         $p['looks_wings']         = 0;
 
-        $ItemInfos = $this->GameData->getItemInfos();
+        $ItemInfos = $this->GameData->getItemInfosIds();
         foreach ($p['equipment']['items'] as $temp) {
             if (!$temp || !$temp['isset']) {
                 continue;
             }
 
-            $RealItem = $this->GameData->getRealItem($temp['info'], $p['level'], $p['class'], $ItemInfos);
+            $RealItem = $this->Item->getRealItem($temp['info'], $p['level'], $p['class'], $ItemInfos);
 
             $p['min_ac']  = toUint16(intval($p['min_ac']) + intval($RealItem['min_ac']));
             $p['max_ac']  = toUint16(intval($p['max_ac']) + intval($RealItem['max_ac']) + intval($temp['ac']));
@@ -697,12 +691,12 @@ class PlayerObject extends AbstractController
     }
 
     //更新角色周边对象
-    public function enqueueAreaObjects($p, $oldCell = null, $newCell = null)
+    public function enqueueAreaObjects($p, $oldCell = null, $newCell = null, $map = null)
     {
         if ($oldCell == null) {
-            $this->Map->rangeObject($p, $p['current_location'], 20, function ($p, $obejct) {
-                if ($obejct['id'] != $p['id']) {
-                    $this->SendMsg->send($p['fd'], $this->MsgFactory->obejct($obejct));
+            $this->Map->rangeObject($p, $p['current_location'], 20, function ($p, $object) {
+                if ($object['id'] != $p['id']) {
+                    $this->SendMsg->send($p['fd'], $this->MsgFactory->object($object));
                 }
                 return true;
             });
@@ -710,7 +704,52 @@ class PlayerObject extends AbstractController
             return false;
         }
 
-        //移动后 删除原有格子对象,新格子对象加入 TODO
+        //移动后 删除原有格子对象,新格子对象加入
+        $cells = $this->Map->calcDiff($map, $oldCell, $newCell);
+
+        foreach ($cells as $cellId => $idAdd) {
+            if ($idAdd) {
+                co(function () use ($p, $cellId) {
+                    $newObjects = $this->GameData->getCellObject($p['map']['info']['id'], $cellId);
+                    if ($newObjects) {
+                        foreach ($newObjects as $k => $v) {
+
+                            //地图小于40的npc不更新
+                            if($p['map']['width'] <= 40 && $p['map']['height'] <= 40 && $v['object_type'] == $this->Enum::ObjectTypeNPC)
+                            {
+                                continue;
+                            }
+
+                            co(function () use ($p, $v) {
+                                if($v['id'] != $p['id'])
+                                {
+                                    $this->SendMsg->send($p['fd'], $this->MsgFactory->object($v));
+                                }
+                            });
+                        }
+                    }
+                });
+            } else {
+                co(function () use ($p, $cellId) {
+                    $oldObjects = $this->GameData->getCellObject($p['map']['info']['id'], $cellId);
+                    if ($oldObjects) {
+                        foreach ($oldObjects as $k => $v) {
+                            //地图小于40的npc不更新
+                            if($p['map']['width'] <= 40 && $p['map']['height'] <= 40 && $v['object_type'] == $this->Enum::ObjectTypeNPC)
+                            {
+                                continue;
+                            }
+
+                            co(function () use ($p, $v) {
+                                if($v['id'] != $p['id']){
+                                    $this->SendMsg->send($p['fd'], $this->MsgFactory->objectRemove($v));
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        }
     }
 
     public function getCell($map, $CurrentLocation)
@@ -721,7 +760,7 @@ class PlayerObject extends AbstractController
     //检查可以地图跳转
     public function checkMovement($point, &$p)
     {
-        $movementInfos = $this->GameData->getMovementInfos();
+        $movementInfos = $this->GameData->getMovements();
 
         $maps = $this->GameData->getMap();
 
@@ -755,8 +794,16 @@ class PlayerObject extends AbstractController
         $this->broadcast($p, ['OBJECT_TELEPORT_OUT', ['object_id' => $p['id'], 'type' => 0]]);
         $this->broadcast($p, $this->MsgFactory->objectRemove($p));
 
-        $p['map']['info']['id'] = $m['info']['id'];
-        $p['current_location']  = $point;
+        $p['map'] = [
+            'id'     => $m['info']['id'],
+            'width'  => $m['width'],
+            'height' => $m['height'],
+            'info'   => [
+                'id' => $m['info']['id'],
+            ],
+        ];
+
+        $p['current_location'] = $point;
 
         $this->Map->addObject($p, $this->Enum::ObjectTypePlayer);
 
@@ -768,7 +815,7 @@ class PlayerObject extends AbstractController
 
         $this->SendMsg->send($p['fd'], $this->MsgFactory->mapChange($m, $p['current_location'], $p['current_direction']));
 
-        $this->enqueueAreaObjects($p, null, $this->getCell($m, $p['current_location']));
+        $this->enqueueAreaObjects($p, null, $p['current_location'], $m);
 
         $this->SendMsg->send($p['fd'], ['OBJECT_TELEPORT_IN', ['object_id' => $p['id'], 'type' => 0]]);
 
@@ -902,6 +949,7 @@ class PlayerObject extends AbstractController
             foreach ($npc['goods'] as $key => $item) {
                 $this->enqueueItemInfo($p, $item['item_id']);
             }
+
             $this->SendMsg->send($p['fd'], $this->MsgFactory->npcGoods($npc['goods'], 1.0, $this->Enum::PanelTypeBuy));
         }
     }
@@ -919,7 +967,7 @@ class PlayerObject extends AbstractController
 
     public function sendBuyBackGoods($p, $npc, $syncItem)
     {
-        $goods = $this->Npc->getPlayerBuyBack($p, $npc);
+        $goods = $this->GameData->getPlayerBuyBack($p['id'], $npc['id']);
 
         if ($syncItem && $goods) {
             foreach ($goods as $key => $item) {
@@ -1118,47 +1166,74 @@ class PlayerObject extends AbstractController
 
     public function process($p)
     {
+        if (empty($p['fd']) || !$p) {
+            return;
+        }
+
         $p = $this->getPlayer($p['fd']);
         if (!$p || $p == 'null') {
             return;
         }
 
-        $now = time();
+        $this->processRegen($p);
         $this->processBuffs($p);
         $this->processPoison($p);
+
+        $this->GameData->setPlayer($p['fd'], $p);
+    }
+
+    public function processRegen(&$p)
+    {
+        if ($p['dead']) {
+            return false;
+        }
+
+        $now = time();
 
         $ch = &$p['health'];
 
         if ($ch['hp_pot_value'] != 0 && $ch['hp_pot_next_time'] < $now) {
+
             $this->changeHp($p, $ch['hp_pot_per_value']);
+
             $ch['hp_pot_tick_time'] += 1;
 
             if ($ch['hp_pot_tick_time'] >= $ch['hp_pot_tick_num']) {
                 $ch['hp_pot_value'] = 0; //回复总值
             } else {
-                $ch['hp_pot_next_time'] = $now + 5; //下次生效时间
+                $ch['hp_pot_next_time'] = $now + $ch['hp_pot_duration']; //下次生效时间
             }
         }
 
         if ($ch['mp_pot_value'] != 0 && $ch['mp_pot_next_time'] < $now) {
+
             $this->changeMp($p, $ch['mp_pot_per_value']);
+
             $ch['mp_pot_tick_time'] += 1;
 
             if ($ch['mp_pot_tick_time'] >= $ch['mp_pot_tick_num']) {
                 $ch['mp_pot_value'] = 0; //回复总值
             } else {
-                $ch['mp_pot_next_time'] = $now + 5; //下次生效时间
+                $ch['mp_pot_next_time'] = $now + $ch['mp_pot_duration']; //下次生效时间
             }
         }
 
         if ($ch['heal_next_time'] < $now) {
-            $ch['heal_next_time'] = $now;
+            $ch['heal_next_time'] = $now + $ch['heal_duration']; //自然恢复时间
 
             $this->changeHp($p, intval($p['max_hp'] * 0.03) + 1);
             $this->changeMp($p, intval($p['max_mp'] * 0.03) + 1);
         }
+    }
 
-        $this->setPlayer($p['fd'], $p);
+    public function processBuffs(&$p)
+    {
+
+    }
+
+    public function processPoison(&$p)
+    {
+
     }
 
     public function giveSkill(&$p, $spell, $level)
@@ -1194,16 +1269,6 @@ class PlayerObject extends AbstractController
         }
 
         return false;
-    }
-
-    public function processBuffs($p)
-    {
-
-    }
-
-    public function processPoison($p)
-    {
-
     }
 
     public function changeHp(&$p, $amount)
@@ -1339,7 +1404,7 @@ class PlayerObject extends AbstractController
             return false;
         }
 
-        $npc = $this->Map->getNpc($p['map']['info']['id'], $p['calling_npc']);
+        $npc = $this->GameData->getMapNpcInfo($p['map']['info']['id'], $p['calling_npc']);
         if (!$this->Npc->hasType($npc, $temp['info']['type'])) {
             $this->PlayerObject->receiveChat($p['fd'], '您不能修理这个物品。', $this->Enum::ChatTypeSystem);
             return false;

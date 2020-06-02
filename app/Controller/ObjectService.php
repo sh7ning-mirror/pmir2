@@ -9,6 +9,22 @@ use Hyperf\Utils\ApplicationContext;
 class ObjectService
 {
     private static $objectRegister = [
+        'Process'       => 'App\Controller\GameProcess',
+        'NpcData'       => 'App\Controller\Process\NpcData',
+        'CellData'      => 'App\Controller\Process\CellData',
+        'GameShopData'  => 'App\Controller\Process\GameShopData',
+        'ItemData'      => 'App\Controller\Process\ItemData',
+        'MagicData'     => 'App\Controller\Process\MagicData',
+        'MonsterData'   => 'App\Controller\Process\MonsterData',
+        'MovementData'  => 'App\Controller\Process\MovementData',
+        'NpcData'       => 'App\Controller\Process\NpcData',
+        'QuestData'     => 'App\Controller\Process\QuestData',
+        'RespawnData'   => 'App\Controller\Process\RespawnData',
+        'SafeZoneData'  => 'App\Controller\Process\SafeZoneData',
+        'MapData'       => 'App\Controller\Process\MapData',
+        'ExpListData'   => 'App\Controller\Process\ExpListData',
+        'AtomicData'    => 'App\Controller\Process\AtomicData',
+        'PlayerData'    => 'App\Controller\Process\PlayerData',
         'Server'        => 'Swoole\Server',
         'Redis'         => 'Hyperf\Redis\Redis',
         'MsgRegister'   => 'App\Controller\MsgRegister',
@@ -44,6 +60,8 @@ class ObjectService
         'Buff'          => 'App\Controller\Game\Buff',
         'Respawn'       => 'App\Controller\Game\Respawn',
         'Monster'       => 'App\Controller\Game\Monster',
+        'GameObject'    => 'App\Controller\Game\GameObject',
+        'Event'         => 'App\Controller\Game\Loop\Event',
     ];
 
     public static function getObject($objectName = null)

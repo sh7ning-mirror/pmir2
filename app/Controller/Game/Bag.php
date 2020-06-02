@@ -52,7 +52,7 @@ class Bag extends AbstractController
 
             if ($res['list']) {
                 foreach ($res['list'] as $k => $v) {
-                    $v['info']                           = $this->GameData->getItemInfoByID($v['item_id']);
+                    $v['info']                           = $this->GameData->getItemInfoById($v['item_id']);
                     $v['dura_changed']                   = false;
                     $bag['items'][$uItemIndex[$v['id']]] = $v;
                 }

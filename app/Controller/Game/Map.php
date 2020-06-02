@@ -67,15 +67,19 @@ class Map extends AbstractController
 
     public function initAll($map, $npcInfos, $respawnInfos, $safeZoneInfo)
     {
-        $npc = [];
+        $npc        = [];
+        $cellObject = [];
         foreach ($npcInfos as $npcInfo) {
             if ($npcInfo['map_id'] == $map['info']['id']) {
-                $n                = $this->Npc->newNpc($npcInfo['map_id'], $this->Atomic->newObjectID(), $npcInfo);
+                $n                = $this->Npc->newNpc($map, $this->Atomic->newObjectID(), $npcInfo);
                 $n['info']        = $npcInfo;
                 $n['object_type'] = $this->Enum::ObjectTypeNPC;
 
-                if (!empty($n['id'])) {
+                if (!empty($n['id']) && !empty($map['width'])) {
                     $npc[$n['id']] = $n;
+                    $cellId        = $this->Cell->getCellId($npcInfo['location_x'], $npcInfo['location_y'], $map['width'], $map['height']);
+
+                    $cellObject[$cellId][] = $n;
                 }
             }
         }
@@ -85,15 +89,20 @@ class Map extends AbstractController
         foreach ($respawnInfos as $respawnInfo) {
             if ($respawnInfo['map_id'] == $map['info']['id']) {
                 $respawn    = $this->Respawn->newRespawn($map, $respawnInfo);
-                $respawns[] = $respawn; //待生成信息
                 $monster    = $this->Respawn->spawn($respawn, false); //生成信息
+                $respawns[] = $respawn; //待生成信息
                 if ($monster) {
                     $monsters = array_merge($monsters, $monster);
+
+                    foreach ($monster as $k => $v) {
+                        $cellId = $this->Cell->getCellId($v['current_location']['x'], $v['current_location']['y'], $v['map']['width'], $v['map']['height']);
+                        $cellObject[$cellId][] = $v;
+                    }
                 }
             }
         }
 
-        return ['npc' => $npc, 'monsters' => $monsters, 'respawns' => $respawns];
+        return ['npc' => $npc, 'monsters' => $monsters, 'respawns' => $respawns, 'cellObject' => $cellObject];
     }
 
     public function addObject($object, $type)
@@ -157,7 +166,7 @@ class Map extends AbstractController
         }
     }
 
-    public function deleteObject($object, $type)
+    public function deleteObject($object, $type=null)
     {
         if (empty($object['id'])) {
             return false;
@@ -228,9 +237,12 @@ class Map extends AbstractController
         if ($players) {
             foreach ($players as $k => $v) {
                 $player = $this->PlayerObject->getIdPlayer($v['id']);
-                if ($this->Point->inRange($currentPoint, $player['current_location'], $this->DataRange)) {
-                    if ($player['id'] != $object['id']) {
-                        $this->SendMsg->send($player['fd'], $msg);
+                if($player['id'] != $object['id'])
+                {
+                    if ($this->Point->inRange($currentPoint, $player['current_location'], $this->DataRange)) {
+                        if ($player['id'] !== $object['id']) {
+                            $this->SendMsg->send($player['fd'], $msg);
+                        }
                     }
                 }
             }
@@ -240,12 +252,13 @@ class Map extends AbstractController
     public function broadcastN($object)
     {
         //给登录玩家同步npc(未用暂留)
-        $npcs = $this->GameData->getMapNpc($object['map']['info']['id']);
+        $npcs = $this->GameData->getMapNpcIds($object['map']['info']['id']);
         if ($npcs) {
             foreach ($npcs as $k => $v) {
-                if (!empty($v['current_location'])) {
-                    if ($this->Point->inRange($object['current_location'], $v['current_location'], $this->DataRange)) {
-                        $this->SendMsg->send($object['fd'], $this->MsgFactory->objectNPC($v));
+                $info = $this->GameData->getMapNpcInfo($object['map']['info']['id'], $v);
+                if (!empty($info['current_location'])) {
+                    if ($this->Point->inRange($object['current_location'], $info['current_location'], $this->DataRange)) {
+                        $this->SendMsg->send($object['fd'], $this->MsgFactory->objectNPC($info));
                     }
                 }
             }
@@ -272,14 +285,15 @@ class Map extends AbstractController
 
     public function getCellNpc($object, $depth)
     {
-        $npcs = $this->GameData->getMapNpc($object['map']['info']['id']);
+        $npcs = $this->GameData->getMapNpcIds($object['map']['info']['id']);
 
         $npcData = [];
         if ($npcs) {
             foreach ($npcs as $k => $v) {
-                if (!empty($v['current_location'])) {
-                    if ($this->Point->inRange($object['current_location'], $v['current_location'], $depth)) {
-                        $npcData[] = $v;
+                $info = $this->GameData->getMapNpcInfo($object['map']['info']['id'], $v);
+                if (!empty($info['current_location'])) {
+                    if ($this->Point->inRange($object['current_location'], $info['current_location'], $depth)) {
+                        $npcData[] = $info;
                     }
                 }
             }
@@ -380,7 +394,7 @@ class Map extends AbstractController
                 $this->PlayerObject->broadcast($object, $this->MsgFactory->objectPlayer($object));
 
                 $mapInfo = $this->GameData->getMap($object['map']['info']['id']);
-                $this->PlayerObject->enqueueAreaObjects($object, $this->getCell($mapInfo, $object['current_location']), $point);
+                $this->PlayerObject->enqueueAreaObjects($object, $object['current_location'], $point, $mapInfo);
                 break;
 
             case $this->Enum::ObjectTypeMonster:
@@ -394,9 +408,7 @@ class Map extends AbstractController
     //检查是否开门
     public function checkDoorOpen($map_id, $point)
     {
-        $mapInfo = $this->GameData->getMap($map_id);
-
-        $door = $this->Door->get($mapInfo['doors_map'], $point);
+        $door = $this->Door->get($map_id, $point);
         if (!$door) {
             return true;
         }
@@ -420,23 +432,9 @@ class Map extends AbstractController
         return true;
     }
 
-    public function getNpc($map_id, $id)
-    {
-        $key = 'map:npcs_' . $map_id;
-
-        $npcs = json_decode($this->Redis->get($key), true);
-
-        if (!$npcs) {
-            return false;
-        }
-
-        return $npcs[$id] ?? null;
-    }
-
     public function rangeCell($object, $m, $p, $depth, $fun)
     {
-        $px = $p['x'];
-        $py = $p['y'];
+        list($px, $py) = [$p['x'], $p['y']];
 
         for ($d = 0; $d <= $depth; $d++) {
             for ($y = $py - $d; $y <= $py + $d; $y++) {
@@ -468,5 +466,69 @@ class Map extends AbstractController
                 }
             }
         }
+    }
+
+    public function calcDiff($map, $from, $to, $datarange = 20)
+    {
+        list($fx, $fy, $tx, $ty) = [$from['x'], $from['y'], $to['x'], $to['y']];
+        list($xChange, $yChange) = [$tx - $fx, $ty - $fy];
+
+        $set = [];
+
+        if ($xChange > 0) {
+            // 右移
+            for ($x = 0; $x < $xChange; $x++) {
+                for ($y = $fy - $datarange; $y <= $fy + $datarange; $y++) {
+                    $cellId       = $this->Cell->getCellId($fx - $datarange + $x, $y, $map['width'], $map['height']);
+                    $set[$cellId] = false; // 左
+                }
+
+                for ($y = $ty - $datarange; $y <= $ty + $datarange; $y++) {
+                    $cellId       = $this->Cell->getCellId($tx + $datarange - $x, $y, $map['width'], $map['height']);
+                    $set[$cellId] = true; // 右
+                }
+            }
+        } else {
+            // 左移
+            for ($x = 0; $x > $xChange; $x--) {
+                for ($y = $ty - $datarange; $y <= $ty + $datarange; $y++) {
+                    $cellId       = $this->Cell->getCellId($tx - $datarange - $x, $y, $map['width'], $map['height']);
+                    $set[$cellId] = true; // 左
+                }
+
+                for ($y = $fy - $datarange; $y <= $fy + $datarange; $y++) {
+                    $cellId       = $this->Cell->getCellId($fx + $datarange + $x, $y, $map['width'], $map['height']);
+                    $set[$cellId] = false; // 右
+                }
+            }
+        }
+
+        if ($yChange < 0) {
+            // 上移
+            for ($y = 0; $y > $yChange; $y--) {
+                for ($x = $tx - $datarange; $x <= $tx + $datarange; $x++) {
+                    $cellId       = $this->Cell->getCellId($x, $ty - $datarange - $y, $map['width'], $map['height']);
+                    $set[$cellId] = true; // 上
+                }
+                for ($x = $fx - $datarange; $x <= $fx + $datarange; $x++) {
+                    $cellId       = $this->Cell->getCellId($x, $fy + $datarange + $y, $map['width'], $map['height']);
+                    $set[$cellId] = false; // 下
+                }
+            }
+        } else {
+            // 下移
+            for ($y = 0; $y < $yChange; $y++) {
+                for ($x = $fx - $datarange; $x <= $fx + $datarange; $x++) {
+                    $cellId       = $this->Cell->getCellId($x, $fy - $datarange + $y, $map['width'], $map['height']);
+                    $set[$cellId] = false; // 上
+                }
+                for ($x = $tx - $datarange; $x <= $tx + $datarange; $x++) {
+                    $cellId       = $this->Cell->getCellId($x, $ty + $datarange - $y, $map['width'], $map['height']);
+                    $set[$cellId] = true; // 下
+                }
+            }
+        }
+
+        return $set;
     }
 }

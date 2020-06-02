@@ -39,10 +39,13 @@ return [
 
                 //固定包头+包体协议
                 'open_length_check'        => true,
-                'package_max_length'       => 20480,
                 'package_length_type'      => 's', //see php pack()
                 'package_length_offset'    => 0, //长度起始字段
                 'package_body_offset'      => 0, //包体起始位置
+
+                'socket_buffer_size'       => 8 * 1024 * 1024, // 配置客户端连接的缓存区长度
+                'package_max_length'       => 8 * 1024 * 1024, //包大小
+                'pipe_buffer_size'         => 32 * 1024 *1024,
             ],
         ],
         // [
@@ -72,8 +75,9 @@ return [
         'max_coroutine'         => 100000, // 设置当前工作进程最大协程数量
         'open_http2_protocol'   => false, // 启用 HTTP2 协议解析
         'max_request'           => 100000, // 设置 worker 进程的最大任务数
-        'socket_buffer_size'    => 10 * 1024 * 1024, // 配置客户端连接的缓存区长度
-        'package_max_length'    => 10 * 1024 * 1024, //包大小
+        'socket_buffer_size'    => 8 * 1024 * 1024, // 配置客户端连接的缓存区长度
+        'package_max_length'    => 8 * 1024 * 1024, //包大小
+        'pipe_buffer_size'      => 32 * 1024 *1024,
         'daemonize'             => env('SERVER_DAEMONIZE', 1), //守护进程
 
         // Task Worker 数量，根据您的服务器配置而配置适当的数量

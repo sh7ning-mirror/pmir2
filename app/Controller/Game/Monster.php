@@ -10,7 +10,7 @@ class Monster extends AbstractController
 {
     public function newMonster($map, $point, $monster)
     {
-        $monsterObejct = [
+        $monsterObject = [
             'id'               => $this->Atomic->newObjectID(),
             'map'              => $map,
             'name'             => $monster['name'],
@@ -55,7 +55,7 @@ class Monster extends AbstractController
             'current_poison'   => $this->Enum::PoisonTypeNone,
         ];
 
-        return $monsterObejct;
+        return $monsterObject;
     }
 
     public function broadcastInfo($monster)
@@ -71,5 +71,10 @@ class Monster extends AbstractController
     public function broadcastHealthChange($monster)
     {
         $this->MapObject->iMapObject_BroadcastHealthChange($monster);
+    }
+
+    public function process($respawn, $time)
+    {
+        
     }
 }

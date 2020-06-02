@@ -685,3 +685,8 @@ function removeBOM($str)
 
     return $str;
 }
+
+function getIndexMax($arra,$index)
+{
+    return max(array_column($arra, $index));
+}

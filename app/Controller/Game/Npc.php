@@ -8,9 +8,7 @@ use App\Controller\AbstractController;
  */
 class Npc extends AbstractController
 {
-    public static $itemNameInfoMap;
-
-    public function newNpc($map_id, $id, $npc)
+    public function newNpc($map, $id, $npc)
     {
         $sc = $this->Script->loadFile($npc['file_name'] . '.txt');
 
@@ -20,17 +18,22 @@ class Npc extends AbstractController
         }
 
         $npc = [
-            // 'MapObject' => [
             'id'               => $id,
             'name'             => $npc['chinese_name'],
             'name_color'       => ['r' => 0, 'g' => 255, 'b' => 0],
-            'map'              => $map_id,
+            'map'              => $map ? [
+                'id'     => $map['info']['id'],
+                'width'  => !empty($map['width']) ? $map['width'] : '',
+                'height' => !empty($map['height']) ? $map['height'] : '',
+                'info'   => [
+                    'id' => $map['info']['id'],
+                ],
+            ] : '',
             'current_location' => ['x' => $npc['location_x'], 'y' => $npc['location_y']],
             'direction'        => rand(0, 1),
             'dead'             => false,
             'player_count'     => 0,
             'in_safe_zone'     => false,
-            // ],
             'image'            => $npc['image'],
             'light'            => 0, // TODO
             'turn_time'        => time(),
@@ -40,10 +43,6 @@ class Npc extends AbstractController
         ];
 
         if (!empty($npc['script']['goods'])) {
-            if (!self::$itemNameInfoMap) {
-                self::$itemNameInfoMap = json_decode($this->Redis->get('itemNameInfoMap'), true);
-            }
-
             foreach ($npc['script']['goods'] as $name) {
 
                 $res = explode(' ', $name);
@@ -54,7 +53,7 @@ class Npc extends AbstractController
                     $count = (int) $res[1];
                 }
 
-                $item = !empty(self::$itemNameInfoMap[$name]) ? self::$itemNameInfoMap[$name] : [];
+                $item = !empty($this->ItemData::$itemNameInfos[$name]) ? $this->ItemData::$itemNameInfos[$name] : [];
 
                 if (!$item) {
                     continue;
@@ -67,7 +66,6 @@ class Npc extends AbstractController
             }
         }
 
-        // file_put_contents('/tmp/test.log', json_encode($npc,JSON_UNESCAPED_UNICODE),FILE_APPEND);
         return $npc;
     }
 
@@ -81,22 +79,13 @@ class Npc extends AbstractController
         return $npc['info']['rate'] / 100;
     }
 
-    public function getPlayerBuyBack($p, $npc)
-    {
-        $key = 'npc:buyBack_' . $npc['id'];
-
-        $buyBackList = json_decode($this->Redis->get($key), true);
-
-        return !empty($buyBackList[$p['id']]) ? $buyBackList[$p['id']] : [];
-    }
-
     public function buy($p, $npc, $userItemID, $count)
     {
         $userItem  = [];
         $iter      = [];
         $isBuyBack = false;
 
-        $items = $this->getPlayerBuyBack($p, $npc);
+        $items = $this->GameData->getPlayerBuyBack($p['id'], $npc['id']);
 
         if ($items) {
             foreach ($items as $k => $v) {
@@ -123,7 +112,7 @@ class Npc extends AbstractController
 
         if ($isBuyBack) {
             $userItem['info']['count'] = $count;
-            $this->removeBuyBack($npc, $p, $userItemID);
+            $this->removePlayerBuyBack($npc, $p, $userItemID);
 
             $this->PlayerObject->sendBuyBackGoods($p, $npc, false);
         } else {
@@ -136,39 +125,18 @@ class Npc extends AbstractController
         }
     }
 
-    public function addBuyBack($npc, $p, $temp)
+    public function setPlayerBuyBack($npc, $p, $temp)
     {
         co(function () use ($npc, $p, $temp) {
+            $temp['time_expire'] = time() + (3 * 60 * 60); //过期时间,过期后放入商店
 
-            $key = 'npc:buyBack_' . $npc['id'];
-
-            $buyBackList = json_decode($this->Redis->get($key), true);
-
-            $timeExpire          = 3 * 60 * 60; //过期时间,过期后放入商店 TODO 需要做定时器
-            $temp['time_expire'] = $timeExpire;
-
-            $buyBackList[$p['id']][] = $temp;
-
-            $this->Redis->set($key, json_encode($buyBackList, JSON_UNESCAPED_UNICODE));
+            $this->GameData->setPlayerBuyBack($p['id'], $npc['id'], $temp);
         });
     }
 
-    public function removeBuyBack($npc, $p, $userItemID)
+    public function removePlayerBuyBack($npc, $p, $userItemID)
     {
-        // co(function () use ($npc, $p, $userItemID) {
-        $key = 'npc:buyBack_' . $npc['id'];
-
-        $buyBackList = json_decode($this->Redis->get($key), true);
-
-        foreach ($buyBackList[$p['id']] as $k => $v) {
-            if ($v['id'] == $userItemID) {
-                unset($buyBackList[$p['id']][$k]);
-                break;
-            }
-        }
-
-        $this->Redis->set($key, json_encode($buyBackList, JSON_UNESCAPED_UNICODE));
-        // });
+        $this->GameData->removePlayerBuyBack($p['id'], $npc['id'], $userItemID);
     }
 
     public function getUserItemByID($npc, $id)
@@ -186,6 +154,35 @@ class Npc extends AbstractController
             foreach ($npc['script']['types'] as $k => $v) {
                 if ($v == $type) {
                     return true;
+                }
+            }
+        }
+    }
+
+    public function broadcast($npcInfo, $msg)
+    {
+        $this->Map->broadcastP($npcInfo['current_location'], $msg, $npcInfo);
+    }
+
+    public function process(&$npcInfo)
+    {
+        $time = time();
+        if ($npcInfo['turn_time'] < $time) {
+            $npcInfo['turn_time'] = $time + rand(20, 60) * 60 * 60;
+            $npcInfo['direction'] = rand(0, 1);
+            $npcInfo['current_direction'] = $npcInfo['direction'];
+            $this->broadcast($npcInfo, ['OBJECT_TURN', $this->MsgFactory->objectTurn($npcInfo)]);
+        }
+
+        //回购物品加入商店
+        $buyBack = $this->GameData->getNpcBuyBack($npcInfo['id']);
+        if($buyBack)
+        {
+            foreach ($buyBack as $k => $v)
+            {
+                if($v['time_expire'] <= $time)
+                {
+
                 }
             }
         }

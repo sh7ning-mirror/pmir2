@@ -33,17 +33,14 @@ class Server extends AbstractController
 
         EchoLog('Server version ' . env('VERSION', '1.0.1'), null, true);
         EchoLog('author by.fan <fan3750060@163.com>', null, true);
+
+        //业务进程
+        $this->Process->start('GameProcess');
     }
 
     public function onStart()
     {
-        if (\Hyperf\Utils\Coroutine::inCoroutine()) {
-            $this->GameData->loadGameData();
-        } else {
-            co(function () {
-                $this->GameData->loadGameData();
-            });
-        }
+        // $this->GameData->loadGameData();
     }
 
     public function onConnect($server, $fd, $reactorId)
@@ -55,31 +52,6 @@ class Server extends AbstractController
 
     public function onReceive($server, $fd, $reactorId, $data)
     {
-        //处理黏包(这里只需要将黏在一起的同一批tcp消息进行处理,底层已经实现单次tcp的收发)
-        // $strlen    = strlen($data);
-        // $dataArray = [];
-        // $i         = 0;
-        // while ($i < $strlen) {
-        //     $size        = unpack('s', substr($data, $i))[1];
-        //     $dataArray[] = substr($data, $i, $size);
-        //     $i += $size;
-        // }
-
-        // co(function () use ($dataArray, $fd) {
-        //     foreach ($dataArray as $k => $v) {
-        //         co(function () use ($fd, $v) {
-        //             $data = $this->SendMsg->unPacketData($v);
-
-        //             EchoLog(sprintf('Client: [%s] serverReceive: %s', $fd, json_encode($data, JSON_UNESCAPED_UNICODE)), 'i');
-
-        //             if ($data['cmdName']) {
-        //                 $this->handler($data['cmdName'], $fd, $data);
-        //             }
-        //         });
-        //     }
-        // });
-
-        //看了文档发现swoole有包头包体解析方式,为了性能弃用上面的方式(不过测试1秒1000次并发貌似和上面性能差不多~)
         $data = $this->SendMsg->unPacketData($data);
 
         $filter = [
@@ -90,15 +62,19 @@ class Server extends AbstractController
             EchoLog(sprintf('Client: [%s] serverReceive: %s', $fd, json_encode($data, JSON_UNESCAPED_UNICODE)), 'i');
 
             $pakc_filter = [
-                'PICK_UP'
+                'PICK_UP',
             ];
             if (empty($data['res']) && !in_array($data['cmdName'], $pakc_filter)) {
                 EchoLog(sprintf('未正确解析数据包: %s', $data['cmdName']), 'w');
             }
         }
 
+        if ($data['len'] < 4) {
+            return;
+        }
+
         if ($data['cmdName']) {
-            $this->handler($data['cmdName'], $fd, $data);
+            $this->Process->send([$data['cmdName'], $fd, $data]);
         }
     }
 
@@ -106,24 +82,11 @@ class Server extends AbstractController
     {
         EchoLog(sprintf('Client: [%s] close IP: [%s]', $fd, $server->getClientInfo($fd)['remote_ip']), 'w');
 
-        //保存玩家属性
-        $this->PlayersList->saveData($fd);
-
-        //删除玩家
-        $this->PlayersList->delPlayersList($fd);
-
-        //删除连接
-        $this->delClientInfo($fd);
+        $this->Process->send(['GAME_OVER', $fd, []]);
     }
 
     public function onShutdown()
     {
         EchoLog("onShutdown");
-    }
-
-    public function delClientInfo($fd = null)
-    {
-        $key = getClientId($fd);
-        $this->Redis->del('player:_' . $key);
     }
 }

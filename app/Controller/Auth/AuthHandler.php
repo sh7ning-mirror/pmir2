@@ -447,10 +447,15 @@ class AuthHandler extends AbstractController
 
         EchoLog(sprintf('玩家登陆: 账户ID(%s) 角色名(%s)', $p['account_id'], $p['name']), 'i');
 
-        // $p['Map'] = $this->GameData->getMap($accountCharacter['data']['current_map_id']);
-        $p['map']['info']['id'] = $accountCharacter['data']['current_map_id'];
-
-        $this->PlayersList->addPlayersList($p);
+        $mapInfo  = $this->GameData->getMap($accountCharacter['data']['current_map_id']);
+        $p['map'] = [
+            'id'     => $mapInfo['info']['id'],
+            'width'  => $mapInfo['width'],
+            'height' => $mapInfo['height'],
+            'info'   => [
+                'id' => $mapInfo['info']['id'],
+            ],
+        ];
 
         $this->Map->addObject($p, $this->Enum::ObjectTypePlayer);
 

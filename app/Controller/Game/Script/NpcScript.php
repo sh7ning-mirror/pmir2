@@ -175,7 +175,7 @@ class NpcScript extends AbstractController
         $x         = $param[1];
         $y         = $param[2];
 
-        $map = $this->GameData->getMapByName($file_name);
+        $map = $this->GameData->getMapByName(strtoupper($file_name));
 
         if ($map && $x >= 0 && $y >= 0) {
             $this->PlayerObject->teleport($p, $map, ['x' => $x, 'y' => $y]);

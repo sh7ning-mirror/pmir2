@@ -14,7 +14,7 @@ use Hyperf\Contract\StdoutLoggerInterface;
 use Psr\Log\LogLevel;
 
 return [
-    'app_name'                   => env('APP_NAME', 'skeleton'),
+    'app_name'                   => env('APP_NAME', 'pmir2'),
     StdoutLoggerInterface::class => [
         'log_level' => [
             LogLevel::ALERT,
@@ -30,5 +30,6 @@ return [
 
     'settings_path'              => BASE_PATH . '/storage',
     'dataRange'                  => 20, //视野范围,正常屏幕大小
-    'respawn_time'               => 2 * 60, //怪物刷新间隔时间
+    'respawn_time'               => 3*60, //怪物刷新间隔时间
+    'heal_duration'              => 10, //玩家回血时长(最低为1秒)
 ];

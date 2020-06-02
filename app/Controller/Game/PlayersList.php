@@ -8,22 +8,7 @@ use App\Controller\AbstractController;
  */
 class PlayersList extends AbstractController
 {
-    protected $key = 'PlayersList';
-
-    public function getPlayersList()
-    {
-        return json_decode($this->Redis->get($this->key), true);
-    }
-
-    public function addPlayersList($p)
-    {
-        $PlayersList   = $this->getPlayersList() ?: [];
-        $PlayersList[] = $p;
-
-        $this->Redis->set($this->key, json_encode($PlayersList, JSON_UNESCAPED_UNICODE));
-    }
-
-    public function delPlayersList($fd, $p = null)
+    public function delMapPlayers($fd, $p = null)
     {
         if (!$p) {
             $p = $this->PlayerObject->getPlayer($fd);
@@ -36,15 +21,6 @@ class PlayersList extends AbstractController
         if (!empty($p['map'])) {
             $this->GameData->delMapPlayers($p['map']['info']['id'], $p);
         }
-
-        if (!empty($p['id'])) {
-            $this->delCharacter($p);
-        }
-    }
-
-    public function delCharacter($p)
-    {
-        $this->Redis->del('player:character_id_' . $p['id']);
     }
 
     public function saveData($fd, $p = null)

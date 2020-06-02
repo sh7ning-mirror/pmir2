@@ -124,10 +124,35 @@ class Handler extends AbstractController
             $this->PlayersList->saveData($fd, $p);
 
             //删除玩家
-            $this->PlayersList->delPlayersList($fd, $p);
+            $this->Map->deleteObject($p);
         });
 
         return ['LOG_OUT_SUCCESS', ['count' => count($Characters), 'characters' => $Characters]];
+    }
+
+    public function gameOver($fd, $param)
+    {
+        $p = $this->PlayerObject->getPlayer($fd);
+
+        if (!$p || !isset($p['game_stage']) || $p['game_stage'] != $this->Enum::GAME) {
+            return false;
+        }
+
+        $Characters = $this->Character->getAccountCharacters($p['account']);
+
+        $this->PlayerObject->stopGame($p);
+
+        co(function () use ($fd, $p) {
+
+            //保存玩家属性
+            $this->PlayersList->saveData($fd, $p);
+
+            //删除玩家
+            $this->Map->deleteObject($p);
+
+            //删除账户数据
+            $this->GameData->delPlayer($fd);
+        });
     }
 
     public function chat($fd, $param)
@@ -389,12 +414,12 @@ class Handler extends AbstractController
     {
         $p = $this->PlayerObject->getPlayer($fd);
 
-        $defaultNPC = $this->GameData->getDefaultNPC();
+        $defaultNpc = $this->GameData->getDefaultNpc();
 
-        if ($param['res']['object_id'] == $defaultNPC['id']) {
-            $npc = $defaultNPC;
+        if ($param['res']['object_id'] == $defaultNpc['id']) {
+            $npc = $defaultNpc;
         } else {
-            $npc = $this->Map->getNpc($p['map']['info']['id'], $param['res']['object_id']);
+            $npc = $this->GameData->getMapNpcInfo($p['map']['info']['id'], $param['res']['object_id']);
         }
 
         if (!$npc) {
@@ -420,7 +445,7 @@ class Handler extends AbstractController
             return false;
         }
 
-        $npc = $this->Map->getNpc($p['map']['info']['id'], $p['calling_npc']);
+        $npc = $this->GameData->getMapNpcInfo($p['map']['info']['id'], $p['calling_npc']);
 
         $this->Npc->buy($p, $npc, $param['res']['item_index'], $param['res']['count']);
     }
@@ -440,6 +465,7 @@ class Handler extends AbstractController
         $item = $this->Item->newItem($p['map'], $res[1]);
 
         $dropMsg = $this->Item->drop($item, $p['current_location'], 1);
+
         if (!$dropMsg) {
             $this->PlayerObject->receiveChat($p['fd'], sprintf('坐标(%s)附近没有合适的点放置物品;', $p['current_location']), $this->Enum::ChatTypeSystem);
 
@@ -491,7 +517,7 @@ class Handler extends AbstractController
             return $this->MsgFactory->sellItem($param['res']['unique_id'], $param['res']['count'], false);
         }
 
-        $npc = $this->Map->getNpc($p['map']['info']['id'], $p['calling_npc']);
+        $npc = $this->GameData->getMapNpcInfo($p['map']['info']['id'], $p['calling_npc']);
         if (!$this->Npc->hasType($npc, $temp['info']['type'])) {
             $this->PlayerObject->receiveChat($p['fd'], '不能在这里卖这类商品', $this->Enum::ChatTypeSystem);
             return $this->MsgFactory->sellItem($param['res']['unique_id'], $param['res']['count'], false);
@@ -511,7 +537,7 @@ class Handler extends AbstractController
             $this->Bag->set($p['id'], $p['inventory'], $index, null);
         }
 
-        $this->Npc->addBuyBack($npc, $p, $temp); //出售回购
+        $this->Npc->setPlayerBuyBack($npc, $p, $temp); //出售回购
 
         $this->PlayerObject->refreshBagWeight($p);
 

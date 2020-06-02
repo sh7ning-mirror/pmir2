@@ -176,10 +176,10 @@ class MsgFactory extends AbstractController
         ];
     }
 
-    public function newUserItem($itemInfo, $ID)
+    public function newUserItem($itemInfo, $id)
     {
         return [
-            'id'              => $ID,
+            'id'              => $id,
             'item_id'         => $itemInfo['id'],
             'current_dura'    => !empty($itemInfo['current_dura']) ? $itemInfo['current_dura'] : $itemInfo['durability'],
             'max_dura'        => !empty($itemInfo['max_dura']) ? $itemInfo['max_dura'] : $itemInfo['durability'],
@@ -240,6 +240,11 @@ class MsgFactory extends AbstractController
 
     public function npcGoods($goods, $rate, $type)
     {
+        if($goods)
+        {
+            sort($goods);
+        }
+        
         return ['NPC_GOODS', [
             'count' => !empty($goods) ? count($goods) : 0,
             'goods' => $goods,
@@ -521,7 +526,7 @@ class MsgFactory extends AbstractController
         ];
     }
 
-    public function obejct($object, $type = null)
+    public function object($object, $type = null)
     {
         if (empty($object['id'])) {
             return false;
@@ -549,7 +554,7 @@ class MsgFactory extends AbstractController
                 break;
 
             default:
-                EchoLog(sprintf('未知的对象: obejct[%s] type:[%s]', json_encode($object), $type), 'w');
+                EchoLog(sprintf('未知的对象: object[%s] type:[%s]', json_encode($object), $type), 'w');
                 break;
         }
     }

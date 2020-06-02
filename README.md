@@ -102,11 +102,11 @@ Linux:
 
 运行游戏模拟器:
 
-./cmd.sh restart
+sh cmd.sh restart
 
 查看帮助:
 
-./cmd.sh
+sh cmd.sh
 
 
 ## 操作指南
@@ -130,15 +130,17 @@ Linux:
     6.下载游戏客户端
     链接：https://pan.baidu.com/s/1odTWKcOgLecFrDcOJnI-1w 提取码：0vos 
     
-    7.绑定hosts,将mir.impyq.com绑定为你的ip
-    xxx.xxx.xxx.xx mir.impyq.com
+    7.修改当前客户端请求IP,客户端目录下Mir2Config.ini,新增配置项
+    [Network]
+    UseConfig=False
+    IPAddress=你的服务器IP
     
     也可以自己编译客户端,将客户端目录下Client/Settings.cs中76行 
-    public static string IPAddress = "47.95.206.70" 中的ip修改为你服务器的ip
+    public static string IPAddress = "127.0.0.1" 中的ip修改为你服务器的ip
     (C#客户端及服务端源代码:https://github.com/fan3750060/mir2)
 
     8.启动服务器
-    ./cmd.sh restart
+    sh cmd.sh restart
 
     9.进行游戏
     

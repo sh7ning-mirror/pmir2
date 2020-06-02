@@ -16,7 +16,7 @@ class Enum
     const AccountCharacter = 4; //允许最大创建角色数
 
     //允许的分辨率
-    const AllowedResolution = 1024; //支持1024(1024, 768),1280(1280, 800),1366(1366, 768)
+    const AllowedResolution = 1366; //支持1024(1024, 768),1280(1280, 800),1366(1366, 768)
 
     const AllowGroup = 1; //允许组队
 

@@ -22,12 +22,13 @@ class Respawn extends AbstractController
     {
         $respawn = [
             'info'     => $info,
-            'monster'  => $this->GameData->getMonsterInfoByID($info['monster_id']), //todo
+            'monster'  => $this->MonsterData::$monsterInfos[$info['monster_id']],
             'routes'   => [],
             'count'    => 0,
             'map'      => [
-                'width'  => $map['width'],
-                'height' => $map['height'],
+                'id'     => $map['info']['id'],
+                'width'  => !empty($map['width']) ? $map['width'] : '',
+                'height' => !empty($map['height']) ? $map['height'] : '',
                 'info'   => [
                     'id' => $map['info']['id'],
                 ],
@@ -123,7 +124,13 @@ class Respawn extends AbstractController
         ];
     }
 
-    public function spawn($respawn, $type = true)
+    //怪物刷新
+    public function process(&$respawn)
+    {
+        $this->spawn($respawn, true);
+    }
+
+    public function spawn(&$respawn, $type = true)
     {
         $monster = [];
         for ($i = $respawn['count']; $i < $respawn['info']['count']; $i++) {
@@ -131,6 +138,8 @@ class Respawn extends AbstractController
                 $monster[] = $info;
             }
         }
+
+        $respawn['count'] = $respawn['info']['count'];
 
         return $monster;
     }
@@ -148,6 +157,7 @@ class Respawn extends AbstractController
             $point                  = ['x' => $x, 'y' => $y];
             $monster                = $this->Monster->newMonster($respawn['map'], $point, $respawn['monster']);
             $monster['direction']   = $respawn['info']['direction'];
+            $monster['respawn_id']  = $respawn['info']['id'];
             $monster['object_type'] = $this->Enum::ObjectTypeMonster;
 
             if ($type) {
@@ -157,8 +167,6 @@ class Respawn extends AbstractController
 
                 $this->Monster->broadcastHealthChange($monster);
             }
-
-            $respawn['count']++;
 
             return $monster;
         }

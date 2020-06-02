@@ -36,7 +36,7 @@ class Door extends AbstractController
 
     public function In($m, $loc)
     {
-        return $loc['x'] < $m['doors_map']['w'] && $loc['y'] < $m['doors_map']['h'];
+        return $loc['x'] < $m['width'] && $loc['y'] < $m['height'];
     }
 
     public function Set($m, $loc, $d)
@@ -53,18 +53,14 @@ class Door extends AbstractController
         }
     }
 
-    public function get($doorsMap, $point)
+    public function get($map_id, $point)
     {
-        if (empty($doorsMap['grid'][$point['x']][$point['y']])) {
-            return null;
-        }
-
-        return $doorsMap['grid'][$point['x']][$point['y']];
+        return $this->GameData->getDoorsMap($map_id, $point['x'], $point['y']);
     }
 
     public function isOpen($door)
     {
-        return $door['state'] == 2;
+        return !empty($door['state']) ? $door['state'] == 2 : false;
     }
 
     public function setOpen($map_id, $doorindex, $open)

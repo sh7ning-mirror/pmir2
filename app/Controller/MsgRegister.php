@@ -22,6 +22,7 @@ class MsgRegister
         'RUN'              => ['\App\Controller\World\Handler', 'run'],
         'TURN'             => ['\App\Controller\World\Handler', 'turn'],
         'LOG_OUT'          => ['\App\Controller\World\Handler', 'logOut'],
+        'GAME_OVER'        => ['\App\Controller\World\Handler', 'gameOver'],
         'CHAT'             => ['\App\Controller\World\Handler', 'chat'],
         'OPENDOOR'         => ['\App\Controller\World\Handler', 'openDoor'],
         'REFINE_CANCEL'    => ['\App\Controller\World\Handler', 'refineCancel'],

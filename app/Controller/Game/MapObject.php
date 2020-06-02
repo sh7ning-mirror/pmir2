@@ -19,7 +19,7 @@ class MapObject extends AbstractController
 
         $msg = [
             'object_id' => $m['id'],
-            'percent'   => $percent,
+            'percent'   => intval($percent),
             'expire'    => 5,
         ];
 

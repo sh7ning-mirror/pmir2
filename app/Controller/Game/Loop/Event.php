@@ -14,28 +14,32 @@ class Event extends AbstractController
 
     public static $hour; //当前时辰
 
+    public static $nowTime;
+
     public function execute()
     {
-        $maps = $this->getMaps();
-
-        if ($maps) {
-            $this->setLights();
-
-            foreach ($maps as $k => $v) {
-                co(function () use ($v) {
-                    $this->frame($v);
-                });
+        co(function(){
+            if (!self::$nowTime) {
+                self::$nowTime = time();
             }
-        }
+
+            $maps = $this->getMaps();
+
+            if ($maps) {
+                $this->setLights();
+
+                foreach ($maps as $k => $v) {
+                    co(function () use ($v) {
+                        $this->frame($v);
+                    });
+                }
+            }
+        });
     }
 
     public function getMaps()
     {
-        if (!self::$maps) {
-            self::$maps = $this->GameData->getMap();
-        }
-
-        return self::$maps;
+        return $this->GameData->getMapIds();
     }
 
     //灯光控制
@@ -66,23 +70,68 @@ class Event extends AbstractController
         }
     }
 
-    //同步每一帧
-    public function frame($map)
+    //同步
+    public function frame($mapId)
     {
         //close door 关不关门感觉无所谓~
 
-        $this->goPlayer($map);
+        $this->goPlayer($mapId);
+
+        $this->goRespawns($mapId);
+
+        $this->goNpc($mapId);
     }
 
-    public function goPlayer($map)
+    public function goPlayer($mapId)
     {
-        co(function () use ($map) {
-            $players = $this->GameData->getMapPlayers($map['info']['id']);
+        co(function () use ($mapId) {
+            $players = $this->GameData->getMapPlayers($mapId);
             if ($players) {
                 foreach ($players as $player) {
                     $this->PlayerObject->process($player);
                 }
             }
+        });
+    }
+
+    public function goRespawns($mapId)
+    {
+        $time = time();
+        if ($time < self::$nowTime + config('respawn_time')) {
+            return;
+        }
+
+        self::$nowTime = $time;
+
+        co(function () use ($mapId, $time) {
+            $respawns = $this->GameData->getMapRespawns($mapId);
+            if ($respawns) {
+                foreach ($respawns as $k => $respawn) {
+                    if (empty($respawn['interval']) || $time < $respawn['interval']) {
+                        break;
+                    }
+                    $this->Respawn->process($respawn);
+                    $respawns[$k] = $respawn;
+                }
+
+                co(function () use ($mapId, $respawns) {
+                    $this->GameData->setMapRespawns($mapId, $respawns);
+                });
+            }
+        });
+    }
+
+    public function goNpc($mapId)
+    {
+        $npcs = $this->GameData->getMapNpcs($mapId);
+
+        co(function () use ($mapId, $npcs) {
+            foreach ($npcs as $k => $v) {
+                $this->Npc->process($v);
+                $npcs[$k] = $v;
+            }
+
+            $this->GameData->setMapNpcs($mapId, $npcs);
         });
     }
 }

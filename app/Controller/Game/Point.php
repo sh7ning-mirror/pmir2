@@ -61,8 +61,6 @@ class Point extends AbstractController
 
     public function inRange($currentPoint, $point, $dataRange)
     {
-        // var_dump('---------------'.$currentPoint['x'].'_'.$point['x'].'___________'.$currentPoint['y'].'_'.$point['y']);
-
         return AbsInt($currentPoint['x'] - intval($point['x'])) <= $dataRange && AbsInt(intval($currentPoint['y']) - intval($point['y'])) <= $dataRange;
     }
 }

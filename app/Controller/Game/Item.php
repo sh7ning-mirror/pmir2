@@ -64,7 +64,7 @@ class Item extends AbstractController
 
             $item['current_location'] = $point;
             $this->Map->addObject($item, $this->Enum::ObjectTypeItem);
-
+            var_dump(json_encode($item));
             $this->Item->broadcastInfo($item);
 
             return false;
@@ -147,6 +147,67 @@ class Item extends AbstractController
         }
 
         return $info['image'];
+    }
+
+    public function getRealItem($origin, $level, $job, $itemList)
+    {
+        if (!empty($origin['class_based']) && !empty($origin['level_based'])) {
+            return $this->getClassAndLevelBasedItem($origin, $job, $level, $itemList);
+        }
+        if (!empty($origin['class_based'])) {
+            return $this->getClassBasedItem($origin, $job, $itemList);
+        }
+        if (!empty($origin['level_based'])) {
+            return $this->getLevelBasedItem($origin, $level, $itemList);
+        }
+
+        return $origin;
+    }
+
+    public function getClassAndLevelBasedItem($origin, $job, $level, $itemList)
+    {
+        $output = $origin;
+
+        for ($i = 0; $i < count($itemList); $i++) {
+            $info = $this->GameData->getItemInfoById($itemList[$i]);
+            if (strpos($info['name'], $origin['name']) === 0) {
+
+                if ($info['required_class'] == (1 << $job)) {
+                    if ($info['required_type'] == $this->Enum::RequiredTypeLevel && $info['required_amount'] <= $level && $output['required_amount'] <= $info['required_amount'] && $origin['required_gender'] == $info['required_gender']) {
+                        $output = $info;
+                    }
+                }
+            }
+        }
+        return $output;
+    }
+
+    public function getClassBasedItem($origin, $job, $itemList)
+    {
+        for ($i = 0; $i < count($itemList); $i++) {
+            $info = $this->GameData->getItemInfoById($itemList[$i]);
+            if (strpos($info['name'], $origin['name']) === 0) {
+                if ($info['required_class'] == (1 << $job) && $origin['required_gender'] == $info['required_gender']) {
+                    return $info;
+                }
+            }
+        }
+        return $origin;
+    }
+
+    public function getLevelBasedItem($origin, $level, $itemList)
+    {
+        $output = $origin;
+
+        for ($i = 0; $i < count($itemList); $i++) {
+            $info = $this->GameData->getItemInfoById($itemList[$i]);
+            if (strpos($info['name'], $origin['name']) === 0) {
+                if ($info['required_type'] == $this->Enum::RequiredTypeLevel && $info['required_amount'] <= $level && $output['required_amount'] < $info['required_amount'] && $origin['required_gender'] == $info['required_gender']) {
+                    $output = $info;
+                }
+            }
+        }
+        return $output;
     }
 
     //物品价格
