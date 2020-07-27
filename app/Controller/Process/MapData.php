@@ -75,9 +75,12 @@ class MapData extends AbstractController
                 //生成地图缓存
                 self::$mapPlayers[$v['id']]  = [];
                 self::$mapNpcs[$v['id']]     = $map_data['npc'];
-                self::$mapMonsters[$v['id']] = $map_data['monsters'];
                 self::$mapRespawns[$v['id']] = $map_data['respawns'];
                 self::$mapItem[$v['id']]     = [];
+
+                foreach ($map_data['monsters'] as $monster) {
+                    self::$mapMonsters[$v['id']][$monster['id']] = $monster;
+                }
 
                 $cells[$v['id']] = $map_data['cellObject'];
             }
@@ -135,6 +138,19 @@ class MapData extends AbstractController
         }
     }
 
+    //更新npc
+    public function updateMapNpc($mapId, $id, $npc)
+    {
+        if (!empty(self::$mapNpcs[$mapId])) {
+            foreach (self::$mapNpcs[$mapId] as $k => $v) {
+                if ($v['id'] == $id) {
+                    self::$mapNpcs[$mapId][$k] = $npc;
+                    break;
+                }
+            }
+        }
+    }
+
     public function getMapNpcInfo($mapId, $id)
     {
         return !empty(self::$mapNpcs[$mapId][$id]) ? self::$mapNpcs[$mapId][$id] : false;
@@ -150,13 +166,28 @@ class MapData extends AbstractController
         return self::$mapPlayers[$mapId][$id];
     }
 
+    //地图添加怪物
     public function setMapMonster($mapId, $object)
     {
-        self::$mapMonsters[$mapId][] = $object;
+        self::$mapMonsters[$mapId][$object['id']] = $object;
 
         //同步到格子
         $oldCellId = $this->Cell->getCellId($object['current_location']['x'], $object['current_location']['y'], $object['map']['width'], $object['map']['height']);
         $this->CellData->setCellObject($mapId, $oldCellId, $object);
+    }
+
+    //地图删除怪物
+    public function delMapMonster($mapId, $monsterId)
+    {
+        if (!empty(self::$mapMonsters[$mapId][$monsterId])) {
+            $object = self::$mapMonsters[$mapId][$monsterId];
+
+            unset(self::$mapMonsters[$mapId][$monsterId]);
+
+            //同步到格子
+            $oldCellId = $this->Cell->getCellId($object['current_location']['x'], $object['current_location']['y'], $object['map']['width'], $object['map']['height']);
+            $this->CellData->delCellObject($mapId, $oldCellId, $object);
+        }
     }
 
     public function getMapMonster($mapId)
@@ -196,6 +227,7 @@ class MapData extends AbstractController
     public function setMapPlayers($mapId, $info)
     {
         if (!empty(self::$mapPlayers[$mapId][$info['id']])) {
+
             //删除老格子
             $object    = self::$mapPlayers[$mapId][$info['id']];
             $oldCellId = $this->Cell->getCellId($object['current_location']['x'], $object['current_location']['y'], $object['map']['width'], $object['map']['height']);
@@ -206,6 +238,7 @@ class MapData extends AbstractController
 
         //新增到格子
         $cellId = $this->Cell->getCellId($info['current_location']['x'], $info['current_location']['y'], $info['map']['width'], $info['map']['height']);
+
         $this->CellData->setCellObject($mapId, $cellId, $info);
     }
 
@@ -230,9 +263,9 @@ class MapData extends AbstractController
     public function setMapItem($mapId, $point, $object)
     {
         self::$mapItem[$mapId][$point] = $object;
+
         //同步到格子 TODO
-        
-        
+
     }
 
     public function getMapItem($mapId, $point = null)
@@ -246,9 +279,46 @@ class MapData extends AbstractController
     public function delMapItem($mapId, $point)
     {
         if (!empty(self::$mapItem[$mapId][$point])) {
-            unset(self::$mapItem[$mapId][$point]);
-        }
 
-        //同步到格子 TODO
+            $object = self::$mapItem[$mapId][$point];
+
+            unset(self::$mapItem[$mapId][$point]);
+
+            //同步到格子
+            $oldCellId = $this->Cell->getCellId($object['current_location']['x'], $object['current_location']['y'], $object['map']['width'], $object['map']['height']);
+            $this->CellData->delCellObject($mapId, $oldCellId, $object);
+        }
+    }
+
+    public function getMapMonsterById($mapId, $monsterId)
+    {
+        if (!empty(self::$mapMonsters[$mapId][$monsterId])) {
+            return self::$mapMonsters[$mapId][$monsterId];
+        } else {
+            return false;
+        }
+    }
+
+    public function updateMapMonster($mapId, $monsterId, $object, $field = null)
+    {
+        if (!empty(self::$mapMonsters[$mapId][$monsterId])) {
+
+            //同步到格子
+            $oldobject    = self::$mapMonsters[$mapId][$monsterId];
+            $oldCellId = $this->Cell->getCellId($oldobject['current_location']['x'], $oldobject['current_location']['y'], $oldobject['map']['width'], $oldobject['map']['height']);
+
+            if ($field) {
+                foreach ($field as $key) {
+                    self::$mapMonsters[$mapId][$monsterId][$key] = isset($object[$key]) ? $object[$key] : null;
+                }
+            } else {
+                self::$mapMonsters[$mapId][$monsterId] = $object;
+            }
+
+            $newCellId = $this->Cell->getCellId($object['current_location']['x'], $object['current_location']['y'], $object['map']['width'], $object['map']['height']);
+
+            $this->CellData->delCellObject($mapId, $oldCellId, $oldobject);
+            $this->CellData->setCellObject($mapId, $newCellId, $object);
+        }
     }
 }

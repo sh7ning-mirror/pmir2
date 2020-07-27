@@ -11,7 +11,8 @@ class PlayersList extends AbstractController
     public function delMapPlayers($fd, $p = null)
     {
         if (!$p) {
-            $p = $this->PlayerObject->getPlayer($fd);
+            // $p = $this->PlayerObject->getPlayer($fd);
+            $p = &$this->PlayerData::$players[$fd];
         }
 
         if (!$p) {
@@ -26,7 +27,8 @@ class PlayersList extends AbstractController
     public function saveData($fd, $p = null)
     {
         if (!$p) {
-            $p = $this->PlayerObject->getPlayer($fd);
+            // $p = $this->PlayerObject->getPlayer($fd);
+            $p = &$this->PlayerData::$players[$fd];
         }
 
         if (!$p) {

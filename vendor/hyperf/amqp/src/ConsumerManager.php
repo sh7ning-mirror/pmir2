@@ -34,7 +34,7 @@ class ConsumerManager
     {
         $classes = AnnotationCollector::getClassByAnnotation(ConsumerAnnotation::class);
         /**
-         * @var string
+         * @var string $class
          * @var ConsumerAnnotation $annotation
          */
         foreach ($classes as $class => $annotation) {
@@ -48,6 +48,7 @@ class ConsumerManager
             $annotation->queue && $instance->setQueue($annotation->queue);
             ! is_null($annotation->enable) && $instance->setEnable($annotation->enable);
             property_exists($instance, 'container') && $instance->container = $this->container;
+            $annotation->maxConsumption && $instance->setMaxConsumption($annotation->maxConsumption);
             $nums = $annotation->nums;
             $process = $this->createProcess($instance);
             $process->nums = (int) $nums;
@@ -86,7 +87,7 @@ class ConsumerManager
                 return $this->consumerMessage;
             }
 
-            public function isEnable(): bool
+            public function isEnable($server): bool
             {
                 return $this->consumerMessage->isEnable();
             }

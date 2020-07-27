@@ -79,7 +79,7 @@ class Npc extends AbstractController
         return $npc['info']['rate'] / 100;
     }
 
-    public function buy($p, $npc, $userItemID, $count)
+    public function buy(&$p, $npc, $userItemID, $count)
     {
         $userItem  = [];
         $iter      = [];
@@ -125,7 +125,7 @@ class Npc extends AbstractController
         }
     }
 
-    public function setPlayerBuyBack($npc, $p, $temp)
+    public function setPlayerBuyBack($npc, &$p, $temp)
     {
         co(function () use ($npc, $p, $temp) {
             $temp['time_expire'] = time() + (3 * 60 * 60); //过期时间,过期后放入商店
@@ -168,21 +168,20 @@ class Npc extends AbstractController
     {
         $time = time();
         if ($npcInfo['turn_time'] < $time) {
-            $npcInfo['turn_time'] = $time + rand(20, 60) * 60 * 60;
-            $npcInfo['direction'] = rand(0, 1);
+            $npcInfo['turn_time']         = $time + rand(20, 60) * 60 * 60;
+            $npcInfo['direction']         = rand(0, 1);
             $npcInfo['current_direction'] = $npcInfo['direction'];
             $this->broadcast($npcInfo, ['OBJECT_TURN', $this->MsgFactory->objectTurn($npcInfo)]);
         }
 
         //回购物品加入商店
         $buyBack = $this->GameData->getNpcBuyBack($npcInfo['id']);
-        if($buyBack)
-        {
-            foreach ($buyBack as $k => $v)
-            {
-                if($v['time_expire'] <= $time)
-                {
-
+        if ($buyBack) {
+            foreach ($buyBack as $k => $v) {
+                foreach ($v as $k1 => $v1) {
+                    if ($v1['time_expire'] <= $time) {
+                        EchoLog(sprintf('物品: %s 已过期,加入商店', $v1['info']['name']), 'i');
+                    }
                 }
             }
         }

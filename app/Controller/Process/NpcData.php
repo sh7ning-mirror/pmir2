@@ -73,7 +73,7 @@ class NpcData extends AbstractController
 
     public function getNpcBuyBack($npcId)
     {
-    	return self::$buyBack[$npcId];
+    	return !empty(self::$buyBack[$npcId]) ? self::$buyBack[$npcId] : null;
     }
 
     public function getPlayerBuyBack($playerId, $npcId)

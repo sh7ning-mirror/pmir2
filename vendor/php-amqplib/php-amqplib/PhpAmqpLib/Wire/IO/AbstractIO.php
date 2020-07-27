@@ -130,19 +130,28 @@ abstract class AbstractIO
     {
         // ignore unless heartbeat interval is set
         if ($this->heartbeat !== 0 && $this->last_read > 0 && $this->last_write > 0) {
-            $t = microtime(true);
-            $t_read = round($t - $this->last_read);
-            $t_write = round($t - $this->last_write);
-
             // server has gone away
-            if (($this->heartbeat * 2) < $t_read) {
-                $this->close();
-                throw new AMQPHeartbeatMissedException('Missed server heartbeat');
-            }
+            $this->checkBrokerHeartbeat();
 
             // time for client to send a heartbeat
-            if (($this->heartbeat / 2) < $t_write) {
+            $now = microtime(true);
+            if (($this->heartbeat / 2) < $now - $this->last_write) {
                 $this->write_heartbeat();
+            }
+        }
+    }
+
+    /**
+     * @throws \PhpAmqpLib\Exception\AMQPHeartbeatMissedException
+     */
+    protected function checkBrokerHeartbeat()
+    {
+        if ($this->heartbeat > 0 && ($this->last_read > 0 || $this->last_write > 0)) {
+            $lastActivity = max($this->last_read, $this->last_write);
+            $now = microtime(true);
+            if (($now - $lastActivity) > $this->heartbeat * 2 + 1) {
+                $this->close();
+                throw new AMQPHeartbeatMissedException('Missed server heartbeat');
             }
         }
     }

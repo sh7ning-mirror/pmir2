@@ -121,7 +121,7 @@ class Map extends AbstractController
                 break;
 
             case $this->Enum::ObjectTypeMonster:
-                $this->GameData->setMapmonster($object['map']['info']['id'], $object);
+                $this->GameData->setMapMonster($object['map']['info']['id'], $object);
                 break;
 
             case $this->Enum::ObjectTypeNPC:
@@ -186,7 +186,7 @@ class Map extends AbstractController
                 break;
 
             case $this->Enum::ObjectTypeMonster:
-                # code...
+                $this->GameData->delMapMonster($object['map']['info']['id'], $object['id']);
                 break;
 
             case $this->Enum::ObjectTypeNPC:
@@ -232,7 +232,7 @@ class Map extends AbstractController
 
     public function broadcastP($currentPoint, $msg, $object)
     {
-        //给地图中人物同步登录玩家
+        //给地图中人物同步对象
         $players = $this->GameData->getMapPlayers($object['map']['info']['id']);
         if ($players) {
             foreach ($players as $k => $v) {
@@ -337,44 +337,45 @@ class Map extends AbstractController
         return $monsterData;
     }
 
-    //给玩家同步地图中的对象
-    public function rangeObject($p, $point, $depth, $fun)
+    //给对象同步地图中的对象
+    public function rangeObject($object, $point, $depth, $fun)
     {
         //获取地图中邻近的人物
-        $palyers = $this->getCellPlayer($p, $depth);
+        $palyers = $this->getCellPlayer($object, $depth);
+        
         if ($palyers) {
             foreach ($palyers as $k => $v) {
-                if (!call_user_func_array($fun, [$p, $v])) {
+                if (!call_user_func_array($fun, [$object, $v])) {
                     return false;
                 }
             }
         }
 
         //获取地图中邻近的npc
-        $npcs = $this->getCellNpc($p, $depth);
+        $npcs = $this->getCellNpc($object, $depth);
         if ($npcs) {
             foreach ($npcs as $k => $v) {
-                if (!call_user_func_array($fun, [$p, $v])) {
+                if (!call_user_func_array($fun, [$object, $v])) {
                     return false;
                 }
             }
         }
 
         //获取地图中邻近的物品
-        $items = $this->getCellItem($p, $depth);
+        $items = $this->getCellItem($object, $depth);
         if ($items) {
             foreach ($items as $k => $v) {
-                if (!call_user_func_array($fun, [$p, $v])) {
+                if (!call_user_func_array($fun, [$object, $v])) {
                     return false;
                 }
             }
         }
 
         //获取地图中邻近的怪物
-        $monsters = $this->getCellMonster($p, $depth);
+        $monsters = $this->getCellMonster($object, $depth);
         if ($monsters) {
             foreach ($monsters as $k => $v) {
-                if (!call_user_func_array($fun, [$p, $v])) {
+                if (!call_user_func_array($fun, [$object, $v])) {
                     return false;
                 }
             }

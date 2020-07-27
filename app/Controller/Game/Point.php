@@ -63,4 +63,44 @@ class Point extends AbstractController
     {
         return AbsInt($currentPoint['x'] - intval($point['x'])) <= $dataRange && AbsInt(intval($currentPoint['y']) - intval($point['y'])) <= $dataRange;
     }
+
+    public function equal($currentPoint, $point)
+    {
+        return $currentPoint['x'] == $point['x'] && $currentPoint['y'] == $point['y'];
+    }
+
+    public function directionFromPoint($source, $dest)
+    {
+        if ($source['x'] < $dest['x']) {
+
+            if ($source['y'] < $dest['y']) {
+                return $this->Enum::MirDirectionDownRight;
+            }
+
+            if ($source['y'] > $dest['y']) {
+                return $this->Enum::MirDirectionUpRight;
+            }
+
+            return $this->Enum::MirDirectionRight;
+        }
+
+        if ($source['x'] > $dest['x']) {
+
+            if ($source['y'] < $dest['y']) {
+                return $this->Enum::MirDirectionDownLeft;
+            }
+
+            if ($source['y'] > $dest['y']) {
+                return $this->Enum::MirDirectionUpLeft;
+            }
+
+            return $this->Enum::MirDirectionLeft;
+        }
+
+        if ($source['y'] < $dest['y']) {
+            return $this->Enum::MirDirectionDown;
+        } else {
+            return $this->Enum::MirDirectionUp;
+        }
+    }
 }

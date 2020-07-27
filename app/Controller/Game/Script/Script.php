@@ -518,7 +518,7 @@ class Script extends AbstractController
         return $say;
     }
 
-    public function check($ps, $npc, $p)
+    public function check($ps, $npc, &$p)
     {
         if (empty($ps['check_list']) || count($ps['check_list']) == 0) {
             return true;

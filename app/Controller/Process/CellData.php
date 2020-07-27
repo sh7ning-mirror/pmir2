@@ -24,7 +24,8 @@ class CellData
 
     public function setCellObject($mapId, $cellId, $object)
     {
-        self::$cells[$mapId][$cellId][] = $object;
+        // self::$cells[$mapId][$cellId][] = $object;
+        self::$cells[$mapId][$cellId][$object['id']] = $object;
     }
 
     public function getCellObject($mapId, $cellId)
@@ -38,14 +39,18 @@ class CellData
 
     public function delCellObject($mapId, $cellId, $object)
     {
-        if (!empty(self::$cells[$mapId][$cellId])) {
+        // if (!empty(self::$cells[$mapId][$cellId])) {
 
-            foreach (self::$cells[$mapId][$cellId] as $k => $v) {
-                if ($v['id'] == $object['id']) {
-                    unset(self::$cells[$mapId][$cellId][$k]);
-                    break;
-                }
-            }
+        //     foreach (self::$cells[$mapId][$cellId] as $k => $v) {
+        //         if ($v['id'] == $object['id']) {
+        //             unset(self::$cells[$mapId][$cellId][$k]);
+        //             break;
+        //         }
+        //     }
+        // }
+
+        if (!empty(self::$cells[$mapId][$cellId][$object['id']])) {
+            unset(self::$cells[$mapId][$cellId][$object['id']]);
         }
     }
 }

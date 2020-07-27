@@ -62,6 +62,9 @@ class ObjectService
         'Monster'       => 'App\Controller\Game\Monster',
         'GameObject'    => 'App\Controller\Game\GameObject',
         'Event'         => 'App\Controller\Game\Loop\Event',
+        'Behavior'      => 'App\Controller\Game\Ai\Behavior',
+        'Brains'        => 'App\Controller\Game\Ai\Brains',
+        'Magic'         => 'App\Controller\Game\Magic',
     ];
 
     public static function getObject($objectName = null)

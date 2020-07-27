@@ -198,9 +198,10 @@ final class CheckTypeDeclarationsPass extends AbstractRecursivePass
             }
         } elseif (\is_string($value)) {
             if ('%' === ($value[0] ?? '') && preg_match('/^%([^%]+)%$/', $value, $match)) {
-                // Only array parameters are not inlined when dumped.
-                $value = [];
-            } elseif ($envPlaceholderUniquePrefix && false !== strpos($value, 'env_')) {
+                $value = $this->container->getParameter(substr($value, 1, -1));
+            }
+
+            if ($envPlaceholderUniquePrefix && \is_string($value) && false !== strpos($value, 'env_')) {
                 // If the value is an env placeholder that is either mixed with a string or with another env placeholder, then its resolved value will always be a string, so we don't need to resolve it.
                 // We don't need to change the value because it is already a string.
                 if ('' === preg_replace('/'.$envPlaceholderUniquePrefix.'_\w+_[a-f0-9]{32}/U', '', $value, -1, $c) && 1 === $c) {
@@ -268,7 +269,7 @@ final class CheckTypeDeclarationsPass extends AbstractRecursivePass
         $checkFunction = sprintf('is_%s', $parameter->getType()->getName());
 
         if (!$parameter->getType()->isBuiltin() || !$checkFunction($value)) {
-            throw new InvalidParameterTypeException($this->currentId, \is_object($value) ? $class : \gettype($value), $parameter);
+            throw new InvalidParameterTypeException($this->currentId, \is_object($value) ? $class : get_debug_type($value), $parameter);
         }
     }
 

@@ -18,5 +18,8 @@ return [
         'ignore_annotations' => [
             'mixin',
         ],
+        'collectors' => [
+            CustomCollector::class,
+        ],
     ],
 ];

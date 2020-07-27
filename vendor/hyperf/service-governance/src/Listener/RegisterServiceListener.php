@@ -16,6 +16,7 @@ use Hyperf\Contract\ConfigInterface;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Event\Contract\ListenerInterface;
 use Hyperf\Framework\Event\MainWorkerStart;
+use Hyperf\Server\Event\MainCoroutineServerStart;
 use Hyperf\ServiceGovernance\Register\ConsulAgent;
 use Hyperf\ServiceGovernance\ServiceManager;
 use Psr\Container\ContainerInterface;
@@ -67,11 +68,12 @@ class RegisterServiceListener implements ListenerInterface
     {
         return [
             MainWorkerStart::class,
+            MainCoroutineServerStart::class,
         ];
     }
 
     /**
-     * @param MainWorkerStart $event
+     * @param MainWorkerStart|MainCoroutineServerStart $event
      */
     public function process(object $event)
     {
@@ -136,7 +138,7 @@ class RegisterServiceListener implements ListenerInterface
                 'Interval' => '1s',
             ];
         }
-        if ($service['protocol'] === 'jsonrpc') {
+        if (in_array($service['protocol'], ['jsonrpc', 'jsonrpc-tcp-length-check'], true)) {
             $requestBody['Check'] = [
                 'DeregisterCriticalServiceAfter' => '90m',
                 'TCP' => "{$address}:{$port}",
@@ -247,9 +249,10 @@ class RegisterServiceListener implements ListenerInterface
     protected function getInternalIp(): string
     {
         $ips = swoole_get_local_ip();
-        if (is_array($ips)) {
+        if (is_array($ips) && ! empty($ips)) {
             return current($ips);
         }
+        /** @var mixed|string $ip */
         $ip = gethostbyname(gethostname());
         if (is_string($ip)) {
             return $ip;

@@ -53,7 +53,7 @@ class GameData extends AbstractController
         return $this->MapData->getMapIds();
     }
 
-    public function getDoorsMap($mapId = null, $x, $y)
+    public function getDoorsMap($mapId, $x, $y)
     {
         return $this->MapData->getDoorsMap($mapId, $x, $y);
     }
@@ -66,6 +66,12 @@ class GameData extends AbstractController
     public function getItemInfosIds()
     {
         return $this->ItemData->getItemInfosIds();
+    }
+
+    //根据名称获取物品
+    public function getItemInfosName($name)
+    {
+        return $this->ItemData->getItemInfosName($name);
     }
 
     public function getMapNpcs($mapId)
@@ -86,6 +92,11 @@ class GameData extends AbstractController
     public function getMapNpcInfo($mapId, $id)
     {
         return $this->MapData->getMapNpcInfo($mapId, $id);
+    }
+
+    public function updateMapNpc($mapId, $id, $npc)
+    {
+        return $this->MapData->updateMapNpc($mapId, $id, $npc);
     }
 
     public function getMapPlayerIds($mapId)
@@ -158,7 +169,7 @@ class GameData extends AbstractController
     }
 
     //怪物
-    public function setMapmonster($mapId, $object)
+    public function setMapMonster($mapId, $object)
     {
         $this->MapData->setMapMonster($mapId, $object);
     }
@@ -166,6 +177,18 @@ class GameData extends AbstractController
     public function getMapMonster($mapId)
     {
         return $this->MapData->getMapMonster($mapId);
+    }
+
+    //删除怪物
+    public function delMapMonster($mapId, $monsterId)
+    {
+        $this->MapData->delMapMonster($mapId, $monsterId);
+    }
+
+    //根据id获取怪物信息
+    public function getMapMonsterById($mapId, $monsterId)
+    {
+        return $this->MapData->getMapMonsterById($mapId, $monsterId);
     }
 
     //待生成
@@ -195,9 +218,10 @@ class GameData extends AbstractController
         return $this->PlayerData->getIdPlayer($id);
     }
 
-    public function setPlayer($fd, $object)
+    public function setPlayer($fd, $object, $field = null)
     {
-        $this->PlayerData->setPlayer($fd, $object);
+        $object['object_type'] = $this->Enum::ObjectTypePlayer;
+        $this->PlayerData->setPlayer($fd, $object, $field);
     }
 
     public function delPlayer($fd)
@@ -211,18 +235,33 @@ class GameData extends AbstractController
         return $this->NpcData->getNpcBuyBack($npcId);
     }
 
+    //获取玩家在当前npc所有回购
     public function getPlayerBuyBack($playerId, $npcId)
     {
         return $this->NpcData->getPlayerBuyBack($playerId, $npcId);
     }
 
+    //设置npc回购信息
     public function setPlayerBuyBack($playerId, $npcId, $object)
     {
         $this->NpcData->setPlayerBuyBack($playerId, $npcId, $object);
     }
 
+    //删除npc回购信息
     public function removePlayerBuyBack($playerId, $npcId, $objectId)
     {
         $this->NpcData->removePlayerBuyBack($playerId, $npcId, $objectId);
+    }
+
+    //更新怪物数据
+    public function updateMapMonster($mapId, $monsterId, $object, $field = null)
+    {
+        $this->MapData->updateMapMonster($mapId, $monsterId, $object, $field);
+    }
+
+    //获取怪物掉落
+    public function getDrop($name)
+    {
+        return $this->MonsterData->getDrop($name);
     }
 }

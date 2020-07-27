@@ -38,15 +38,32 @@ class PlayerData extends AbstractController
         return false;
     }
 
-    public function setPlayer($fd, $object)
+    public function setPlayer($fd, $object, $field = null)
     {
-        self::$players[$fd] = $object;
+        if (!$field || empty(self::$players[$fd])) {
+            self::$players[$fd] = $object;
+        } else {
+            foreach ($field as $key) {
+                self::$players[$fd][$key] = isset($object[$key]) ? $object[$key] : null;
+            }
+        }
+
+        //更新格子数据
+        // if (!empty(self::$players[$fd]['map']['info']['id'])) {
+        //     self::$players[$fd]['object_type'] = $this->Enum::ObjectTypePlayer;
+        //     $this->MapData->setMapPlayers(self::$players[$fd]['map']['info']['id'], self::$players[$fd]);
+        // }
     }
 
     public function delPlayer($fd)
     {
-        if(!empty(self::$players[$fd]))
-        {
+        if (!empty(self::$players[$fd])) {
+
+            //更新格子数据
+            if (!empty(self::$players[$fd]['map']['info']['id'])) {
+                $this->MapData->delMapPlayers(self::$players[$fd]['map']['info']['id'], self::$players[$fd]['id']);
+            }
+
             unset(self::$players[$fd]);
         }
     }

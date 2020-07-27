@@ -8,7 +8,7 @@ use App\Controller\AbstractController;
  */
 class NpcScript extends AbstractController
 {
-    public function replaceTemplates($npc, $p, $say)
+    public function replaceTemplates($npc, &$p, $say)
     {
         $res = [];
 
@@ -20,7 +20,7 @@ class NpcScript extends AbstractController
         return $res;
     }
 
-    public function replaceTemplateName($npc, $p, $str)
+    public function replaceTemplateName($npc, &$p, $str)
     {
         preg_match_all('/\<\$\w+\>/', $str, $match);
 
@@ -149,22 +149,22 @@ class NpcScript extends AbstractController
         }
     }
 
-    public function CHECKPKPOINT($param, $p)
+    public function CHECKPKPOINT($param, &$p)
     {
         return $this->compareInt($param[0], $p['pk_points'], $param[1]);
     }
 
-    public function LEVEL($param, $p)
+    public function LEVEL($param, &$p)
     {
         return $this->compareInt($param[0], $p['pk_points'], $param[1]);
     }
 
-    public function INGUILD($param, $p)
+    public function INGUILD($param, &$p)
     {
         return true;
     }
 
-    public function CHECKGOLD($param, $p)
+    public function CHECKGOLD($param, &$p)
     {
         return $this->compareInt($param[0], $p['gold'], $param[1]);
     }

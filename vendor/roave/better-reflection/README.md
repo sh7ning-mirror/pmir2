@@ -1,9 +1,7 @@
 Better Reflection
 =================
 
-[![Build Status](https://travis-ci.org/Roave/BetterReflection.svg?branch=master)](https://travis-ci.org/Roave/BetterReflection)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Roave/BetterReflection/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Roave/BetterReflection/?branch=master)
-[![Code Coverage](https://scrutinizer-ci.com/g/Roave/BetterReflection/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/Roave/BetterReflection/?branch=master)
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2FRoave%2FBetterReflection%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/Roave/BetterReflection/master)
 [![Type Coverage](https://shepherd.dev/github/Roave/BetterReflection/coverage.svg)](https://shepherd.dev/github/Roave/BetterReflection)
 [![Latest Stable Version](https://poser.pugx.org/roave/better-reflection/v/stable)](https://packagist.org/packages/roave/better-reflection)
 [![License](https://poser.pugx.org/roave/better-reflection/license)](https://packagist.org/packages/roave/better-reflection)
@@ -23,6 +21,13 @@ Better Reflection is a reflection API that aims to improve and provide more feat
 * Change or remove PHP 7 parameter type and return type declarations from methods and functions
 * Change the body of a function or method to do something different
 * *Moar stuff coming soon!*
+
+Typically you would use Better Reflection for static analysis tooling. It can serve as a baseline to access type
+information (e.g. doc blocks, type declarations), method/function body AST fetching etc. for static analysis.
+
+Better Reflection is **NOT** suited to runtime usage, since performance is **much** worse than PHP built-in reflection.
+If you do not want to do anything that native PHP reflection can't do, then just use native PHP reflection! The "Better"
+in Better Reflection refers to feature, not speed!
 
 Be sure to read more in the [feature documentation](docs/features.md).
 

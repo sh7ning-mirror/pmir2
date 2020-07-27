@@ -64,7 +64,7 @@ class Item extends AbstractController
 
             $item['current_location'] = $point;
             $this->Map->addObject($item, $this->Enum::ObjectTypeItem);
-            var_dump(json_encode($item));
+
             $this->Item->broadcastInfo($item);
 
             return false;

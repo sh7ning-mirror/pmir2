@@ -88,8 +88,8 @@ class PlayerObject extends AbstractController
         'p_mode'                => null,
         'calling_npc'           => null,
         'calling_npc_page'      => null,
-        'slaying'               => null, // TODO
-        'flaming_sword'         => null, // TODO
+        'slaying'               => null,
+        'flaming_sword'         => null,
         'twin_drake_blade'      => null, // TODO
         'bind_map_index'        => null, // 绑定的地图 死亡时复活用
         'bind_location'         => null, // 绑定的坐标 死亡时复活用
@@ -116,9 +116,9 @@ class PlayerObject extends AbstractController
         return $this->GameData->getIdPlayer($id);
     }
 
-    public function setPlayer($fd, $data = null)
+    public function setPlayer($fd, $data = null, $field = null)
     {
-    	$this->GameData->setPlayer($fd, $data);
+        $this->GameData->setPlayer($fd, $data, $field);
     }
 
     public function updatePlayerInfo(&$p, $accountCharacter, $user_magic)
@@ -175,7 +175,6 @@ class PlayerObject extends AbstractController
 
         $p['health'] = $this->MsgFactory->health($health);
 
-        $p['pets']        = [];
         $p['pk_points']   = 0;
         $p['a_mode']      = $accountCharacter['attack_mode'];
         $p['p_mode']      = $accountCharacter['pet_mode'];
@@ -213,7 +212,6 @@ class PlayerObject extends AbstractController
                     $this->Bag->setCount($p['inventory'], $k, $v['count'] + $itemInfo['count']);
 
                     $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['info']));
-                    $this->setPlayer($p['fd'], $p);
                     return true;
                 }
 
@@ -249,7 +247,7 @@ class PlayerObject extends AbstractController
             $this->enqueueItemInfo($p, $itemInfo['item_id']);
             $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['info']));
             $this->refreshBagWeight($p);
-            $this->setPlayer($p['fd'], $p);
+
             return true;
         }
 
@@ -262,7 +260,7 @@ class PlayerObject extends AbstractController
             $this->enqueueItemInfo($p, $itemInfo['item_id']);
             $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['info']));
             $this->refreshBagWeight($p);
-            $this->setPlayer($p['fd'], $p);
+
             return true;
         }
 
@@ -313,7 +311,7 @@ class PlayerObject extends AbstractController
         return true;
     }
 
-    public function StartGame($p)
+    public function StartGame(&$p)
     {
         $this->receiveChat($p['fd'], '[欢迎进入游戏,游戏目前处于测试模式]', $this->Enum::ChatTypeHint);
         $this->receiveChat($p['fd'], '[本模拟器为学习研究使用,禁止一切商业行为]', $this->Enum::ChatTypeHint);
@@ -343,8 +341,6 @@ class PlayerObject extends AbstractController
         $this->enqueueAreaObjects($p, null, $p['current_location'], $mapInfo);
 
         $this->broadcast($p, $this->MsgFactory->objectPlayer($p));
-
-        $this->setPlayer($p['fd'], $p);
     }
 
     public function stopGame($p)
@@ -396,8 +392,6 @@ class PlayerObject extends AbstractController
                 $this->enqueueItemInfo($p, $v['id']);
             }
         }
-
-        return $p;
     }
 
     //状态
@@ -514,6 +508,7 @@ class PlayerObject extends AbstractController
         }
     }
 
+    //刷新负重
     public function refreshBagWeight(&$p)
     {
         $p['current_bag_weight'] = 0;
@@ -600,7 +595,7 @@ class PlayerObject extends AbstractController
         }
     }
 
-    public function getUpdateInfo($p)
+    public function getUpdateInfo(&$p)
     {
         $this->updateConcentration($p);
 
@@ -690,7 +685,7 @@ class PlayerObject extends AbstractController
         # code...
     }
 
-    //更新角色周边对象
+    //更新对象周边对象
     public function enqueueAreaObjects($p, $oldCell = null, $newCell = null, $map = null)
     {
         if ($oldCell == null) {
@@ -715,14 +710,12 @@ class PlayerObject extends AbstractController
                         foreach ($newObjects as $k => $v) {
 
                             //地图小于40的npc不更新
-                            if($p['map']['width'] <= 40 && $p['map']['height'] <= 40 && $v['object_type'] == $this->Enum::ObjectTypeNPC)
-                            {
+                            if ($p['map']['width'] <= 40 && $p['map']['height'] <= 40 && $v['object_type'] == $this->Enum::ObjectTypeNPC) {
                                 continue;
                             }
 
                             co(function () use ($p, $v) {
-                                if($v['id'] != $p['id'])
-                                {
+                                if ($v['id'] != $p['id']) {
                                     $this->SendMsg->send($p['fd'], $this->MsgFactory->object($v));
                                 }
                             });
@@ -735,13 +728,12 @@ class PlayerObject extends AbstractController
                     if ($oldObjects) {
                         foreach ($oldObjects as $k => $v) {
                             //地图小于40的npc不更新
-                            if($p['map']['width'] <= 40 && $p['map']['height'] <= 40 && $v['object_type'] == $this->Enum::ObjectTypeNPC)
-                            {
+                            if ($p['map']['width'] <= 40 && $p['map']['height'] <= 40 && $v['object_type'] == $this->Enum::ObjectTypeNPC) {
                                 continue;
                             }
 
                             co(function () use ($p, $v) {
-                                if($v['id'] != $p['id']){
+                                if ($v['id'] != $p['id']) {
                                     $this->SendMsg->send($p['fd'], $this->MsgFactory->objectRemove($v));
                                 }
                             });
@@ -893,7 +885,7 @@ class PlayerObject extends AbstractController
         return [-1, []];
     }
 
-    public function callNPC1($p, $npc, $key)
+    public function callNPC1(&$p, $npc, $key)
     {
         $say = $this->Npc->callScript($p, $npc, $key);
 
@@ -939,11 +931,9 @@ class PlayerObject extends AbstractController
                 # code...
                 break;
         }
-
-        $this->setPlayer($p['fd'], $p);
     }
 
-    public function sendNpcGoods($p, $npc)
+    public function sendNpcGoods(&$p, $npc)
     {
         if (!empty($npc['goods'])) {
             foreach ($npc['goods'] as $key => $item) {
@@ -954,7 +944,7 @@ class PlayerObject extends AbstractController
         }
     }
 
-    public function sendStorage($p, $npc)
+    public function sendStorage(&$p, $npc)
     {
         if (!empty($p['storage']['items'])) {
             foreach ($p['storage']['items'] as $key => $item) {
@@ -965,7 +955,7 @@ class PlayerObject extends AbstractController
         }
     }
 
-    public function sendBuyBackGoods($p, $npc, $syncItem)
+    public function sendBuyBackGoods(&$p, $npc, $syncItem)
     {
         $goods = $this->GameData->getPlayerBuyBack($p['id'], $npc['id']);
 
@@ -988,8 +978,6 @@ class PlayerObject extends AbstractController
         }
 
         co(function () use ($p) {
-            $this->setPlayer($p['fd'], $p);
-
             $this->PlayersList->saveGold($p['id'], $p['gold']);
         });
 
@@ -1166,11 +1154,9 @@ class PlayerObject extends AbstractController
 
     public function process($p)
     {
-        if (empty($p['fd']) || !$p) {
-            return;
-        }
+        // $p = $this->getPlayer($p['fd']);
+        $p = &$this->PlayerData::$players[$p['fd']];
 
-        $p = $this->getPlayer($p['fd']);
         if (!$p || $p == 'null') {
             return;
         }
@@ -1178,13 +1164,11 @@ class PlayerObject extends AbstractController
         $this->processRegen($p);
         $this->processBuffs($p);
         $this->processPoison($p);
-
-        $this->GameData->setPlayer($p['fd'], $p);
     }
 
     public function processRegen(&$p)
     {
-        if ($p['dead']) {
+        if (!empty($p['dead'])) {
             return false;
         }
 
@@ -1335,14 +1319,14 @@ class PlayerObject extends AbstractController
         $this->broadcastHealthChange($p);
     }
 
-    function die(&$p) {
+    public function die(&$p) {
         $p['hp']   = 0;
         $p['dead'] = true;
 
         $this->SendMsg->send($p['fd'], $this->MsgFactory->death($p));
-        $this->broadcast($p, $this->MsgFactory->objectDied($p));
+        $this->broadcast($p, $this->MsgFactory->objectDied($p['id'], $p['current_direction'], $p['current_location']));
 
-        // $this->callDefaultNPC($p, $this->Enum::DefaultNPCTypeDie);
+        $this->callDefaultNPC($p, $this->Enum::DefaultNPCTypeDie);
     }
 
     public function callDefaultNPC(&$p, $calltype, ...$args)
@@ -1355,26 +1339,11 @@ class PlayerObject extends AbstractController
         }
 
         $key = '[@_' . $key . ']';
+
+        // $this->callNPC1($p,);
     }
 
-// func (p *Player) CallDefaultNPC(calltype DefaultNPCType, args ...interface{}) {
-    //     var key string
-
-//     switch calltype {
-    //     case DefaultNPCTypeUseItem:
-    //         key = fmt.Sprintf("UseItem(%v)", args[0])
-    //     }
-
-//     key = fmt.Sprintf("[@_%s]", key)
-
-//     p.ActionList.PushAction(DelayedTypeNPC, func() {
-    //         p.CallNPC1(env.DefaultNPC, key)
-    //     })
-
-//     p.Enqueue(&server.NPCUpdate{NPCID: env.DefaultNPC.GetID()})
-    // }
-
-    public function repairItem($p, $unique_id, $special)
+    public function repairItem(&$p, $unique_id, $special)
     {
         $this->SendMsg->send($p['fd'], $this->MsgFactory->repairItem($unique_id));
 
@@ -1434,9 +1403,514 @@ class PlayerObject extends AbstractController
         $this->SendMsg->send($p['fd'], $this->MsgFactory->itemRepaired($unique_id, $temp['max_dura'], $temp['current_dura']));
 
         co(function () use ($p, $temp) {
-            $this->setPlayer($p['fd'], $p);
             $this->PlayersList->saveGold($p['id'], $p['gold']);
             $this->PlayersList->saveItemDura($temp);
         });
+    }
+
+    //判断玩家是否是攻击者的攻击对象
+    public function isAttackTarget($object, $attacker)
+    {
+        if (!empty($object['dead'])) {
+            return true;
+        }
+
+        switch ($attacker['object_type']) {
+            case $this->Enum::ObjectTypeMonster:
+
+                if ($attacker['ai'] == 6 || $attacker['ai'] == 58) {
+                    return $object['pk_points'] >= 200;
+                }
+
+                if (empty($attacker['master'])) {
+                    break;
+                }
+
+                if ($attacker['master']['id'] == $object['id']) {
+                    return false;
+                }
+
+                switch ($attacker['master']['a_mode']) {
+                    case $this->Enum::AttackModeAll:
+                        return true;
+                        break;
+
+                    case $this->Enum::AttackModeGroup:
+                        return true;
+                        break;
+
+                    case $this->Enum::AttackModeGuild:
+                        return true;
+                        break;
+
+                    case $this->Enum::AttackModeEnemyGuild:
+                        return false;
+                        break;
+
+                    case $this->Enum::AttackModePeace:
+                        return false;
+                        break;
+
+                    case $this->Enum::AttackModeRedBrown:
+                        return $object['pk_points'] >= 200;
+                        break;
+
+                    default:
+                        # code...
+                        break;
+                }
+
+                break;
+
+            default:
+                # code...
+                break;
+        }
+
+        return true;
+    }
+
+    public function canAttack()
+    {
+        return true;
+    }
+
+    public function getMagic($p, $spell)
+    {
+        foreach ($p['magics'] as $k => $v) {
+            if ($v['spell'] == $spell) {
+                return $v['spell'];
+            }
+        }
+
+        return null;
+    }
+
+    public function attack(&$p, $direction, $spell)
+    {
+        if (!$this->canAttack()) {
+            $this->SendMsg->send($p['fd'], $this->MsgFactory->userLocation($p));
+            return;
+        }
+
+        $level = 0;
+
+        switch ($spell) {
+            case $this->Enum::SpellSlaying:
+                if (!$p['slaying']) {
+                    $spell = $this->Enum::SpellNone;
+                } else {
+                    $magic = $this->getMagic($p, $this->Enum::SpellSlaying);
+                    $level = $magic['level'];
+                }
+
+                $p['slaying'] = false;
+
+                break;
+
+            case $this->Enum::SpellDoubleSlash:
+                $magic = $this->getMagic($p, $spell);
+
+                if (!$magic || ($magic['info']['base_cost'] + ($magic['level'] * $magic['info']['level_cost'])) > intval($p['mp'])) {
+                    $spell = $this->Enum::SpellNone;
+                    break;
+                }
+
+                $level = $magic['level'];
+                $this->changeMP($p, -($magic['info']['base_cost'] + $magic['level'] * $magic['info']['level_cost']));
+
+                break;
+
+            case $spell == $this->Enum::SpellThrusting || $spell == $this->Enum::SpellFlamingSword:
+                $magic = $this->getMagic($p, $spell);
+
+                if (!$magic || (!$p['flaming_sword'] && ($spell == $this->Enum::SpellFlamingSword))) {
+                    $spell = $this->Enum::SpellNone;
+                    break;
+                }
+
+                $level = $magic['level'];
+                break;
+
+            case $spell == $this->Enum::SpellHalfMoon || $spell == $this->Enum::SpellCrossHalfMoon:
+                $magic = $this->getMagic($p, $spell);
+                if (!$magic || $magic['info']['base_cost'] + ($magic['level'] * $magic['info']['level_cost']) > intval($p['mp'])) {
+                    $spell = $this->Enum::SpellNone;
+                    break;
+                }
+
+                $level = $magic['level'];
+                $this->changeMP($p, -($magic['info']['base_cost'] + $magic['level'] * $magic['info']['level_cost']));
+                break;
+
+            case $this->Enum::SpellTwinDrakeBlade:
+                $magic = $this->getMagic($p, $spell);
+                if (!$p['twin_drake_blade'] || !$magic || $magic['info']['base_cost'] + $magic['level'] * $magic['info']['level_cost'] > intval($p['mp'])) {
+                    $spell = $this->Enum::SpellNone;
+                    break;
+                }
+
+                $level = $magic['level'];
+                $this->changeMP($p, -($magic['info']['base_cost'] + $magic['level'] * $magic['info']['level_cost']));
+                break;
+
+            default:
+                $spell = $this->Enum::SpellNone;
+                break;
+        }
+
+        if (!$p['slaying']) {
+            $magic = $this->getMagic($p, $this->Enum::SpellSlaying);
+
+            if (!$magic && rand(0, 12) <= $magic['level']) {
+                $p['slaying'] = true;
+
+                $this->SendMsg->send($p['fd'], $this->MsgFactory->spellToggle($this->Enum::SpellSlaying, $p['slaying']));
+            }
+        }
+
+        $p['direction'] = $direction;
+
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->userLocation($p));
+
+        $this->broadcast($p, $this->MsgFactory->objectAttack($p, $spell, 0, 0));
+
+        $point = $this->Point->NextPoint($p['current_location'], $p['direction'], 1);
+
+        $damageBase = $this->getAttackPower($p['min_dc'], $p['max_dc']);
+
+        $map    = $p['map'];
+        $cellId = $this->Cell->getCellId($point['x'], $point['y'], $map['width']);
+
+        $cellObjects = $this->GameData->getCellObject($map['info']['id'], $cellId);
+
+        if ($cellObjects) {
+
+            foreach ($cellObjects as $key => $object) {
+
+                if ($object['object_type'] == $this->Enum::ObjectTypePlayer) {
+                    if (!$this->isAttackTarget($object, $p)) {
+                        continue;
+                    }
+                } elseif ($object['object_type'] == $this->Enum::ObjectTypeMonster) {
+                    if (!$this->Monster->isAttackTarget($object, $p)) {
+                        continue;
+                    }
+                } else {
+                    continue;
+                }
+
+                $defence     = $this->Enum::DefenceTypeACAgility;
+                $damageFinal = $damageBase;
+
+                switch ($spell) {
+
+                    //攻杀剑术
+                    case $this->Enum::SpellSlaying:
+                        $magic       = $this->getMagic($p, $this->Enum::SpellSlaying);
+                        $damageFinal = $this->Magic->getDamage($magic, $damageBase);
+                        $this->Magic->levelMagic($p, $magic);
+                        break;
+
+                    //刺杀剑术
+                    case $this->Enum::SpellThrusting:
+                        $magic = $this->getMagic($p, $this->Enum::SpellThrusting);
+                        $this->Magic->levelMagic($p, $magic);
+                        break;
+
+                    //半月弯刀
+                    case $this->Enum::SpellHalfMoon:
+                        $magic = $this->getMagic($p, $this->Enum::SpellHalfMoon);
+                        $this->Magic->levelMagic($p, $magic);
+                        break;
+
+                    //圆月弯刀
+                    case $this->Enum::SpellCrossHalfMoon:
+                        $magic = $this->getMagic($p, $this->Enum::SpellCrossHalfMoon);
+                        $this->Magic->levelMagic($p, $magic);
+                        break;
+
+                    //双龙斩
+                    case $this->Enum::SpellTwinDrakeBlade:
+                        $magic                 = $this->getMagic($p, $this->Enum::SpellTwinDrakeBlade);
+                        $damageFinal           = $this->Magic->getDamage($magic, $damageBase);
+                        $p['twin_drake_blade'] = false;
+
+                        $this->completeAttack($object, $damageFinal, $this->Enum::DefenceTypeAgility, false);
+
+                        $this->Magic->levelMagic($p, $magic);
+                        break;
+
+                    //烈火剑法
+                    case $this->Enum::SpellFlamingSword:
+                        $magic              = $this->getMagic($p, $this->Enum::SpellFlamingSword);
+                        $damageFinal        = $this->Magic->getDamage($magic, $damageBase);
+                        $p['flaming_sword'] = false;
+                        $defence            = $this->Enum::DefenceTypeAC;
+                        $this->Magic->levelMagic($p, $magic);
+                        break;
+                    default:
+                        # code...
+                        break;
+                }
+
+                $this->completeAttack($p, $object, $damageFinal, $defence, true);
+            }
+        }
+    }
+
+    public function completeAttack(&$p, $target, $damage, $defence, $damageWeapon)
+    {
+        if (!$target) {
+            return;
+        }
+
+        $p['target'] = [
+            'id'          => $target['id'],
+            'mapId'       => $target['map']['id'],
+            'object_type' => $target['object_type'],
+        ];
+
+        if ($target['object_type'] == $this->Enum::ObjectTypePlayer) {
+            if (!$this->isAttackTarget($target, $p)) {
+                return;
+            }
+
+            if ($this->attacked($p, $damage, $defence, $damageWeapon) <= 0) {
+                return;
+            }
+
+        } elseif ($target['object_type'] == $this->Enum::ObjectTypeMonster) {
+            if (!$this->Monster->isAttackTarget($target, $p)) {
+                return;
+            }
+
+            if ($this->Monster->attacked($p, $damage, $defence, $damageWeapon) <= 0) {
+                return;
+            }
+        }
+
+        foreach ($p['magics'] as $k => $magic) {
+            switch ($magic['spell']) {
+                case $magic['spell'] == $this->Enum::SpellFencing || $magic['spell'] == $this->Enum::SpellSpiritSword:
+                    $this->Magic->levelMagic($p, $magic);
+                    break;
+
+            }
+        }
+    }
+
+    public function broadcastDamageIndicator($object, $type, $damage)
+    {
+        switch ($object['object_type']) {
+            case $this->Enum::ObjectTypePlayer:
+                $msg = $this->MsgFactory->damageIndicator($damage, $type, $object['id']);
+                $this->SendMsg->send($object['fd'], $msg);
+                $this->broadcast($object, $msg);
+                break;
+
+            case $this->Enum::ObjectTypeMonster:
+                $this->Monster->broadcastDamageIndicator($object, $type, $damage);
+                break;
+        }
+    }
+
+    //获取防御值
+    public function getDefencePower($min, $max)
+    {
+        if ($min < 0) {
+            $min = 0;
+        }
+
+        if ($min > $max) {
+            $max = $min;
+        }
+
+        return rand($min, $max + 1);
+    }
+
+    public function attacked(&$attacker, $damage, $type, $damageWeapon)
+    {
+        $armour = 0;
+
+        $target = $this->getTarget($attacker);
+
+        switch ($attacker['object_type']) {
+            case $this->Enum::ObjectTypePlayer:
+                # code...
+                break;
+
+            case $this->Enum::ObjectTypeMonster:
+                switch ($type) {
+                    case $this->Enum::DefenceTypeACAgility:
+                        if (rand(0, $target['agility'] + 1) > $attacker['accuracy']) {
+                            $this->broadcastDamageIndicator($target, $this->Enum::DamageTypeMiss, 0);
+                            return 0;
+                        }
+
+                        $armour = $this->getDefencePower($target['min_ac'], $target['max_ac']);
+                        break;
+
+                    case $this->Enum::DefenceTypeAC:
+                        $armour = $this->getDefencePower($target['min_ac'], $target['max_ac']);
+                        break;
+
+                    case $this->Enum::DefenceTypeMACAgility:
+
+                        if (rand(0, $this->Settings::MagicResistWeight) < $target['magic_resist']) {
+                            $this->broadcastDamageIndicator($target, $this->Enum::DamageTypeMiss, 0);
+                            return 0;
+                        }
+
+                        if (rand(0, $target['agility'] + 1) > $attacker['accuracy']) {
+                            return 0;
+                        }
+
+                        $armour = $this->getDefencePower($target['min_ac'], $target['max_ac']);
+                        break;
+
+                    case $this->Enum::DefenceTypeMAC:
+
+                        if (rand(0, $this->Settings::MagicResistWeight) < $target['magic_resist']) {
+                            $this->broadcastDamageIndicator($target, $this->Enum::DamageTypeMiss, 0);
+                            return 0;
+                        }
+
+                        $armour = $this->getDefencePower($target['min_ac'], $target['max_ac']);
+                        break;
+
+                    case $this->Enum::DefenceTypeAgility:
+
+                        if (rand(0, $target['agility'] + 1) > $attacker['accuracy']) {
+                            EchoLog('玩家攻击防御类型敏捷');
+                            EchoLog(sprintf('被攻击者敏捷: %s  攻击者精准: %s', $target['agility'], $attacker['accuracy']), 'w');
+
+                            $this->broadcastDamageIndicator($target, $this->Enum::DamageTypeMiss, 0);
+                            return 0;
+                        }
+                        break;
+                }
+
+                if (rand(0, 100) < $target['reflect']) {
+                    if ($target['object_type'] == $this->Enum::ObjectTypePlayer) {
+                        if ($this->isAttackTarget($target, $p)) {
+                            $this->attacked($attacker, $damage, $type, false);
+                            $this->broadcast($target, $this->MsgFactory->objectEffect($attacker['id'], $this->Enum::SpellEffectReflect, 0, 0, 0));
+                        }
+
+                    } elseif ($target['object_type'] == $this->Enum::ObjectTypeMonster) {
+                        if ($this->Monster->isAttackTarget($target, $p)) {
+                            $this->Monster->attacked($attacker, $damage, $type, false);
+                            $this->Monster->broadcast($target, $this->MsgFactory->objectEffect($attacker['id'], $this->Enum::SpellEffectReflect, 0, 0, 0));
+                        }
+                    }
+
+                    return 0;
+                }
+
+                $armour = $armour * $target['armour_rate'];
+                $damage = $damage * $target['damage_rate'];
+
+                if ($target['magic_shield']) {
+                    $damage -= $damage * ($target['magic_shield_lv'] + 2) / 10;
+                }
+
+                if ($armour >= $damage) {
+                    EchoLog(sprintf('被攻击者: %s  盔甲: %s  伤害: %s', $target['name'], $armour, $damage), 'w');
+                    $this->broadcastDamageIndicator($target, $this->Enum::DamageTypeMiss, 0);
+                    return 0;
+                }
+
+                $this->SendMsg->send($target['fd'], $this->MsgFactory->struck($attacker['fd']));
+                $this->broadcast($target, $this->MsgFactory->objectStruck($target, $attacker['id']));
+                $p['struck_time'] = time() + 5;
+
+                EchoLog(sprintf('被攻击者:%s  盔甲: %s  伤害: %s 失血: %s', $target['name'], $armour, $damage, intval($armour - $damage)), 'w');
+                EchoLog(sprintf('被攻击者:%s  血值: %s  魔法值: %s  最大血值: %s  最大魔法值: %s', $target['name'], $target['hp'], $target['mp'], $target['max_hp'], $target['max_mp']), 'w');
+
+                $this->broadcastDamageIndicator($target, $this->Enum::DamageTypeHit, intval($armour - $damage));
+                $this->changeHP($target, intval($armour - $damage));
+
+                return intval($armour - $damage);
+                break;
+        }
+
+        return 0;
+    }
+
+    //获取攻击值
+    public function getAttackPower($min, $max)
+    {
+        if ($min < 0) {
+            $min = 0;
+        }
+
+        if ($min > $max) {
+            $max = $min;
+        }
+
+        return rand($min, $max);
+    }
+
+    //玩家获取经验
+    public function winExp(&$p, $amount, $targetLevel)
+    {
+        $expPoint = 0;
+        $level    = $p['level'];
+
+        if ($level < $targetLevel + 10) {
+            $expPoint = $amount;
+        } else {
+            $expPoint = $amount - intval(round(max($amount / 15, 1) * ($level - ($targetLevel + 10))));
+        }
+
+        if ($expPoint <= 0) {
+            $expPoint = 1;
+        }
+
+        $this->gainExp($p, $expPoint);
+    }
+
+    public function gainExp(&$p, $amount)
+    {
+        $p['experience'] += (int) $amount;
+
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->gainExperience($amount));
+
+        EchoLog(sprintf('玩家:%s  获取经验: %s  当前经验: %s 当前等级最大经验: %s 当前百分比: %s', $p['name'], $amount, $p['experience'], $p['max_experience'],intval($p['experience']/$p['max_experience'])*100), 'w');
+
+        if ($p['experience'] < $p['max_experience']) {
+            return;
+        }
+
+        //连续升级
+        $exp = $p['experience'];
+
+        for ($i = $exp; $i >= $p['max_experience'];) {
+            $p['level']++;
+            $exp -= $p['max_experience'];
+            $this->refreshStats($p);
+        }
+
+        $p['experience'] = $exp;
+
+        $this->PlayersList->saveData($p['fd'], $p);
+
+        $this->levelUp($p);
+    }
+
+    //提升等级
+    public function levelUp(&$p)
+    {
+        EchoLog(sprintf('玩家:%s  升级成功! 当前等级: %s', $p['name'], $p['level']), 'w');
+
+        $this->refreshStats($p);
+        $this->setHp($p, $p['max_hp']);
+        $this->setMp($p, $p['max_mp']);
+
+        $this->SendMsg->send($p['fd'], $this->MsgFactory->levelChanged($p['level'], $p['experience'], $p['max_experience']));
+        $this->broadcast($p, $this->MsgFactory->objectLeveled($p['id']));
+
+        $this->PlayersList->saveData($p['fd'], $p);
     }
 }

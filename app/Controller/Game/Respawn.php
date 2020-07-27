@@ -133,13 +133,16 @@ class Respawn extends AbstractController
     public function spawn(&$respawn, $type = true)
     {
         $monster = [];
-        for ($i = $respawn['count']; $i < $respawn['info']['count']; $i++) {
-            if ($info = $this->spawnOne($respawn, $type)) {
-                $monster[] = $info;
+        if($respawn)
+        {
+            for ($i = $respawn['count']; $i < $respawn['info']['count']; $i++) {
+                if ($info = $this->spawnOne($respawn, $type)) {
+                    $monster[] = $info;
+                }
             }
-        }
 
-        $respawn['count'] = $respawn['info']['count'];
+            $respawn['count'] = $respawn['info']['count'];
+        }
 
         return $monster;
     }

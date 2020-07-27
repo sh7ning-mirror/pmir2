@@ -58,7 +58,7 @@ class CommonModel extends Model implements CacheableInterface
      * @param   [type]          $page         [开始页]
      * @return  [type]                        [条数,数据]
      */
-    public function getList($table, $field, $join, $where, $orwhere, $orderBy, $groupBy = null, $page, $dbDatabase = null)
+    public function getList($table, $field, $join, $where, $orwhere, $orderBy, $groupBy = null, $page=null, $dbDatabase = null)
     {
         try {
             $tableObject = $this->dbConnection($table, $dbDatabase);
@@ -215,10 +215,10 @@ class CommonModel extends Model implements CacheableInterface
         foreach ($join as $k => $v) {
             switch ($v[0]) {
                 case 'left':
-                    if (is_array($v[2])) 
+                    if (is_array($v[2]))
                     {
                         $object->leftJoin($v[1], function ($query) use ($v) {
-                            foreach ($v[2] as $k1 => $v1) 
+                            foreach ($v[2] as $k1 => $v1)
                             {
                                 $query->on($v1[0], $v1[1], $v1[2]);
                             }
@@ -229,10 +229,10 @@ class CommonModel extends Model implements CacheableInterface
                     break;
 
                 case 'right':
-                    if (is_array($v[2])) 
+                    if (is_array($v[2]))
                     {
                         $object->rightJoin($v[1], function ($query) use ($v) {
-                            foreach ($v[2] as $k1 => $v1) 
+                            foreach ($v[2] as $k1 => $v1)
                             {
                                 $query->on($v1[0], $v1[1], $v1[2]);
                             }
@@ -243,10 +243,10 @@ class CommonModel extends Model implements CacheableInterface
                     break;
 
                 case 'inner':
-                    if (is_array($v[2])) 
+                    if (is_array($v[2]))
                     {
                         $object->join($v[1], function ($query) use ($v) {
-                            foreach ($v[2] as $k1 => $v1) 
+                            foreach ($v[2] as $k1 => $v1)
                             {
                                 $query->on($v1[0], $v1[1], $v1[2]);
                             }
@@ -539,7 +539,7 @@ class CommonModel extends Model implements CacheableInterface
      * @param   [type]          $page         [开始页]
      * @return  [type]                        [条数,数据]
      */
-    public function getCount($table, $field, $join, $where, $orwhere, $orderBy, $groupBy = null, $page, $dbDatabase = null)
+    public function getCount($table, $field, $join, $where, $orwhere, $orderBy, $groupBy = null, $page=null, $dbDatabase = null)
     {
         try {
 

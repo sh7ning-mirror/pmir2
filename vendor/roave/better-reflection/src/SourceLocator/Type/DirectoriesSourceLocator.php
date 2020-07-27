@@ -19,12 +19,11 @@ use function is_dir;
 use function is_string;
 
 /**
- * This source locator loads all php files in an entire directory or multiple directories.
+ * This source locator recursively loads all php files in an entire directory or multiple directories.
  */
 class DirectoriesSourceLocator implements SourceLocator
 {
-    /** @var AggregateSourceLocator */
-    private $aggregateSourceLocator;
+    private AggregateSourceLocator $aggregateSourceLocator;
 
     /**
      * @param string[] $directories directories to scan
@@ -47,12 +46,12 @@ class DirectoriesSourceLocator implements SourceLocator
                 return new FileIteratorSourceLocator(
                     new RecursiveIteratorIterator(new RecursiveDirectoryIterator(
                         $directory,
-                        RecursiveDirectoryIterator::SKIP_DOTS
+                        RecursiveDirectoryIterator::SKIP_DOTS,
                     )),
-                    $astLocator
+                    $astLocator,
                 );
             },
-            $directories
+            $directories,
         )));
     }
 

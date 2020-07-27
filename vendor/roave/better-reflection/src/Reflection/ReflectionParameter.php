@@ -21,7 +21,7 @@ use Roave\BetterReflection\Reflection\StringCast\ReflectionParameterStringCast;
 use Roave\BetterReflection\Reflector\ClassReflector;
 use Roave\BetterReflection\Reflector\Reflector;
 use Roave\BetterReflection\TypesFinder\FindParameterType;
-use Roave\BetterReflection\Util\CalculateReflectionColum;
+use Roave\BetterReflection\Util\CalculateReflectionColumn;
 use RuntimeException;
 use function assert;
 use function count;
@@ -35,32 +35,22 @@ use function strtolower;
 
 class ReflectionParameter
 {
-    /** @var ParamNode */
-    private $node;
+    private ParamNode $node;
 
-    /** @var Namespace_|null */
-    private $declaringNamespace;
+    private ?Namespace_ $declaringNamespace;
 
-    /** @var ReflectionFunctionAbstract */
-    private $function;
+    private ReflectionFunctionAbstract $function;
 
-    /** @var int */
-    private $parameterIndex;
+    private int $parameterIndex;
 
-    /**
-     * @var bool|int|float|string|array<bool|int|float|string>|null
-     * @psalm-var scalar|array<scalar>|null
-     */
+    /** @var scalar|array<scalar>|null */
     private $defaultValue;
 
-    /** @var bool */
-    private $isDefaultValueConstant = false;
+    private bool $isDefaultValueConstant = false;
 
-    /** @var string|null */
-    private $defaultValueConstantName;
+    private ?string $defaultValueConstantName;
 
-    /** @var Reflector */
-    private $reflector;
+    private Reflector $reflector;
 
     private function __construct()
     {
@@ -84,12 +74,10 @@ class ReflectionParameter
     /**
      * Create a reflection of a parameter using an instance
      *
-     * @param object $instance
-     *
      * @throws OutOfBoundsException
      */
     public static function createFromClassInstanceAndMethod(
-        $instance,
+        object $instance,
         string $methodName,
         string $parameterName
     ) : self {
@@ -203,7 +191,7 @@ class ReflectionParameter
 
         $this->defaultValue = (new CompileNodeToValue())->__invoke(
             $defaultValueNode,
-            new CompilerContext($this->reflector, $this->getDeclaringClass())
+            new CompilerContext($this->reflector, $this->getDeclaringClass()),
         );
     }
 
@@ -292,11 +280,9 @@ class ReflectionParameter
     /**
      * Get the default value of the parameter.
      *
-     * @return bool|int|float|string|array|null
+     * @return scalar|array<scalar>|null
      *
      * @throws LogicException
-     *
-     * @psalm-return scalar|array<scalar>|null
      */
     public function getDefaultValue()
     {
@@ -485,7 +471,7 @@ class ReflectionParameter
             throw new RuntimeException(sprintf(
                 'Unable to reflect class type because we were not given a "%s", but a "%s" instead',
                 ClassReflector::class,
-                get_class($this->reflector)
+                get_class($this->reflector),
             ));
         }
 
@@ -537,12 +523,12 @@ class ReflectionParameter
 
     public function getStartColumn() : int
     {
-        return CalculateReflectionColum::getStartColumn($this->function->getLocatedSource()->getSource(), $this->node);
+        return CalculateReflectionColumn::getStartColumn($this->function->getLocatedSource()->getSource(), $this->node);
     }
 
     public function getEndColumn() : int
     {
-        return CalculateReflectionColum::getEndColumn($this->function->getLocatedSource()->getSource(), $this->node);
+        return CalculateReflectionColumn::getEndColumn($this->function->getLocatedSource()->getSource(), $this->node);
     }
 
     public function getAst() : ParamNode

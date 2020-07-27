@@ -71,4 +71,14 @@ class ItemData extends AbstractController
     {
         return array_column(self::$itemInfos, 'id');
     }
+
+    public function getItemInfosName($name)
+    {
+        if(!empty(self::$itemNameInfos[$name]))
+        {
+            return self::$itemNameInfos[$name];
+        }
+
+        return null;
+    }
 }

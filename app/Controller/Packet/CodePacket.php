@@ -11,14 +11,14 @@ use App\Controller\AbstractController;
 class CodePacket extends AbstractController
 {
     public $clientPacketStruct = [
-        'CLIENT_VERSION'   => [
+        'CLIENT_VERSION'    => [
             'count'        => 'uint32',
             'version_hash' => '[]int8',
         ],
-        'KEEP_ALIVE'       => [
+        'KEEP_ALIVE'        => [
             'time' => 'int64',
         ],
-        'NEW_ACCOUNT'      => [
+        'NEW_ACCOUNT'       => [
             'account'         => 'string',
             'password'        => 'string',
             'date_time'       => 'int64',
@@ -27,93 +27,100 @@ class CodePacket extends AbstractController
             'secret_answer'   => 'string',
             'email_address'   => 'string',
         ],
-        'CHANGE_PASSWORD'  => [
+        'CHANGE_PASSWORD'   => [
             'account'          => 'string',
             'current_password' => 'string',
             'new_password'     => 'string',
         ],
-        'LOGIN'            => [
+        'LOGIN'             => [
             'account'  => 'string',
             'password' => 'string',
         ],
-        'NEW_CHARACTER'    => [
+        'NEW_CHARACTER'     => [
             'name'   => 'string',
             'gender' => 'int8',
             'class'  => 'int8',
         ],
-        'DELETE_CHARACTER' => [
+        'DELETE_CHARACTER'  => [
             'character_index' => 'int32',
         ],
-        'START_GAME'       => [
+        'START_GAME'        => [
             'character_index' => 'int16',
         ],
-        'WALK'             => [
+        'WALK'              => [
             'direction' => 'uint8',
         ],
-        'RUN'              => [
+        'RUN'               => [
             'direction' => 'uint8',
         ],
-        'TURN'             => [
+        'TURN'              => [
             'direction' => 'uint8',
         ],
-        'LOG_OUT'          => [
+        'LOG_OUT'           => [
 
         ],
-        'CHAT'             => [
+        'CHAT'              => [
             'message' => 'string',
             'type'    => 'uint8',
         ],
-        'OPENDOOR'         => [
+        'OPENDOOR'          => [
             'door_index' => 'uint8',
         ],
-        'REFINE_CANCEL'    => [],
-        'EQUIP_ITEM'       => [
+        'REFINE_CANCEL'     => [],
+        'EQUIP_ITEM'        => [
             'grid'      => 'uint8',
             'unique_id' => 'uint64',
             'to'        => 'int32',
         ],
-        'REMOVE_ITEM'      => [
+        'REMOVE_ITEM'       => [
             'grid'      => 'uint8',
             'unique_id' => 'uint64',
             'to'        => 'int32',
         ],
-        'MOVE_ITEM'        => [
+        'MOVE_ITEM'         => [
             'grid' => 'uint8',
             'from' => 'int32',
             'to'   => 'int32',
         ],
-        'CALL_NPC'         => [
+        'CALL_NPC'          => [
             'object_id' => 'uint32',
             'key'       => 'string',
         ],
-        'BUY_ITEM'         => [
+        'BUY_ITEM'          => [
             'item_index' => 'uint64',
             'count'      => 'uint32',
             'type'       => 'uint8',
         ],
-        'SELL_ITEM'        => [
+        'SELL_ITEM'         => [
             'unique_id' => 'uint64',
             'count'     => 'uint32',
         ],
-        'DROP_ITEM'        => [
+        'DROP_ITEM'         => [
             'unique_id' => 'uint64',
             'count'     => 'uint32',
         ],
-        'PICK_UP'          => [],
-        'CHANGE_A_MODE'    => [
+        'PICK_UP'           => [],
+        'CHANGE_A_MODE'     => [
             'mode' => 'uint8',
         ],
-        'CHANGE_P_MODE'    => [
+        'CHANGE_P_MODE'     => [
             'mode' => 'uint8',
         ],
-        'USE_ITEM'         => [
+        'USE_ITEM'          => [
             'unique_id' => 'uint64',
         ],
-        'DROP_GOLD'        => [
+        'DROP_GOLD'         => [
             'amount' => 'uint32',
         ],
-        'REPAIR_ITEM'      => [
+        'REPAIR_ITEM'       => [
             'unique_id' => 'uint64',
+        ],
+        'REQUEST_USER_NAME' => [
+            'user_id' => 'uint32',
+        ],
+        'ATTACK'            => [
+            'direction' => 'uint8',
+            'spell'     => 'uint8',
         ],
     ];
 
@@ -764,7 +771,7 @@ class CodePacket extends AbstractController
         'NEW_MAGIC'                => [
             'magic' => [
                 'name'       => 'string',
-                'spell'      => 'int',
+                'spell'      => 'uint8',
                 'base_cost'  => 'uint8',
                 'level_cost' => 'uint8',
                 'icon'       => 'uint8',
@@ -797,6 +804,81 @@ class CodePacket extends AbstractController
             'unique_id'    => 'uint64',
             'max_dura'     => 'uint16',
             'current_dura' => 'uint16',
+        ],
+        'OBJECT_ATTACK'            => [
+            'object_id'  => 'uint32',
+            'location_x' => 'int32',
+            'location_y' => 'int32',
+            'direction'  => 'uint8',
+            'spell'      => 'uint8',
+            'level'      => 'uint8',
+            'type'       => 'uint8',
+        ],
+        'OBJECT_RANGE_ATTACK'      => [
+            'object_id'         => 'uint32',
+            'location_x'        => 'int32',
+            'location_y'        => 'int32',
+            'direction'         => 'uint8',
+            'target_object_id'  => 'uint32',
+            'target_location_x' => 'int32',
+            'target_location_y' => 'int32',
+            'type'              => 'uint8',
+            'spell'             => 'uint8',
+        ],
+        'OBJECT_STRUCK'            => [
+            'object_id'   => 'uint32',
+            'attacker_id' => 'uint32',
+            'location_x'  => 'int32',
+            'location_y'  => 'int32',
+            'direction'   => 'uint8',
+        ],
+        'DAMAGE_INDICATOR'         => [
+            'damage'    => 'int32',
+            'type'      => 'uint8',
+            'object_id' => 'uint32',
+        ],
+        'USER_NAME'                => [
+            'id'   => 'uint32',
+            'name' => 'string',
+        ],
+        'SPELL_TOGGLE'             => [
+            'spell'   => 'uint8',
+            'can_use' => 'bool',
+        ],
+        'MAGIC_DELAY'              => [
+            'spell' => 'uint8',
+            'delay' => 'int64',
+        ],
+        'MAGIC_LEVELED'            => [
+            'spell'      => 'uint8',
+            'level'      => 'uint8',
+            'experience' => 'uint16',
+        ],
+        'OBJECT_EFFECT'            => [
+            'object_id'  => 'uint32',
+            'effect'     => 'uint8',
+            'effectType' => 'uint32',
+            'delayTime'  => 'uint32',
+            'time'       => 'uint32',
+        ],
+        'STRUCK'                   => [
+            'attacker_id' => 'uint32',
+        ],
+        'GAIN_EXPERIENCE'          => [
+            'amount' => 'uint32',
+        ],
+        'levelChanged'             => [
+            'level'          => 'uint16',
+            'experience'     => 'int64',
+            'max_experience' => 'int64',
+        ],
+        'OBJECT_LEVELED'           => [
+            'object_id' => 'uint32',
+        ],
+        'LEVEL_CHANGED'            => [
+            'level'          => 'uint16',
+            'experience'     => 'int64',
+            'max_experience' => 'int64',
         ],
     ];
 

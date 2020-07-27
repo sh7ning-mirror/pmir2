@@ -686,7 +686,12 @@ function removeBOM($str)
     return $str;
 }
 
-function getIndexMax($arra,$index)
+function getIndexMax($arra, $index)
 {
     return max(array_column($arra, $index));
+}
+
+function randomDirection($mirDirectionCount)
+{
+    return rand(0, $mirDirectionCount);
 }

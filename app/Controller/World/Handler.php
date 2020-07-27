@@ -12,7 +12,8 @@ class Handler extends AbstractController
 {
     public function walk($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
 
         $point = $this->Point->NextPoint($p['current_location'], $param['res']['direction'], 1);
 
@@ -22,20 +23,17 @@ class Handler extends AbstractController
         ];
 
         if ($this->PlayerObject->checkMovement($point, $p)) {
-            $this->PlayerObject->setPlayer($fd, $p);
             return false;
         }
 
         if (!$this->Map->updateObject($p, $point, $this->Enum::ObjectTypePlayer)) {
             $p['current_location']  = $point;
             $p['current_direction'] = $param['res']['direction'];
-            $this->PlayerObject->setPlayer($fd, $p);
             return ['USER_LOCATION', $data];
         }
 
         $p['current_location']  = $point;
         $p['current_direction'] = $param['res']['direction'];
-        $this->PlayerObject->setPlayer($fd, $p);
 
         $this->PlayerObject->broadcast($p, ['OBJECT_WALK', $this->MsgFactory->objectWalk($p)]);
 
@@ -46,7 +44,8 @@ class Handler extends AbstractController
     {
         $steps = 2;
 
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
 
         for ($i = 1; $i <= $steps; $i++) {
 
@@ -57,13 +56,11 @@ class Handler extends AbstractController
             ];
 
             if (!$this->Map->checkDoorOpen($p['map']['info']['id'], $point)) {
-                $this->PlayerObject->setPlayer($fd, $p);
                 $this->SendMsg->send($fd, ['USER_LOCATION', $data]);
                 return false;
             }
 
             if ($this->PlayerObject->checkMovement($point, $p)) {
-                $this->PlayerObject->setPlayer($fd, $p);
                 return false;
             }
         }
@@ -71,13 +68,11 @@ class Handler extends AbstractController
         if (!$this->Map->updateObject($p, $point, $this->Enum::ObjectTypePlayer)) {
             $p['current_location']  = $point;
             $p['current_direction'] = $param['res']['direction'];
-            $this->PlayerObject->setPlayer($fd, $p);
             return ['USER_LOCATION', $data];
         }
 
         $p['current_location']  = $point;
         $p['current_direction'] = $param['res']['direction'];
-        $this->PlayerObject->setPlayer($fd, $p);
 
         $this->SendMsg->send($fd, ['USER_LOCATION', $data]);
 
@@ -86,7 +81,8 @@ class Handler extends AbstractController
 
     public function turn($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
 
         $data = [
             'location'  => $p['current_location'],
@@ -97,15 +93,16 @@ class Handler extends AbstractController
 
         $this->SendMsg->send($fd, ['USER_LOCATION', $data]);
 
-        $this->PlayerObject->setPlayer($fd, $p);
-
         $this->PlayerObject->broadcast($p, ['OBJECT_TURN', $this->MsgFactory->objectTurn($p)]);
     }
 
     public function logOut($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
 
+        var_dump('_______________________________');
+        var_dump($p['experience']);
         if (!$p || !isset($p['game_stage']) || $p['game_stage'] != $this->Enum::GAME) {
             return false;
         }
@@ -114,11 +111,9 @@ class Handler extends AbstractController
 
         $this->PlayerObject->stopGame($p);
 
+        $p['game_stage'] = $this->Enum::SELECT;
+        
         co(function () use ($fd, $p) {
-
-            $p['game_stage'] = $this->Enum::SELECT;
-
-            $this->PlayerObject->setPlayer($fd, $p);
 
             //保存玩家属性
             $this->PlayersList->saveData($fd, $p);
@@ -132,7 +127,8 @@ class Handler extends AbstractController
 
     public function gameOver($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
 
         if (!$p || !isset($p['game_stage']) || $p['game_stage'] != $this->Enum::GAME) {
             return false;
@@ -157,7 +153,8 @@ class Handler extends AbstractController
 
     public function chat($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
 
         //私聊
         if (strpos($param['res']['message'], '/') === 0) {
@@ -208,14 +205,16 @@ class Handler extends AbstractController
 
     public function openDoor($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
 
         $this->PlayerObject->openDoor($p, $param['res']['door_index']);
     }
 
     public function refineCancel($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
 
         if (!empty($p['refine'])) {
             foreach ($p['refine'] as $temp) {
@@ -265,7 +264,8 @@ class Handler extends AbstractController
 
     public function equipItem($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
 
         $msg = [
             'grid'      => $param['res']['grid'],
@@ -304,7 +304,6 @@ class Handler extends AbstractController
 
         $msg['success'] = true;
         $this->PlayerObject->refreshStats($p);
-        $this->PlayerObject->setPlayer($p['fd'], $p);
 
         $this->PlayerObject->updateConcentration($p);
         $this->PlayerObject->broadcast($p, ['PLAYER_UPDATE', $this->MsgFactory->playerUpdate($p)]);
@@ -314,7 +313,8 @@ class Handler extends AbstractController
 
     public function removeItem($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
 
         $msg = [
             'grid'      => $param['res']['grid'],
@@ -354,7 +354,6 @@ class Handler extends AbstractController
 
         $msg['success'] = true;
         $this->PlayerObject->refreshStats($p);
-        $this->PlayerObject->setPlayer($p['fd'], $p);
 
         $this->PlayerObject->updateConcentration($p);
         $this->PlayerObject->broadcast($p, ['PLAYER_UPDATE', $this->MsgFactory->playerUpdate($p)]);
@@ -364,7 +363,8 @@ class Handler extends AbstractController
 
     public function moveItem($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
 
         $msg = [
             'grid'    => $param['res']['grid'],
@@ -404,7 +404,6 @@ class Handler extends AbstractController
             $this->PlayerObject->receiveChat($p['fd'], '移动物品失败', $this->Enum::ChatTypeSystem);
         } else {
             $msg['success'] = true;
-            $this->PlayerObject->setPlayer($p['fd'], $p);
         }
 
         return ['MOVE_ITEM', $msg];
@@ -412,7 +411,8 @@ class Handler extends AbstractController
 
     public function callNpc($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
 
         $defaultNpc = $this->GameData->getDefaultNpc();
 
@@ -432,7 +432,9 @@ class Handler extends AbstractController
 
     public function buyItem($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
+
         if ($p['dead']) {
             return false;
         }
@@ -452,7 +454,9 @@ class Handler extends AbstractController
 
     public function dropItem($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
+
         if ($p['dead']) {
             return false;
         }
@@ -480,14 +484,14 @@ class Handler extends AbstractController
 
         $this->PlayerObject->refreshBagWeight($p);
 
-        $this->PlayerObject->setPlayer($fd, $p);
-
         return $this->MsgFactory->dropItem($param['res']['unique_id'], $param['res']['count'], true);
     }
 
     public function sellItem($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
+
         if ($p['dead'] || !$param['res']['count']) {
             return $this->MsgFactory->sellItem($param['res']['unique_id'], $param['res']['count'], false);
         }
@@ -543,14 +547,14 @@ class Handler extends AbstractController
 
         $this->PlayerObject->gainGold($p, $this->Item->price($temp) / 2);
 
-        $this->PlayerObject->setPlayer($fd, $p);
-
         return $this->MsgFactory->sellItem($param['res']['unique_id'], $param['res']['count'], true);
     }
 
     public function pickUp($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
+
         if ($p['dead']) {
             return false;
         }
@@ -573,8 +577,6 @@ class Handler extends AbstractController
             }
         }
 
-        $this->PlayerObject->setPlayer($fd, $p);
-
         foreach ($items as $key => $item) {
             $object = [
                 'current_location' => $p['current_location'],
@@ -590,29 +592,29 @@ class Handler extends AbstractController
 
     public function changeAMode($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
 
         $p['a_mode'] = $param['res']['mode'];
-
-        $this->PlayerObject->setPlayer($fd, $p);
 
         $this->SendMsg->send($p['fd'], $this->MsgFactory->changeAMode($param['res']['mode']));
     }
 
     public function changePMode($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
 
         $p['p_mode'] = $param['res']['mode'];
-
-        $this->PlayerObject->setPlayer($fd, $p);
 
         $this->SendMsg->send($p['fd'], $this->MsgFactory->changePMode($param['res']['mode']));
     }
 
     public function useItem($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
+
         if ($p['dead']) {
             return false;
         }
@@ -666,15 +668,15 @@ class Handler extends AbstractController
 
             $this->PlayerObject->refreshBagWeight($p);
 
-            $this->PlayerObject->setPlayer($fd, $p);
-
             return $msg;
         }
     }
 
     public function dropGold($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
+
         if ($p['dead']) {
             return false;
         }
@@ -697,8 +699,28 @@ class Handler extends AbstractController
 
     public function repairItem($fd, $param)
     {
-        $p = $this->PlayerObject->getPlayer($fd);
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
 
         $this->PlayerObject->repairItem($p, $param['res']['unique_id'], false);
+    }
+
+    public function requestUserName($fd, $param)
+    {
+        $p = $this->PlayerObject->getIdPlayer($param['res']['user_id']);
+
+        $p = &$this->PlayerData::$players[$p['fd']];
+
+        if ($p) {
+            return $this->MsgFactory->userName($param['res']['user_id'], $p['name']);
+        }
+    }
+
+    public function attack($fd, $param)
+    {
+        // $p = $this->PlayerObject->getPlayer($fd);
+        $p = &$this->PlayerData::$players[$fd];
+
+        $this->PlayerObject->attack($p, $param['res']['direction'], $param['res']['spell']);
     }
 }

@@ -27,9 +27,12 @@ return [
             LogLevel::WARNING,
         ],
     ],
+    // 是否使用注解扫描缓存
+    'scan_cacheable'             => env('SCAN_CACHEABLE', false),
 
     'settings_path'              => BASE_PATH . '/storage',
     'dataRange'                  => 20, //视野范围,正常屏幕大小
     'respawn_time'               => 3*60, //怪物刷新间隔时间
     'heal_duration'              => 10, //玩家回血时长(最低为1秒)
+    'dead_time'                  => 5, //怪物死亡尸体消失时间
 ];

@@ -10,31 +10,24 @@ use Roave\BetterReflection\NodeCompiler\CompileNodeToValue;
 use Roave\BetterReflection\NodeCompiler\CompilerContext;
 use Roave\BetterReflection\Reflection\StringCast\ReflectionClassConstantStringCast;
 use Roave\BetterReflection\Reflector\Reflector;
-use Roave\BetterReflection\Util\CalculateReflectionColum;
-use Roave\BetterReflection\Util\GetFirstDocComment;
+use Roave\BetterReflection\Util\CalculateReflectionColumn;
+use Roave\BetterReflection\Util\GetLastDocComment;
 
 class ReflectionClassConstant
 {
-    /** @var bool */
-    private $valueWasCached = false;
+    private bool $valueWasCached = false;
 
-    /**
-     * @var bool|int|float|string|array<bool|int|float|string>|null const value
-     * @psalm-var scalar|array<scalar>|null
-     */
+    /** @var scalar|array<scalar>|null const value */
     private $value;
 
-    /** @var Reflector */
-    private $reflector;
+    private Reflector $reflector;
 
     /** @var ReflectionClass Constant owner */
-    private $owner;
+    private ReflectionClass $owner;
 
-    /** @var ClassConst */
-    private $node;
+    private ClassConst $node;
 
-    /** @var int */
-    private $positionInNode;
+    private int $positionInNode;
 
     private function __construct()
     {
@@ -74,9 +67,7 @@ class ReflectionClassConstant
     /**
      * Returns constant value
      *
-     * @return bool|int|float|string|array|null
-     *
-     * @psalm-return scalar|array<scalar>|null
+     * @return scalar|array<scalar>|null
      */
     public function getValue()
     {
@@ -86,7 +77,7 @@ class ReflectionClassConstant
 
         $this->value          = (new CompileNodeToValue())->__invoke(
             $this->node->consts[$this->positionInNode]->value,
-            new CompilerContext($this->reflector, $this->getDeclaringClass())
+            new CompilerContext($this->reflector, $this->getDeclaringClass()),
         );
         $this->valueWasCached = true;
 
@@ -148,12 +139,12 @@ class ReflectionClassConstant
 
     public function getStartColumn() : int
     {
-        return CalculateReflectionColum::getStartColumn($this->owner->getLocatedSource()->getSource(), $this->node);
+        return CalculateReflectionColumn::getStartColumn($this->owner->getLocatedSource()->getSource(), $this->node);
     }
 
     public function getEndColumn() : int
     {
-        return CalculateReflectionColum::getEndColumn($this->owner->getLocatedSource()->getSource(), $this->node);
+        return CalculateReflectionColumn::getEndColumn($this->owner->getLocatedSource()->getSource(), $this->node);
     }
 
     /**
@@ -169,7 +160,7 @@ class ReflectionClassConstant
      */
     public function getDocComment() : string
     {
-        return GetFirstDocComment::forNode($this->node);
+        return GetLastDocComment::forNode($this->node);
     }
 
     public function __toString() : string

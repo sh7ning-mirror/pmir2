@@ -8,6 +8,8 @@ use App\Controller\AbstractController;
  */
 class Settings extends AbstractController
 {
+    const MagicResistWeight = 10;
+
     public $baseStats = [
         0 => [
             'hp_gain'               => 4,

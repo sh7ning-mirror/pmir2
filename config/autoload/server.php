@@ -32,6 +32,7 @@ return [
 
             ],
             'settings'  => [
+                'heartbeat_idle_time'      => (int) env('HEARTABEAT_TIME', 30),
                 'heartbeat_check_interval' => (int) env('HEARTABEAT_TIME', 60), //每隔多少秒检测一次，单位秒，Swoole会轮询所有TCP连接，将超过心跳时间的连接关闭掉
                 'open_eof_check'           => false, //打开EOF检测
                 // 'package_eof'              => "", //设置EOF

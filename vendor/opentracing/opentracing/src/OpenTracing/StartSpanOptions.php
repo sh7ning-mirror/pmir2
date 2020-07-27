@@ -27,12 +27,7 @@ final class StartSpanOptions
      *
      * @var bool
      */
-    private $finishSpanOnClose = ScopeManager::DEFAULT_FINISH_SPAN_ON_CLOSE;
-
-    /**
-     * @var bool
-     */
-    private $ignoreActiveSpan = false;
+    private $finishSpanOnClose = true;
 
     /**
      * @param array $options
@@ -99,14 +94,6 @@ final class StartSpanOptions
                     $spanOptions->finishSpanOnClose = $value;
                     break;
 
-                case 'ignore_active_span':
-                    if (!is_bool($value)) {
-                        throw InvalidSpanOption::forIgnoreActiveSpan($value);
-                    }
-
-                    $spanOptions->ignoreActiveSpan = $value;
-                    break;
-
                 default:
                     throw InvalidSpanOption::forUnknownOption($key);
                     break;
@@ -127,7 +114,6 @@ final class StartSpanOptions
         $newSpanOptions->tags = $this->tags;
         $newSpanOptions->startTime = $this->startTime;
         $newSpanOptions->finishSpanOnClose = $this->finishSpanOnClose;
-        $newSpanOptions->ignoreActiveSpan = $this->ignoreActiveSpan;
 
         return $newSpanOptions;
     }
@@ -163,14 +149,6 @@ final class StartSpanOptions
     public function shouldFinishSpanOnClose()
     {
         return $this->finishSpanOnClose;
-    }
-
-    /**
-     * @return bool
-     */
-    public function shouldIgnoreActiveSpan()
-    {
-        return $this->ignoreActiveSpan;
     }
 
     private static function buildChildOf($value)

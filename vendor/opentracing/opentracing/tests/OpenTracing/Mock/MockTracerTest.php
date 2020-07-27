@@ -5,23 +5,21 @@ namespace OpenTracing\Mock\Tests;
 use OpenTracing\Exceptions\UnsupportedFormat;
 use OpenTracing\Mock\MockTracer;
 use OpenTracing\NoopSpan;
-use OpenTracing\Span;
-use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase;
 
 /**
  * @covers MockTracer
  */
-final class MockTracerTest extends TestCase
+final class MockTracerTest extends PHPUnit_Framework_TestCase
 {
-    private const OPERATION_NAME = 'test_name';
-    private const FORMAT = 'test_format';
+    const OPERATION_NAME = 'test_name';
+    const FORMAT = 'test_format';
 
     public function testStartActiveSpanSuccess()
     {
         $tracer = new MockTracer();
         $scope = $tracer->startActiveSpan(self::OPERATION_NAME);
         $activeSpan = $tracer->getActiveSpan();
-
         $this->assertEquals($scope->getSpan(), $activeSpan);
     }
 
@@ -30,7 +28,6 @@ final class MockTracerTest extends TestCase
         $tracer = new MockTracer();
         $tracer->startSpan(self::OPERATION_NAME);
         $activeSpan = $tracer->getActiveSpan();
-
         $this->assertNull($activeSpan);
     }
 
@@ -39,7 +36,6 @@ final class MockTracerTest extends TestCase
         $tracer = new MockTracer();
         $span = $tracer->startSpan(self::OPERATION_NAME);
         $carrier = [];
-
         $this->expectException(UnsupportedFormat::class);
         $tracer->inject($span->getContext(), self::FORMAT, $carrier);
     }
@@ -67,7 +63,6 @@ final class MockTracerTest extends TestCase
     {
         $tracer = new MockTracer();
         $carrier = [];
-
         $this->expectException(UnsupportedFormat::class);
         $tracer->extract(self::FORMAT, $carrier);
     }
@@ -87,20 +82,15 @@ final class MockTracerTest extends TestCase
             'TRACE_ID' => 'trace_id'
         ];
 
-        $spanContext = $tracer->extract(self::FORMAT, $carrier);
-
-        $this->assertInstanceOf(Span::class, $spanContext);
+        $tracer->extract(self::FORMAT, $carrier);
     }
 
     public function testFlushSuccess()
     {
         $tracer = new MockTracer();
         $tracer->startSpan(self::OPERATION_NAME);
-
         $this->assertCount(1, $tracer->getSpans());
-
         $tracer->flush();
-
         $this->assertCount(0, $tracer->getSpans());
     }
 }

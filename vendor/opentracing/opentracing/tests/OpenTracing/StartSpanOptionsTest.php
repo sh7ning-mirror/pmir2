@@ -2,17 +2,16 @@
 
 namespace OpenTracing\Tests;
 
-use DateTime;
 use OpenTracing\Exceptions\InvalidSpanOption;
 use OpenTracing\NoopSpanContext;
-use OpenTracing\Reference;
 use OpenTracing\StartSpanOptions;
-use PHPUnit\Framework\TestCase;
+use OpenTracing\Reference;
+use PHPUnit_Framework_TestCase;
 
 /**
  * @covers StartSpanOptions
  */
-final class StartSpanOptionsTest extends TestCase
+final class StartSpanOptionsTest extends PHPUnit_Framework_TestCase
 {
     const REFERENCE_TYPE = 'a_reference_type';
 
@@ -56,7 +55,7 @@ final class StartSpanOptionsTest extends TestCase
     public function validStartTime()
     {
         return [
-            [new DateTime()],
+            [new \DateTime()],
             ['1499355363'],
             [1499355363],
             [1499355363.123456]
@@ -104,24 +103,7 @@ final class StartSpanOptionsTest extends TestCase
 
         $context2 = NoopSpanContext::create();
         $spanOptions = $spanOptions->withParent($context2);
-
         $this->assertCount(1, $spanOptions->getReferences());
         $this->assertSame($context2, $spanOptions->getReferences()[0]->getContext());
-    }
-
-    public function testDefaultIgnoreActiveSpan()
-    {
-        $options = StartSpanOptions::create([]);
-
-        $this->assertFalse($options->shouldIgnoreActiveSpan());
-    }
-
-    public function testSpanOptionsWithValidIgnoreActiveSpan()
-    {
-        $options = StartSpanOptions::create([
-            'ignore_active_span' => true,
-        ]);
-
-        $this->assertTrue($options->shouldIgnoreActiveSpan());
     }
 }

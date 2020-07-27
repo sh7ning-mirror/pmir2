@@ -80,6 +80,8 @@ class Event extends AbstractController
         $this->goRespawns($mapId);
 
         $this->goNpc($mapId);
+
+        $this->goMonster($mapId);
     }
 
     public function goPlayer($mapId)
@@ -132,6 +134,35 @@ class Event extends AbstractController
             }
 
             $this->GameData->setMapNpcs($mapId, $npcs);
+        });
+    }
+
+    //执行玩家周边怪物AI(全局怪物太费资源)
+    public function goMonster($mapId)
+    {
+        co(function() use($mapId){
+            $players = $this->GameData->getMapPlayers($mapId);
+            $moreMonsters = [];
+
+            if ($players) {
+                foreach ($players as $k => $v) {
+                    $monsters = $this->Map->getCellMonster($v,40);
+                    if($monsters)
+                    {
+                        foreach ($monsters as  $monster) {
+                            $moreMonsters[$monster['id']] = $monster;
+                        }
+                    }
+                }
+            }
+
+            if($moreMonsters)
+            {
+                foreach ($moreMonsters as $monster) 
+                {
+                    $this->Monster->process($monster);
+                }
+            }
         });
     }
 }

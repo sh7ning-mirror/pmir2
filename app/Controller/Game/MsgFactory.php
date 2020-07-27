@@ -104,7 +104,7 @@ class MsgFactory extends AbstractController
         return [
             'object_id' => $object['id'],
             'location'  => $object['current_location'],
-            'direction' => $object['current_direction'],
+            'direction' => isset($object['current_direction']) ? $object['current_direction'] : $object['direction'],
         ];
     }
 
@@ -113,7 +113,7 @@ class MsgFactory extends AbstractController
         return [
             'object_id' => $object['id'],
             'location'  => $object['current_location'],
-            'direction' => $object['current_direction'],
+            'direction' => isset($object['current_direction']) ? $object['current_direction'] : $object['direction'],
         ];
     }
 
@@ -122,7 +122,7 @@ class MsgFactory extends AbstractController
         return [
             'object_id' => $object['id'],
             'location'  => $object['current_location'],
-            'direction' => $object['current_direction'],
+            'direction' => isset($object['current_direction']) ? $object['current_direction'] : $object['direction'],
         ];
     }
 
@@ -240,11 +240,10 @@ class MsgFactory extends AbstractController
 
     public function npcGoods($goods, $rate, $type)
     {
-        if($goods)
-        {
+        if ($goods) {
             sort($goods);
         }
-        
+
         return ['NPC_GOODS', [
             'count' => !empty($goods) ? count($goods) : 0,
             'goods' => $goods,
@@ -409,14 +408,14 @@ class MsgFactory extends AbstractController
         ];
     }
 
-    public function objectDied($p)
+    public function objectDied($id, $direction, $current_location)
     {
         return [
             'OBJECT_DIED', [
-                'object_id'  => $p['id'],
-                'location_x' => $p['current_location']['x'],
-                'location_y' => $p['current_location']['y'],
-                'direction'  => $p['current_direction'],
+                'object_id'  => $id,
+                'location_x' => $current_location['x'],
+                'location_y' => $current_location['y'],
+                'direction'  => $direction,
                 'type'       => 0,
             ],
         ];
@@ -542,7 +541,12 @@ class MsgFactory extends AbstractController
                 break;
 
             case $this->Enum::ObjectTypeItem:
-                return $this->objectItem($object);
+                if (!empty($object['user_item'])) {
+                    return $this->objectItem($object);
+                } else {
+                    return $this->objectGold($object);
+                }
+
                 break;
 
             case $this->Enum::ObjectTypeMonster:
@@ -575,6 +579,175 @@ class MsgFactory extends AbstractController
                 'unique_id'    => $unique_id,
                 'max_dura'     => $max_dura,
                 'current_dura' => $current_dura,
+            ],
+        ];
+    }
+
+    public function objectAttack($object, $spell, $level, $type)
+    {
+        return [
+            'OBJECT_ATTACK', [
+                'object_id'  => $object['id'],
+                'location_x' => isset($object['current_location']) ? $object['current_location']['x'] : $object['location']['x'],
+                'location_y' => isset($object['current_location']) ? $object['current_location']['y'] : $object['location']['y'],
+                'direction'  => $object['direction'],
+                'spell'      => $spell,
+                'level'      => $level,
+                'type'       => $type,
+            ],
+        ];
+    }
+
+    public function objectRangeAttack($object, $target, $type, $spell)
+    {
+        return [
+            'OBJECT_RANGE_ATTACK', [
+                'object_id'         => $object['id'],
+                'location_x'        => isset($object['current_location']) ? $object['current_location']['x'] : $object['location']['x'],
+                'location_y'        => isset($object['current_location']) ? $object['current_location']['y'] : $object['location']['y'],
+                'direction'         => $object['direction'],
+                'target_object_id'  => $target['id'],
+                'target_location_x' => isset($target['current_location']) ? $target['current_location']['x'] : $target['location']['x'],
+                'target_location_y' => isset($target['current_location']) ? $target['current_location']['y'] : $target['location']['y'],
+                'type'              => $type,
+                'spell'             => $spell,
+            ],
+        ];
+    }
+
+    public function damageIndicator($damage, $type, $id)
+    {
+        return [
+            'DAMAGE_INDICATOR', [
+                'damage'    => $damage,
+                'type'      => $type,
+                'object_id' => $id,
+            ],
+        ];
+    }
+
+    public function struck($attacker_id)
+    {
+        return [
+            'STRUCK', [
+                'attacker_id' => $attacker_id,
+            ],
+        ];
+    }
+
+    public function objectStruck($object, $id)
+    {
+        return [
+            'OBJECT_STRUCK', [
+                'object_id'   => $object['id'],
+                'attacker_id' => $id,
+                'location_x'  => isset($object['current_location']) ? $object['current_location']['x'] : $object['location']['x'],
+                'location_y'  => isset($object['current_location']) ? $object['current_location']['y'] : $object['location']['y'],
+                'direction'   => $object['direction'],
+            ],
+        ];
+    }
+
+    public function objectHealth($id, $percent, $expire)
+    {
+        return [
+            'OBJECT_HEALTH', [
+                'object_id' => $id,
+                'percent'   => $percent,
+                'expire'    => $expire,
+            ],
+        ];
+    }
+
+    public function userName($id, $name)
+    {
+        return [
+            'USER_NAME', [
+                'id'   => $id,
+                'name' => $name,
+            ],
+        ];
+    }
+
+    public function userLocation($object)
+    {
+        return [
+            'USER_LOCATION', [
+                'location'  => isset($object['current_location']) ? $object['current_location'] : [],
+                'direction' => $object['direction'],
+            ],
+        ];
+    }
+
+    public function spellToggle($spell, $can_use)
+    {
+        return [
+            'SPELL_TOGGLE', [
+                'spell'   => $spell,
+                'can_use' => $can_use,
+            ],
+        ];
+    }
+
+    public function magicDelay($spell, $delay)
+    {
+        return [
+            'MAGIC_DELAY', [
+                'spell' => $spell,
+                'delay' => $delay,
+            ],
+        ];
+    }
+
+    public function magicLeveled($spell, $level, $experience)
+    {
+        return [
+            'MAGIC_LEVELED', [
+                'spell'      => $spell,
+                'level'      => $level,
+                'experience' => $experience,
+            ],
+        ];
+    }
+
+    public function objectEffect($object_id, $effect, $effectType, $delayTime, $time)
+    {
+        return [
+            'OBJECT_EFFECT', [
+                'object_id'  => $object_id,
+                'effect'     => $effect,
+                'effectType' => $effectType,
+                'delayTime'  => $delayTime,
+                'time'       => $time,
+            ],
+        ];
+    }
+
+    public function gainExperience($amount)
+    {
+        return [
+            'GAIN_EXPERIENCE', [
+                'amount' => $amount,
+            ],
+        ];
+    }
+
+    public function levelChanged($level, $experience, $max_experience)
+    {
+        return [
+            'LEVEL_CHANGED', [
+                'level'          => $level,
+                'experience'     => $experience,
+                'max_experience' => $max_experience,
+            ],
+        ];
+    }
+
+    public function objectLeveled($id)
+    {
+        return [
+            'OBJECT_LEVELED', [
+                'object_id' => $id,
             ],
         ];
     }

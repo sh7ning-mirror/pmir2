@@ -20,7 +20,7 @@ The current system is: Linux
         MMM            MMM MMM  MMM     MMM     MMM    MMM      MMM
         MMM            MMM      MMM     MMM     MMM    MMM     MMMM
         MMM            MMM      MMM     MMM     MMM    MMMM    MMMMMMMMM
-            
+
 Server version 1.2.0
 author by.fan <fan3750060@163.com>
 [INFO] Worker#2 started.
@@ -35,7 +35,8 @@ author by.fan <fan3750060@163.com>
 加载地图 /home/2020_pmir/storage/Maps/GA2.mapp
 加载完成 19.826506853104
 数据初始化加载 商品:81 物品:1348 技能:105 地图:389 怪物:521 怪物巡逻:1838 NPC:301 任务:157 重新生成:5639 安全区:19
-[2020-05-01 8:44:50 ERROR] 掉落分子错误 content: ﻿1/5 Gold 500; /home/2020_pmir/storage/Envir/Drops/蝎蛇3.txt line: 1;
+[2020-05-01 8:44:50 ERROR] 掉落分子错误 content: ﻿1/5 Gold 500;
+/home/2020_pmir/storage/Envir/Drops/蝎蛇3.txt line: 1;
 
 ~~~
 
@@ -128,14 +129,14 @@ sh cmd.sh
     将根目录中.env.example复制为.env并更改其中配置
 
     6.下载游戏客户端
-    链接：https://pan.baidu.com/s/1odTWKcOgLecFrDcOJnI-1w 提取码：0vos 
-    
+    链接：https://pan.baidu.com/s/1odTWKcOgLecFrDcOJnI-1w 提取码：0vos
+
     7.修改当前客户端请求IP,客户端目录下Mir2Config.ini,新增配置项
     [Network]
     UseConfig=False
     IPAddress=你的服务器IP
-    
-    也可以自己编译客户端,将客户端目录下Client/Settings.cs中76行 
+
+    也可以自己编译客户端,将客户端目录下Client/Settings.cs中76行
     public static string IPAddress = "127.0.0.1" 中的ip修改为你服务器的ip
     (C#客户端及服务端源代码:https://github.com/fan3750060/mir2)
 
@@ -143,7 +144,7 @@ sh cmd.sh
     sh cmd.sh restart
 
     9.进行游戏
-    
+
     注: 测试账户fanfan 密码fanfan
 
 ## 链接 Links
@@ -170,7 +171,7 @@ sh cmd.sh
 
 
 
-  
+
 
 
 

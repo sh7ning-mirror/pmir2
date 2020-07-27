@@ -56,6 +56,16 @@ class MonsterData extends AbstractController
         }
     }
 
+    public function getDrop($name)
+    {
+        if(!empty(self::$dropInfoMap[$name]))
+        {
+            return self::$dropInfoMap[$name];
+        }
+
+        return null;
+    }
+
     public function loadDropFile($file = '')
     {
         if (!$fp = fopen($file, 'r')) {
