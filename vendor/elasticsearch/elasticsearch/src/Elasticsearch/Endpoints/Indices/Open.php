@@ -1,48 +1,63 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints\Indices;
 
-use Elasticsearch\Common\Exceptions\RuntimeException;
 use Elasticsearch\Endpoints\AbstractEndpoint;
+use Elasticsearch\Common\Exceptions;
 
 /**
  * Class Open
- * Elasticsearch API name indices.open
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints\Indices
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class Open extends AbstractEndpoint
 {
-
-    public function getURI(): string
+    /**
+     * @throws \Elasticsearch\Common\Exceptions\RuntimeException
+     * @return string
+     */
+    public function getURI()
     {
-        $index = $this->index ?? null;
-
-        if (isset($index)) {
-            return "/$index/_open";
+        if (isset($this->index) !== true) {
+            throw new Exceptions\RuntimeException(
+                'index is required for Open'
+            );
         }
-        throw new RuntimeException('Missing parameter for the endpoint indices.open');
+        $index = $this->index;
+        $uri   = "/$index/_open";
+
+        if (isset($index) === true) {
+            $uri = "/$index/_open";
+        }
+
+        return $uri;
     }
 
-    public function getParamWhitelist(): array
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
     {
-        return [
+        return array(
             'timeout',
             'master_timeout',
             'ignore_unavailable',
             'allow_no_indices',
             'expand_wildcards',
-            'wait_for_active_shards'
-        ];
+            'wait_for_active_shards',
+        );
     }
 
-    public function getMethod(): string
+    /**
+     * @return string
+     */
+    public function getMethod()
     {
         return 'POST';
     }

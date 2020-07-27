@@ -1,10 +1,10 @@
 <?php
 namespace Doctrine\Common\Proxy;
 
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Proxy\Exception\InvalidArgumentException;
 use Doctrine\Common\Proxy\Exception\UnexpectedValueException;
 use Doctrine\Common\Util\ClassUtils;
-use Doctrine\Persistence\Mapping\ClassMetadata;
 use function array_map;
 use function method_exists;
 
@@ -14,6 +14,8 @@ use function method_exists;
  *
  * @author Marco Pivetta <ocramius@gmail.com>
  * @since  2.4
+ *
+ * @deprecated The Doctrine\Common\Proxy component is deprecated, please use ocramius/proxy-manager instead.
  */
 class ProxyGenerator
 {
@@ -80,7 +82,7 @@ class <proxyShortClassName> extends \<className> implements \<baseProxyInterface
     /**
      * @var boolean flag indicating if this object was already initialized
      *
-     * @see \Doctrine\Persistence\Proxy::__isInitialized
+     * @see \Doctrine\Common\Persistence\Proxy::__isInitialized
      */
     public $__isInitialized__ = false;
 
@@ -242,8 +244,8 @@ class <proxyShortClassName> extends \<className> implements \<baseProxyInterface
     /**
      * Generates a proxy class file.
      *
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class    Metadata for the original class.
-     * @param string|bool                                 $fileName Filename (full path) for the generated class. If none is given, eval() is used.
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class    Metadata for the original class.
+     * @param string|bool                                        $fileName Filename (full path) for the generated class. If none is given, eval() is used.
      *
      * @throws InvalidArgumentException
      * @throws UnexpectedValueException
@@ -317,7 +319,7 @@ class <proxyShortClassName> extends \<className> implements \<baseProxyInterface
     /**
      * Generates the proxy short class name to be used in the template.
      *
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      *
      * @return string
      */
@@ -332,7 +334,7 @@ class <proxyShortClassName> extends \<className> implements \<baseProxyInterface
     /**
      * Generates the proxy namespace.
      *
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      *
      * @return string
      */
@@ -347,7 +349,7 @@ class <proxyShortClassName> extends \<className> implements \<baseProxyInterface
     /**
      * Generates the original class name.
      *
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      *
      * @return string
      */
@@ -359,7 +361,7 @@ class <proxyShortClassName> extends \<className> implements \<baseProxyInterface
     /**
      * Generates the array representation of lazy loaded public properties and their default values.
      *
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      *
      * @return string
      */
@@ -378,7 +380,7 @@ class <proxyShortClassName> extends \<className> implements \<baseProxyInterface
     /**
      * Generates the array representation of lazy loaded public properties names.
      *
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      *
      * @return string
      */
@@ -390,7 +392,7 @@ class <proxyShortClassName> extends \<className> implements \<baseProxyInterface
     /**
      * Generates the constructor code (un-setting public lazy loaded properties, setting identifier field values).
      *
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      *
      * @return string
      */
@@ -420,7 +422,7 @@ EOT;
     /**
      * Generates the magic getter invoked when lazy loaded public properties are requested.
      *
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      *
      * @return string
      */
@@ -431,24 +433,14 @@ EOT;
         $hasParentGet         = false;
         $returnReference      = '';
         $inheritDoc           = '';
-        $name                 = '$name';
-        $parametersString     = '$name';
-        $returnTypeHint       = null;
 
         if ($reflectionClass->hasMethod('__get')) {
-            $hasParentGet     = true;
-            $inheritDoc       = '{@inheritDoc}';
-            $methodReflection = $reflectionClass->getMethod('__get');
+            $hasParentGet = true;
+            $inheritDoc   = '{@inheritDoc}';
 
-            if ($methodReflection->returnsReference()) {
+            if ($reflectionClass->getMethod('__get')->returnsReference()) {
                 $returnReference = '& ';
             }
-
-            $methodParameters = $methodReflection->getParameters();
-            $name             = '$' . $methodParameters[0]->getName();
-
-            $parametersString = $this->buildParametersString($methodReflection->getParameters(), ['name']);
-            $returnTypeHint   = $this->getMethodReturnType($methodReflection);
         }
 
         if (empty($lazyPublicProperties) && ! $hasParentGet) {
@@ -460,7 +452,7 @@ EOT;
      * $inheritDoc
      * @param string \$name
      */
-    public function {$returnReference}__get($parametersString)$returnTypeHint
+    public function {$returnReference}__get(\$name)
     {
 
 EOT;
@@ -469,16 +461,8 @@ EOT;
             $magicGet .= <<<'EOT'
         if (\array_key_exists($name, self::$lazyPropertiesNames)) {
             $this->__initializer__ && $this->__initializer__->__invoke($this, '__get', [$name]);
-EOT;
 
-            if ($returnTypeHint === ': void') {
-                $magicGet .= "\n            return;";
-            } else {
-                $magicGet .= "\n            return \$this->\$name;";
-            }
-
-            $magicGet .= <<<'EOT'
-
+            return $this->$name;
         }
 
 
@@ -488,35 +472,26 @@ EOT;
         if ($hasParentGet) {
             $magicGet .= <<<'EOT'
         $this->__initializer__ && $this->__initializer__->__invoke($this, '__get', [$name]);
-EOT;
-
-            if ($returnTypeHint === ': void') {
-                $magicGet .= <<<'EOT'
-
-        parent::__get($name);
-        return;
-EOT;
-            } else {
-                $magicGet .= <<<'EOT'
 
         return parent::__get($name);
-EOT;
-            }
-        } else {
-            $magicGet .= sprintf(<<<EOT
-        trigger_error(sprintf('Undefined property: %%s::$%%s', __CLASS__, %s), E_USER_NOTICE);
 
-EOT
-                , $name);
+EOT;
+        } else {
+            $magicGet .= <<<'EOT'
+        trigger_error(sprintf('Undefined property: %s::$%s', __CLASS__, $name), E_USER_NOTICE);
+
+EOT;
         }
 
-        return $magicGet . "\n    }";
+        $magicGet .= "    }";
+
+        return $magicGet;
     }
 
     /**
      * Generates the magic setter (currently unused).
      *
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      *
      * @return string
      */
@@ -524,31 +499,22 @@ EOT
     {
         $lazyPublicProperties = $this->getLazyLoadedPublicPropertiesNames($class);
         $hasParentSet         = $class->getReflectionClass()->hasMethod('__set');
-        $parametersString     = '$name, $value';
-        $returnTypeHint       = null;
-
-        if ($hasParentSet) {
-            $methodReflection = $class->getReflectionClass()->getMethod('__set');
-            $parametersString = $this->buildParametersString($methodReflection->getParameters(), ['name', 'value']);
-            $returnTypeHint   = $this->getMethodReturnType($methodReflection);
-        }
 
         if (empty($lazyPublicProperties) && ! $hasParentSet) {
             return '';
         }
 
         $inheritDoc = $hasParentSet ? '{@inheritDoc}' : '';
-        $magicSet   = sprintf(<<<'EOT'
+        $magicSet   = <<<EOT
     /**
-     * %s
-     * @param string $name
-     * @param mixed  $value
+     * $inheritDoc
+     * @param string \$name
+     * @param mixed  \$value
      */
-    public function __set(%s)%s
+    public function __set(\$name, \$value)
     {
 
-EOT
-            , $inheritDoc, $parametersString, $returnTypeHint);
+EOT;
 
         if ( ! empty($lazyPublicProperties)) {
             $magicSet .= <<<'EOT'
@@ -574,13 +540,15 @@ EOT;
             $magicSet .= "        \$this->\$name = \$value;";
         }
 
-        return $magicSet . "\n    }";
+        $magicSet .= "\n    }";
+
+        return $magicSet;
     }
 
     /**
      * Generates the magic issetter invoked when lazy loaded public properties are checked against isset().
      *
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      *
      * @return string
      */
@@ -588,14 +556,6 @@ EOT;
     {
         $lazyPublicProperties = $this->getLazyLoadedPublicPropertiesNames($class);
         $hasParentIsset       = $class->getReflectionClass()->hasMethod('__isset');
-        $parametersString     = '$name';
-        $returnTypeHint       = null;
-
-        if ($hasParentIsset) {
-            $methodReflection = $class->getReflectionClass()->getMethod('__isset');
-            $parametersString = $this->buildParametersString($methodReflection->getParameters(), ['name']);
-            $returnTypeHint   = $this->getMethodReturnType($methodReflection);
-        }
 
         if (empty($lazyPublicProperties) && ! $hasParentIsset) {
             return '';
@@ -608,7 +568,7 @@ EOT;
      * @param  string \$name
      * @return boolean
      */
-    public function __isset($parametersString)$returnTypeHint
+    public function __isset(\$name)
     {
 
 EOT;
@@ -630,6 +590,7 @@ EOT;
         $this->__initializer__ && $this->__initializer__->__invoke($this, '__isset', [$name]);
 
         return parent::__isset($name);
+
 EOT;
         } else {
             $magicIsset .= "        return false;";
@@ -641,7 +602,7 @@ EOT;
     /**
      * Generates implementation for the `__sleep` method of proxies.
      *
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      *
      * @return string
      */
@@ -712,7 +673,7 @@ EOT;
     /**
      * Generates implementation for the `__wakeup` method of proxies.
      *
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      *
      * @return string
      */
@@ -767,7 +728,7 @@ EOT;
     /**
      * Generates implementation for the `__clone` method of proxies.
      *
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      *
      * @return string
      */
@@ -791,7 +752,7 @@ EOT;
     /**
      * Generates decorated methods by picking those available in the parent class.
      *
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      *
      * @return string
      */
@@ -890,8 +851,8 @@ EOT;
      * ID is interesting for the userland code (for example in views that
      * generate links to the entity, but do not display anything else).
      *
-     * @param \ReflectionMethod                           $method
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class
+     * @param \ReflectionMethod                                  $method
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      *
      * @return boolean
      */
@@ -925,7 +886,7 @@ EOT;
     /**
      * Generates the list of public properties to be lazy loaded.
      *
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      *
      * @return array<int, string>
      */
@@ -947,7 +908,7 @@ EOT;
     /**
      * Generates the list of default values of public properties.
      *
-     * @param \Doctrine\Persistence\Mapping\ClassMetadata $class
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      *
      * @return mixed[]
      */
@@ -979,18 +940,15 @@ EOT;
 
     /**
      * @param \ReflectionParameter[] $parameters
-     * @param string[]               $renameParameters
      *
      * @return string
      */
-    private function buildParametersString(array $parameters, array $renameParameters = [])
+    private function buildParametersString(array $parameters)
     {
         $parameterDefinitions = [];
 
         /* @var $param \ReflectionParameter */
-        $i = -1;
         foreach ($parameters as $param) {
-            $i++;
             $parameterDefinition = '';
 
             if ($parameterType = $this->getParameterType($param)) {
@@ -1005,7 +963,7 @@ EOT;
                 $parameterDefinition .= '...';
             }
 
-            $parameterDefinition .= '$' . ($renameParameters ? $renameParameters[$i] : $param->getName());
+            $parameterDefinition .= '$' . $param->getName();
 
             if ($param->isDefaultValueAvailable()) {
                 $parameterDefinition .= ' = ' . var_export($param->getDefaultValue(), true);
@@ -1148,5 +1106,3 @@ EOT;
         return $name;
     }
 }
-
-interface_exists(ClassMetadata::class);

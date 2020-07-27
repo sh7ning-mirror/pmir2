@@ -14,11 +14,14 @@ use function explode;
 
 class FindReturnType
 {
-    private ResolveTypes $resolveTypes;
+    /** @var ResolveTypes */
+    private $resolveTypes;
 
-    private DocBlockFactory $docBlockFactory;
+    /** @var DocBlockFactory */
+    private $docBlockFactory;
 
-    private NamespaceNodeToReflectionTypeContext $makeContext;
+    /** @var NamespaceNodeToReflectionTypeContext */
+    private $makeContext;
 
     public function __construct()
     {

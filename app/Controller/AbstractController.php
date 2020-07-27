@@ -15,6 +15,13 @@ abstract class AbstractController
 
     public static $staticObject = [];
 
+    public $player; //当前用户
+
+    public function usePlayer($fd)
+    {
+        $this->player = &$this->PlayerData::$players[$fd];
+    }
+
     public function __get($name)
     {
         if (empty(self::$staticObject[$name])) {
@@ -33,6 +40,10 @@ abstract class AbstractController
     //处理
     public function handler($cmaName, $fd, $param = [])
     {
+        //当前连接的用户
+        $this->usePlayer($fd);
+
+        //业务处理
         $objectInfo = $this->MsgRegister->msgList[$cmaName] ?? [];
         if ($objectInfo) {
             if (is_array($objectInfo[0])) {

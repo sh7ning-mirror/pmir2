@@ -12,8 +12,6 @@
 namespace Symfony\Component\PropertyAccess;
 
 use Psr\Cache\CacheItemPoolInterface;
-use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
-use Symfony\Component\PropertyInfo\PropertyWriteInfoExtractorInterface;
 
 /**
  * A configurable builder to create a PropertyAccessor.
@@ -30,16 +28,6 @@ class PropertyAccessorBuilder
      * @var CacheItemPoolInterface|null
      */
     private $cacheItemPool;
-
-    /**
-     * @var PropertyReadInfoExtractorInterface|null
-     */
-    private $readInfoExtractor;
-
-    /**
-     * @var PropertyWriteInfoExtractorInterface|null
-     */
-    private $writeInfoExtractor;
 
     /**
      * Enables the use of "__call" by the PropertyAccessor.
@@ -170,42 +158,12 @@ class PropertyAccessorBuilder
     }
 
     /**
-     * @return $this
-     */
-    public function setReadInfoExtractor(?PropertyReadInfoExtractorInterface $readInfoExtractor)
-    {
-        $this->readInfoExtractor = $readInfoExtractor;
-
-        return $this;
-    }
-
-    public function getReadInfoExtractor(): ?PropertyReadInfoExtractorInterface
-    {
-        return $this->readInfoExtractor;
-    }
-
-    /**
-     * @return $this
-     */
-    public function setWriteInfoExtractor(?PropertyWriteInfoExtractorInterface $writeInfoExtractor)
-    {
-        $this->writeInfoExtractor = $writeInfoExtractor;
-
-        return $this;
-    }
-
-    public function getWriteInfoExtractor(): ?PropertyWriteInfoExtractorInterface
-    {
-        return $this->writeInfoExtractor;
-    }
-
-    /**
      * Builds and returns a new PropertyAccessor object.
      *
      * @return PropertyAccessorInterface The built PropertyAccessor
      */
     public function getPropertyAccessor()
     {
-        return new PropertyAccessor($this->magicCall, $this->throwExceptionOnInvalidIndex, $this->cacheItemPool, $this->throwExceptionOnInvalidPropertyPath, $this->readInfoExtractor, $this->writeInfoExtractor);
+        return new PropertyAccessor($this->magicCall, $this->throwExceptionOnInvalidIndex, $this->cacheItemPool, $this->throwExceptionOnInvalidPropertyPath);
     }
 }

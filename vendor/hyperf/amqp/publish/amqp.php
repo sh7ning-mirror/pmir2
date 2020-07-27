@@ -12,7 +12,7 @@ declare(strict_types=1);
 return [
     'default' => [
         'host' => env('AMQP_HOST', 'localhost'),
-        'port' => (int) env('AMQP_PORT', 5672),
+        'port' => env('AMQP_PORT', 5672),
         'user' => env('AMQP_USER', 'guest'),
         'password' => env('AMQP_PASSWORD', 'guest'),
         'vhost' => env('AMQP_VHOST', '/'),
@@ -34,9 +34,9 @@ return [
             'connection_timeout' => 3.0,
             'read_write_timeout' => 6.0,
             'context' => null,
-            'keepalive' => true,
+            'keepalive' => false,
             'heartbeat' => 3,
-            'close_on_destruct' => false,
+            'close_on_destruct' => true,
         ],
     ],
 ];

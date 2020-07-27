@@ -78,7 +78,7 @@ class SwooleStream implements StreamInterface
     {
         $this->contents = '';
         $this->size = 0;
-        $this->writable = false;
+        $this->readable = $this->writable = false;
 
         return null;
     }

@@ -25,12 +25,12 @@ class ServerFactory
     protected $container;
 
     /**
-     * @var null|LoggerInterface
+     * @var LoggerInterface
      */
     protected $logger;
 
     /**
-     * @var null|EventDispatcherInterface
+     * @var EventDispatcherInterface
      */
     protected $eventDispatcher;
 
@@ -39,11 +39,6 @@ class ServerFactory
      */
     protected $server;
 
-    /**
-     * @var null|ServerConfig
-     */
-    protected $config;
-
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
@@ -51,9 +46,7 @@ class ServerFactory
 
     public function configure(array $config)
     {
-        $this->config = new ServerConfig($config);
-
-        $this->getServer()->init($this->config);
+        $this->getServer()->init(new ServerConfig($config));
     }
 
     public function start()
@@ -64,8 +57,7 @@ class ServerFactory
     public function getServer(): ServerInterface
     {
         if (! $this->server instanceof ServerInterface) {
-            $serverName = $this->config->getType();
-            $this->server = new $serverName(
+            $this->server = new Server(
                 $this->container,
                 $this->getLogger(),
                 $this->getEventDispatcher()

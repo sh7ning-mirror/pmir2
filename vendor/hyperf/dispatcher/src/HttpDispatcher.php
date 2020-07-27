@@ -14,7 +14,6 @@ namespace Hyperf\Dispatcher;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Server\MiddlewareInterface;
 
 class HttpDispatcher extends AbstractDispatcher
 {
@@ -28,12 +27,15 @@ class HttpDispatcher extends AbstractDispatcher
         $this->container = $container;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function dispatch(...$params): ResponseInterface
     {
         /**
          * @var RequestInterface
          * @var array $middlewares
-         * @var MiddlewareInterface $coreHandler
+         * @var string $coreHandler
          */
         [$request, $middlewares, $coreHandler] = $params;
         $requestHandler = new HttpRequestHandler($middlewares, $coreHandler, $this->container);

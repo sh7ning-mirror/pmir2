@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Hyperf\HttpServer;
 
 use BadMethodCallException;
+use Hyperf\Contract\Sendable;
 use Hyperf\HttpMessage\Cookie\Cookie;
 use Hyperf\HttpMessage\Stream\SwooleFileStream;
 use Hyperf\HttpMessage\Stream\SwooleStream;
@@ -22,7 +23,6 @@ use Hyperf\HttpServer\Exception\Http\InvalidResponseException;
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\ClearStatCache;
 use Hyperf\Utils\Codec\Json;
-use Hyperf\Utils\Codec\Xml;
 use Hyperf\Utils\Context;
 use Hyperf\Utils\Contracts\Arrayable;
 use Hyperf\Utils\Contracts\Jsonable;
@@ -33,9 +33,10 @@ use Hyperf\Utils\Traits\Macroable;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
+use SimpleXMLElement;
 use function get_class;
 
-class Response implements PsrResponseInterface, ResponseInterface
+class Response implements PsrResponseInterface, ResponseInterface, Sendable
 {
     use Macroable;
 
@@ -412,6 +413,11 @@ class Response implements PsrResponseInterface, ResponseInterface
         return $this->getResponse()->getReasonPhrase();
     }
 
+    public function send()
+    {
+        return $this->getResponse()->send();
+    }
+
     protected function call($name, $arguments)
     {
         $response = $this->getResponse();
@@ -468,9 +474,33 @@ class Response implements PsrResponseInterface, ResponseInterface
      * @param mixed $root
      * @throws EncodingException when the data encoding error
      */
-    protected function toXml($data, $parentNode = null, $root = 'root'): string
+    protected function toXml($data, $parentNode = null, $root = 'root')
     {
-        return Xml::toXml($data, $parentNode = null, $root = 'root');
+        if ($data instanceof Xmlable) {
+            return (string) $data;
+        }
+        if ($data instanceof Arrayable) {
+            $data = $data->toArray();
+        } else {
+            $data = (array) $data;
+        }
+        if ($parentNode === null) {
+            $xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?>' . "<{$root}></{$root}>");
+        } else {
+            $xml = $parentNode;
+        }
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $this->toXml($value, $xml->addChild($key));
+            } else {
+                if (is_numeric($key)) {
+                    $xml->addChild('item' . $key, (string) $value);
+                } else {
+                    $xml->addChild($key, (string) $value);
+                }
+            }
+        }
+        return trim($xml->asXML());
     }
 
     /**

@@ -172,6 +172,7 @@ class KeepaliveIO extends AbstractIO
      */
     public function check_heartbeat()
     {
+        return true;
     }
 
     public function close()

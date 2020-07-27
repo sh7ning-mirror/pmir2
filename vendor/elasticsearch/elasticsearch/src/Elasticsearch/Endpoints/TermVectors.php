@@ -1,54 +1,79 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints;
 
-use Elasticsearch\Common\Exceptions\RuntimeException;
-use Elasticsearch\Endpoints\AbstractEndpoint;
+use Elasticsearch\Common\Exceptions;
 
 /**
  * Class TermVectors
- * Elasticsearch API name termvectors
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class TermVectors extends AbstractEndpoint
 {
-
-    public function getURI(): string
+    /**
+     * @param array $body
+     *
+     * @throws \Elasticsearch\Common\Exceptions\InvalidArgumentException
+     * @return $this
+     */
+    public function setBody($body)
     {
-        if (isset($this->index) !== true) {
-            throw new RuntimeException(
-                'index is required for termvectors'
-            );
-        }
-        $index = $this->index;
-        $id = $this->id ?? null;
-        $type = $this->type ?? null;
-        if (isset($type)) {
-            @trigger_error('Specifying types in urls has been deprecated', E_USER_DEPRECATED);
+        if (isset($body) !== true) {
+            return $this;
         }
 
-        if (isset($type) && isset($id)) {
-            return "/$index/$type/$id/_termvectors";
-        }
-        if (isset($type)) {
-            return "/$index/$type/_termvectors";
-        }
-        if (isset($id)) {
-            return "/$index/_termvectors/$id";
-        }
-        return "/$index/_termvectors";
+        $this->body = $body;
+
+        return $this;
     }
 
-    public function getParamWhitelist(): array
+    /**
+     * @throws \Elasticsearch\Common\Exceptions\RuntimeException
+     * @return string
+     */
+    public function getURI()
     {
-        return [
+        if (isset($this->index) !== true) {
+            throw new Exceptions\RuntimeException(
+                'index is required for TermVectors'
+            );
+        }
+        if (isset($this->type) !== true) {
+            throw new Exceptions\RuntimeException(
+                'type is required for TermVectors'
+            );
+        }
+        if (isset($this->id) !== true && isset($this->body['doc']) !== true) {
+            throw new Exceptions\RuntimeException(
+                'id or doc is required for TermVectors'
+            );
+        }
+
+        $index = $this->index;
+        $type  = $this->type;
+        $id    = $this->id;
+        $uri   = "/$index/$type/_termvectors";
+
+        if ($id !== null) {
+            $uri = "/$index/$type/$id/_termvectors";
+        }
+
+        return $uri;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
+    {
+        return array(
             'term_statistics',
             'field_statistics',
             'fields',
@@ -57,24 +82,16 @@ class TermVectors extends AbstractEndpoint
             'payloads',
             'preference',
             'routing',
-            'realtime',
-            'version',
-            'version_type'
-        ];
+            'parent',
+            'realtime'
+        );
     }
 
-    public function getMethod(): string
+    /**
+     * @return string
+     */
+    public function getMethod()
     {
         return isset($this->body) ? 'POST' : 'GET';
-    }
-
-    public function setBody($body): TermVectors
-    {
-        if (isset($body) !== true) {
-            return $this;
-        }
-        $this->body = $body;
-
-        return $this;
     }
 }

@@ -6,6 +6,7 @@ namespace Elasticsearch\ConnectionPool;
 
 use Elasticsearch\Common\Exceptions\InvalidArgumentException;
 use Elasticsearch\ConnectionPool\Selectors\SelectorInterface;
+use Elasticsearch\Connections\Connection;
 use Elasticsearch\Connections\ConnectionFactoryInterface;
 use Elasticsearch\Connections\ConnectionInterface;
 
@@ -41,25 +42,21 @@ abstract class AbstractConnectionPool implements ConnectionPoolInterface
      */
     protected $selector;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $connectionPoolParams;
 
-    /**
-     * @var \Elasticsearch\Connections\ConnectionFactory
-     */
+    /** @var \Elasticsearch\Connections\ConnectionFactory  */
     protected $connectionFactory;
 
     /**
      * Constructor
      *
-     * @param ConnectionInterface[]      $connections          The Connections to choose from
-     * @param SelectorInterface          $selector             A Selector instance to perform the selection logic for the available connections
-     * @param ConnectionFactoryInterface $factory              ConnectionFactory instance
-     * @param array                      $connectionPoolParams
+     * @param ConnectionInterface[]          $connections          The Connections to choose from
+     * @param SelectorInterface              $selector             A Selector instance to perform the selection logic for the available connections
+     * @param ConnectionFactoryInterface     $factory              ConnectionFactory instance
+     * @param array                          $connectionPoolParams
      */
-    public function __construct(array $connections, SelectorInterface $selector, ConnectionFactoryInterface $factory, array $connectionPoolParams)
+    public function __construct($connections, SelectorInterface $selector, ConnectionFactoryInterface $factory, $connectionPoolParams)
     {
         $paramList = array('connections', 'selector', 'connectionPoolParams');
         foreach ($paramList as $param) {
@@ -69,8 +66,7 @@ abstract class AbstractConnectionPool implements ConnectionPoolInterface
         }
 
         if (isset($connectionPoolParams['randomizeHosts']) === true
-            && $connectionPoolParams['randomizeHosts'] === true
-        ) {
+            && $connectionPoolParams['randomizeHosts'] === true) {
             shuffle($connections);
         }
 
@@ -81,7 +77,12 @@ abstract class AbstractConnectionPool implements ConnectionPoolInterface
         $this->connectionFactory    = $factory;
     }
 
-    abstract public function nextConnection(bool $force = false): ConnectionInterface;
+    /**
+     * @param bool $force
+     *
+     * @return Connection
+     */
+    abstract public function nextConnection($force = false);
 
-    abstract public function scheduleCheck(): void;
+    abstract public function scheduleCheck();
 }

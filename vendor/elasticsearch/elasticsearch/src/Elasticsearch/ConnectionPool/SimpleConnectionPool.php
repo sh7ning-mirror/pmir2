@@ -7,7 +7,6 @@ namespace Elasticsearch\ConnectionPool;
 use Elasticsearch\ConnectionPool\Selectors\SelectorInterface;
 use Elasticsearch\Connections\Connection;
 use Elasticsearch\Connections\ConnectionFactoryInterface;
-use Elasticsearch\Connections\ConnectionInterface;
 
 class SimpleConnectionPool extends AbstractConnectionPool implements ConnectionPoolInterface
 {
@@ -20,12 +19,18 @@ class SimpleConnectionPool extends AbstractConnectionPool implements ConnectionP
         parent::__construct($connections, $selector, $factory, $connectionPoolParams);
     }
 
-    public function nextConnection(bool $force = false): ConnectionInterface
+    /**
+     * @param bool $force
+     *
+     * @return Connection
+     * @throws \Elasticsearch\Common\Exceptions\NoNodesAvailableException
+     */
+    public function nextConnection($force = false)
     {
         return $this->selector->select($this->connections);
     }
 
-    public function scheduleCheck(): void
+    public function scheduleCheck()
     {
     }
 }

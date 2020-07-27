@@ -24,9 +24,11 @@ class CompileNodeToValue
      *
      * @param Node\Stmt\Expression|Node\Expr $node Node has to be processed by the PhpParser\NodeVisitor\NameResolver
      *
-     * @return scalar|array<scalar>|null
+     * @return bool|int|float|string|array|null
      *
      * @throws Exception\UnableToCompileNode
+     *
+     * @psalm-return scalar|array<scalar>|null
      */
     public function __invoke(Node $node, CompilerContext $context)
     {
@@ -60,9 +62,11 @@ class CompileNodeToValue
     /**
      * Compile constant expressions
      *
-     * @return scalar|array<scalar>|null
+     * @return bool|int|float|string|array|null
      *
      * @throws Exception\UnableToCompileNode
+     *
+     * @psalm-return scalar|array<scalar>|null
      */
     private function compileConstFetch(Node\Expr\ConstFetch $constNode, CompilerContext $context)
     {
@@ -86,10 +90,12 @@ class CompileNodeToValue
     /**
      * Compile class constants
      *
-     * @return scalar|array<scalar>|null
+     * @return bool|int|float|string|array|null
      *
      * @throws IdentifierNotFound
      * @throws Exception\UnableToCompileNode If a referenced constant could not be located on the expected referenced class.
+     *
+     * @psalm-return scalar|array<scalar>|null
      */
     private function compileClassConstFetch(Node\Expr\ClassConstFetch $node, CompilerContext $context)
     {
@@ -123,7 +129,7 @@ class CompileNodeToValue
 
         return $this->__invoke(
             $reflectionConstant->getAst()->consts[$reflectionConstant->getPositionInAst()]->value,
-            new CompilerContext($context->getReflector(), $classInfo),
+            new CompilerContext($context->getReflector(), $classInfo)
         );
     }
 

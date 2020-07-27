@@ -47,9 +47,6 @@ class JsonLengthPacker implements PackerInterface
     public function unpack(string $data)
     {
         $data = substr($data, $this->length);
-        if (! $data) {
-            return null;
-        }
         return json_decode($data, true);
     }
 }

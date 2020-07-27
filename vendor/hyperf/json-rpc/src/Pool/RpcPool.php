@@ -31,8 +31,8 @@ class RpcPool extends Pool
     {
         $this->name = $name;
         $this->config = $config;
-        $options = $config['pool'] ?? [];
-        $this->frequency = make(Frequency::class, [$this]);
+        $options = [];
+        $this->frequency = make(Frequency::class);
         parent::__construct($container, $options);
     }
 

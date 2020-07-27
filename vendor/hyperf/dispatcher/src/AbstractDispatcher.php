@@ -15,4 +15,11 @@ use Hyperf\Contract\DispatcherInterface;
 
 abstract class AbstractDispatcher implements DispatcherInterface
 {
+    /**
+     * @param array ...$params
+     */
+    public function dispatch(...$params)
+    {
+        return $this->handle(...$params);
+    }
 }

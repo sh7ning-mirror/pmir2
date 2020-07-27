@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints\Indices;
@@ -7,41 +8,51 @@ use Elasticsearch\Endpoints\AbstractEndpoint;
 
 /**
  * Class ForceMerge
- * Elasticsearch API name indices.forcemerge
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints\Indices
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class ForceMerge extends AbstractEndpoint
 {
-
-    public function getURI(): string
+    /**
+     * @return string
+     */
+    public function getURI()
     {
-        $index = $this->index ?? null;
+        $index = $this->index;
+        $uri   = "/_forcemerge";
 
-        if (isset($index)) {
-            return "/$index/_forcemerge";
+        if (isset($index) === true) {
+            $uri = "/$index/_forcemerge";
         }
-        return "/_forcemerge";
+
+        return $uri;
     }
 
-    public function getParamWhitelist(): array
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
     {
-        return [
+        return array(
             'flush',
             'ignore_unavailable',
             'allow_no_indices',
             'expand_wildcards',
             'max_num_segments',
-            'only_expunge_deletes'
-        ];
+            'only_expunge_deletes',
+            'operation_threading',
+            'wait_for_merge',
+        );
     }
 
-    public function getMethod(): string
+    /**
+     * @return string
+     */
+    public function getMethod()
     {
         return 'POST';
     }

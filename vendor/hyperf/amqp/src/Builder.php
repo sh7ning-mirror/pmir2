@@ -20,10 +20,6 @@ use Psr\Container\ContainerInterface;
 
 class Builder
 {
-    /**
-     * @deprecated v2.0
-     * @var string
-     */
     protected $name = 'default';
 
     /**
@@ -34,7 +30,7 @@ class Builder
     /**
      * @var PoolFactory
      */
-    protected $poolFactory;
+    private $poolFactory;
 
     public function __construct(ContainerInterface $container, PoolFactory $poolFactory)
     {

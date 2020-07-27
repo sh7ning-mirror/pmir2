@@ -176,7 +176,7 @@ class RedisDriver extends Driver
 
     /**
      * Remove data from reserved queue.
-     * @param string $data
+     * @param mixed $data
      */
     protected function remove($data): bool
     {

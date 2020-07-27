@@ -28,11 +28,14 @@ class ReflectionType
         'void'     => null,
     ];
 
-    private string $type;
+    /** @var string */
+    private $type;
 
-    private bool $allowsNull;
+    /** @var bool */
+    private $allowsNull;
 
-    private Reflector $reflector;
+    /** @var Reflector */
+    private $reflector;
 
     private function __construct()
     {

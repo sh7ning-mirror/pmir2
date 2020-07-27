@@ -12,14 +12,9 @@ use Roave\BetterReflection\Reflection\ReflectionClass as BetterReflectionClass;
 use Roave\BetterReflection\Reflection\ReflectionClassConstant as BetterReflectionClassConstant;
 use Roave\BetterReflection\Reflection\ReflectionMethod as BetterReflectionMethod;
 use Roave\BetterReflection\Reflection\ReflectionObject as BetterReflectionObject;
-use Roave\BetterReflection\Reflection\ReflectionProperty as BetterReflectionProperty;
-use Roave\BetterReflection\Util\FileHelper;
 use function array_combine;
 use function array_map;
-use function array_values;
-use function assert;
 use function func_num_args;
-use function is_array;
 use function is_object;
 use function is_string;
 use function sprintf;
@@ -27,7 +22,8 @@ use function strtolower;
 
 class ReflectionClass extends CoreReflectionClass
 {
-    private BetterReflectionClass $betterReflectionClass;
+    /** @var BetterReflectionClass */
+    private $betterReflectionClass;
 
     public function __construct(BetterReflectionClass $betterReflectionClass)
     {
@@ -121,9 +117,7 @@ class ReflectionClass extends CoreReflectionClass
      */
     public function getFileName()
     {
-        $fileName = $this->betterReflectionClass->getFileName();
-
-        return $fileName !== null ? FileHelper::normalizeSystemPath($fileName) : false;
+        return $this->betterReflectionClass->getFileName() ?? false;
     }
 
     /**
@@ -167,7 +161,7 @@ class ReflectionClass extends CoreReflectionClass
      */
     public function hasMethod($name)
     {
-        return $this->betterReflectionClass->hasMethod($name);
+        return $this->betterReflectionClass->hasMethod($this->getMethodRealName($name));
     }
 
     /**
@@ -175,7 +169,20 @@ class ReflectionClass extends CoreReflectionClass
      */
     public function getMethod($name)
     {
-        return new ReflectionMethod($this->betterReflectionClass->getMethod($name));
+        return new ReflectionMethod($this->betterReflectionClass->getMethod($this->getMethodRealName($name)));
+    }
+
+    private function getMethodRealName(string $name) : string
+    {
+        $realMethodNames = array_map(static function (BetterReflectionMethod $method) : string {
+            return $method->getName();
+        }, $this->betterReflectionClass->getMethods());
+
+        $methodNames = array_combine(array_map(static function (string $methodName) : string {
+            return strtolower($methodName);
+        }, $realMethodNames), $realMethodNames);
+
+        return $methodNames[strtolower($name)] ?? $name;
     }
 
     /**
@@ -183,9 +190,14 @@ class ReflectionClass extends CoreReflectionClass
      */
     public function getMethods($filter = null)
     {
-        return array_map(static function (BetterReflectionMethod $method) : ReflectionMethod {
-            return new ReflectionMethod($method);
-        }, $this->betterReflectionClass->getMethods($filter));
+        $methods = $this->betterReflectionClass->getMethods();
+
+        $wrappedMethods = [];
+        foreach ($methods as $key => $method) {
+            $wrappedMethods[$key] = new ReflectionMethod($method);
+        }
+
+        return $wrappedMethods;
     }
 
     /**
@@ -215,9 +227,14 @@ class ReflectionClass extends CoreReflectionClass
      */
     public function getProperties($filter = null)
     {
-        return array_values(array_map(static function (BetterReflectionProperty $property) : ReflectionProperty {
-            return new ReflectionProperty($property);
-        }, $this->betterReflectionClass->getProperties($filter)));
+        $properties = $this->betterReflectionClass->getProperties();
+
+        $wrappedProperties = [];
+        foreach ($properties as $key => $property) {
+            $wrappedProperties[$key] = new ReflectionProperty($property);
+        }
+
+        return $wrappedProperties;
     }
 
     /**
@@ -249,22 +266,21 @@ class ReflectionClass extends CoreReflectionClass
      */
     public function getReflectionConstant($name)
     {
-        $betterReflectionConstant = $this->betterReflectionClass->getReflectionConstant($name);
-        if ($betterReflectionConstant === null) {
-            return false;
-        }
-
-        return new ReflectionClassConstant($betterReflectionConstant);
+        return new ReflectionClassConstant(
+            $this->betterReflectionClass->getReflectionConstant($name)
+        );
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @psalm-suppress InvalidReturnType see #530
      */
     public function getReflectionConstants()
     {
-        return array_values(array_map(static function (BetterReflectionClassConstant $betterConstant) : ReflectionClassConstant {
+        return array_map(static function (BetterReflectionClassConstant $betterConstant) : ReflectionClassConstant {
             return new ReflectionClassConstant($betterConstant);
-        }, $this->betterReflectionClass->getReflectionConstants()));
+        }, $this->betterReflectionClass->getReflectionConstants());
     }
 
     /**
@@ -300,32 +316,19 @@ class ReflectionClass extends CoreReflectionClass
 
     /**
      * {@inheritDoc}
+     *
+     * @psalm-suppress InvalidReturnType see #530
      */
     public function getTraits()
     {
         $traits = $this->betterReflectionClass->getTraits();
 
-        /** @var array<trait-string> $traitNames */
-        $traitNames = array_map(static function (BetterReflectionClass $trait) : string {
-            return $trait->getName();
-        }, $traits);
+        $wrappedTraits = [];
+        foreach ($traits as $key => $trait) {
+            $wrappedTraits[$key] = new self($trait);
+        }
 
-        $traitsByName = array_combine(
-            $traitNames,
-            array_map(static function (BetterReflectionClass $trait) : self {
-                return new self($trait);
-            }, $traits),
-        );
-
-        assert(
-            is_array($traitsByName),
-            sprintf(
-                'Could not create an array<trait-string, ReflectionClass> for class "%s"',
-                $this->betterReflectionClass->getName(),
-            ),
-        );
-
-        return $traitsByName;
+        return $wrappedTraits;
     }
 
     /**
@@ -378,17 +381,9 @@ class ReflectionClass extends CoreReflectionClass
 
     /**
      * {@inheritDoc}
-     *
-     * @see https://bugs.php.net/bug.php?id=79645
-     *
-     * @param mixed $object in PHP 7.x, the type declaration is absent in core reflection
      */
     public function isInstance($object)
     {
-        if (! is_object($object)) {
-            return null;
-        }
-
         return $this->betterReflectionClass->isInstance($object);
     }
 

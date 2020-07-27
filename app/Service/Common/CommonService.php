@@ -17,6 +17,11 @@ class CommonService
      */
     protected $CommonModel;
 
+    public function __construct(CommonModel $CommonModel)
+    {
+        $this->CommonModel = $CommonModel;
+    }
+
     /**
      * [getList description]
      * ------------------------------------------------------------------------------

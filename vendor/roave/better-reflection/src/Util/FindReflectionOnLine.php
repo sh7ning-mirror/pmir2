@@ -23,9 +23,11 @@ use function method_exists;
 
 final class FindReflectionOnLine
 {
-    private SourceLocator $sourceLocator;
+    /** @var SourceLocator */
+    private $sourceLocator;
 
-    private Locator $astLocator;
+    /** @var Locator */
+    private $astLocator;
 
     public function __construct(SourceLocator $sourceLocator, Locator $astLocator)
     {
@@ -87,7 +89,7 @@ final class FindReflectionOnLine
         return array_merge(
             $singleFileSourceLocator->locateIdentifiersByType($reflector, new IdentifierType(IdentifierType::IDENTIFIER_CLASS)),
             $singleFileSourceLocator->locateIdentifiersByType($reflector, new IdentifierType(IdentifierType::IDENTIFIER_FUNCTION)),
-            $singleFileSourceLocator->locateIdentifiersByType($reflector, new IdentifierType(IdentifierType::IDENTIFIER_CONSTANT)),
+            $singleFileSourceLocator->locateIdentifiersByType($reflector, new IdentifierType(IdentifierType::IDENTIFIER_CONSTANT))
         );
     }
 

@@ -1,14 +1,13 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints;
 
-use Elasticsearch\Endpoints\AbstractEndpoint;
+use Elasticsearch\Common\Exceptions\RuntimeException;
 
 /**
- * Class ScriptsPainlessExecute
- * Elasticsearch API name scripts_painless_execute
- * Generated running $ php util/GenerateEndpoints.php 7.8
+ * Class Reindex
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints
@@ -18,30 +17,40 @@ use Elasticsearch\Endpoints\AbstractEndpoint;
  */
 class ScriptsPainlessExecute extends AbstractEndpoint
 {
-
-    public function getURI(): string
+    /**
+     * @return array
+     */
+    public function getParamWhitelist()
     {
+        return [];
+    }
 
+    /**
+     * @return string
+     */
+    public function getURI()
+    {
         return "/_scripts/painless/_execute";
     }
 
-    public function getParamWhitelist(): array
-    {
-        return [
-            
-        ];
-    }
-
-    public function getMethod(): string
+    /**
+     * @return string
+     */
+    public function getMethod()
     {
         return isset($this->body) ? 'POST' : 'GET';
     }
 
-    public function setBody($body): ScriptsPainlessExecute
+    /**
+     * @param array $body
+     * @return $this
+     */
+    public function setBody($body)
     {
         if (isset($body) !== true) {
             return $this;
         }
+
         $this->body = $body;
 
         return $this;

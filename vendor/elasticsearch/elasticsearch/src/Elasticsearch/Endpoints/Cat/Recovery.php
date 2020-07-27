@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints\Cat;
@@ -7,45 +8,51 @@ use Elasticsearch\Endpoints\AbstractEndpoint;
 
 /**
  * Class Recovery
- * Elasticsearch API name cat.recovery
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints\Cat
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class Recovery extends AbstractEndpoint
 {
-
-    public function getURI(): string
+    /**
+     * @return string
+     */
+    public function getURI()
     {
-        $index = $this->index ?? null;
+        $index = $this->index;
+        $uri   = "/_cat/recovery";
 
-        if (isset($index)) {
-            return "/_cat/recovery/$index";
+        if (isset($index) === true) {
+            $uri = "/_cat/recovery/$index";
         }
-        return "/_cat/recovery";
+
+        return $uri;
     }
 
-    public function getParamWhitelist(): array
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
     {
-        return [
-            'format',
-            'active_only',
+        return array(
             'bytes',
-            'detailed',
+            'local',
+            'master_timeout',
             'h',
             'help',
-            'index',
+            'v',
             's',
-            'time',
-            'v'
-        ];
+            'format',
+        );
     }
 
-    public function getMethod(): string
+    /**
+     * @return string
+     */
+    public function getMethod()
     {
         return 'GET';
     }

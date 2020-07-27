@@ -22,7 +22,8 @@ use function file_get_contents;
  */
 class ComposerSourceLocator extends AbstractSourceLocator
 {
-    private ClassLoader $classLoader;
+    /** @var ClassLoader */
+    private $classLoader;
 
     public function __construct(ClassLoader $classLoader, Locator $astLocator)
     {
@@ -50,7 +51,7 @@ class ComposerSourceLocator extends AbstractSourceLocator
 
         return new LocatedSource(
             file_get_contents($filename),
-            $filename,
+            $filename
         );
     }
 }

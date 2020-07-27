@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Roave\BetterReflection\SourceLocator\Type;
 
+use InvalidArgumentException;
 use PhpParser\Node;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\NodeTraverser;
@@ -27,6 +28,9 @@ use function array_filter;
 use function array_values;
 use function assert;
 use function file_get_contents;
+use function gettype;
+use function is_object;
+use function sprintf;
 use function strpos;
 
 /**
@@ -34,15 +38,29 @@ use function strpos;
  */
 final class AnonymousClassObjectSourceLocator implements SourceLocator
 {
-    private CoreReflectionClass $coreClassReflection;
+    /** @var CoreReflectionClass */
+    private $coreClassReflection;
 
-    private Parser $parser;
+    /** @var Parser */
+    private $parser;
 
     /**
+     * @param object $anonymousClassObject
+     *
+     * @throws InvalidArgumentException
      * @throws ReflectionException
+     *
+     * @psalm-suppress DocblockTypeContradiction
      */
-    public function __construct(object $anonymousClassObject, Parser $parser)
+    public function __construct($anonymousClassObject, Parser $parser)
     {
+        if (! is_object($anonymousClassObject)) {
+            throw new InvalidArgumentException(sprintf(
+                'Can only create from an instance of an object, "%s" given',
+                gettype($anonymousClassObject)
+            ));
+        }
+
         $this->coreClassReflection = new CoreReflectionClass($anonymousClassObject);
         $this->parser              = $parser;
     }
@@ -85,12 +103,14 @@ final class AnonymousClassObjectSourceLocator implements SourceLocator
 
         $nodeVisitor = new class($fileName, $this->coreClassReflection->getStartLine()) extends NodeVisitorAbstract
         {
-            private string $fileName;
+            /** @var string */
+            private $fileName;
 
-            private int $startLine;
+            /** @var int */
+            private $startLine;
 
             /** @var Class_[] */
-            private array $anonymousClassNodes = [];
+            private $anonymousClassNodes = [];
 
             public function __construct(string $fileName, int $startLine)
             {
@@ -142,7 +162,7 @@ final class AnonymousClassObjectSourceLocator implements SourceLocator
             $reflector,
             $nodeVisitor->getAnonymousClassNode(),
             new LocatedSource($fileContents, $fileName),
-            null,
+            null
         );
         assert($reflectionClass instanceof ReflectionClass || $reflectionClass === null);
 

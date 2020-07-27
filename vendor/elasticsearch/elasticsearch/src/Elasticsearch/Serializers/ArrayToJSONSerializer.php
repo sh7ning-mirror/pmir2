@@ -6,11 +6,6 @@ namespace Elasticsearch\Serializers;
 
 use Elasticsearch\Common\Exceptions\RuntimeException;
 
-if (!defined('JSON_INVALID_UTF8_SUBSTITUTE')) {
-    //PHP < 7.2 Define it as 0 so it does nothing
-    define('JSON_INVALID_UTF8_SUBSTITUTE', 0);
-}
-
 /**
  * Class JSONSerializer
  *
@@ -23,14 +18,18 @@ if (!defined('JSON_INVALID_UTF8_SUBSTITUTE')) {
 class ArrayToJSONSerializer implements SerializerInterface
 {
     /**
-     * {@inheritdoc}
+     * Serialize assoc array into JSON string
+     *
+     * @param string|array $data Assoc array to encode into JSON
+     *
+     * @return string
      */
-    public function serialize($data): string
+    public function serialize($data)
     {
         if (is_string($data) === true) {
             return $data;
         } else {
-            $data = json_encode($data, JSON_PRESERVE_ZERO_FRACTION + JSON_INVALID_UTF8_SUBSTITUTE);
+            $data = json_encode($data, JSON_PRESERVE_ZERO_FRACTION);
             if ($data === false) {
                 throw new RuntimeException("Failed to JSON encode: ".json_last_error());
             }
@@ -43,9 +42,14 @@ class ArrayToJSONSerializer implements SerializerInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Deserialize JSON into an assoc array
+     *
+     * @param string $data JSON encoded string
+     * @param array  $headers Response Headers
+     *
+     * @return array
      */
-    public function deserialize(?string $data, array $headers)
+    public function deserialize($data, $headers)
     {
         return json_decode($data, true);
     }

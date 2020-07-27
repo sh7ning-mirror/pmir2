@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints\Cat;
@@ -7,48 +8,54 @@ use Elasticsearch\Endpoints\AbstractEndpoint;
 
 /**
  * Class Indices
- * Elasticsearch API name cat.indices
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints\Cat
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
+
 class Indices extends AbstractEndpoint
 {
-
-    public function getURI(): string
+    /**
+     * @return string
+     */
+    public function getURI()
     {
-        $index = $this->index ?? null;
+        $index = $this->index;
+        $uri   = "/_cat/indices";
 
-        if (isset($index)) {
-            return "/_cat/indices/$index";
+        if (isset($index) === true) {
+            $uri = "/_cat/indices/$index";
         }
-        return "/_cat/indices";
+
+        return $uri;
     }
 
-    public function getParamWhitelist(): array
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
     {
-        return [
-            'format',
+        return array(
             'bytes',
             'local',
             'master_timeout',
             'h',
-            'health',
             'help',
             'pri',
-            's',
-            'time',
             'v',
-            'include_unloaded_segments',
-            'expand_wildcards'
-        ];
+            'health',
+            's',
+            'format',
+        );
     }
 
-    public function getMethod(): string
+    /**
+     * @return string
+     */
+    public function getMethod()
     {
         return 'GET';
     }

@@ -19,7 +19,7 @@ class Aspects extends AbstractAdapter
 {
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $result = $this->prepareResult();
+        $result = $this->prepareResult($input);
         $this->dump($result, $output);
     }
 

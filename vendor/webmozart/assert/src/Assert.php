@@ -15,8 +15,6 @@ use ArrayAccess;
 use BadMethodCallException;
 use Closure;
 use Countable;
-use DateTime;
-use DateTimeImmutable;
 use Exception;
 use InvalidArgumentException;
 use ResourceBundle;
@@ -27,7 +25,182 @@ use Traversable;
 /**
  * Efficient assertions to validate the input/output of your methods.
  *
- * @mixin Mixin
+ * @method static void nullOrString($value, $message = '')
+ * @method static void nullOrStringNotEmpty($value, $message = '')
+ * @method static void nullOrInteger($value, $message = '')
+ * @method static void nullOrIntegerish($value, $message = '')
+ * @method static void nullOrFloat($value, $message = '')
+ * @method static void nullOrNumeric($value, $message = '')
+ * @method static void nullOrNatural($value, $message = '')
+ * @method static void nullOrBoolean($value, $message = '')
+ * @method static void nullOrScalar($value, $message = '')
+ * @method static void nullOrObject($value, $message = '')
+ * @method static void nullOrResource($value, $type = null, $message = '')
+ * @method static void nullOrIsCallable($value, $message = '')
+ * @method static void nullOrIsArray($value, $message = '')
+ * @method static void nullOrIsTraversable($value, $message = '')
+ * @method static void nullOrIsArrayAccessible($value, $message = '')
+ * @method static void nullOrIsCountable($value, $message = '')
+ * @method static void nullOrIsIterable($value, $message = '')
+ * @method static void nullOrIsInstanceOf($value, $class, $message = '')
+ * @method static void nullOrNotInstanceOf($value, $class, $message = '')
+ * @method static void nullOrIsInstanceOfAny($value, $classes, $message = '')
+ * @method static void nullOrIsAOf($value, $classes, $message = '')
+ * @method static void nullOrIsAnyOf($value, $classes, $message = '')
+ * @method static void nullOrIsNotA($value, $classes, $message = '')
+ * @method static void nullOrIsEmpty($value, $message = '')
+ * @method static void nullOrNotEmpty($value, $message = '')
+ * @method static void nullOrTrue($value, $message = '')
+ * @method static void nullOrFalse($value, $message = '')
+ * @method static void nullOrNotFalse($value, $message = '')
+ * @method static void nullOrIp($value, $message = '')
+ * @method static void nullOrIpv4($value, $message = '')
+ * @method static void nullOrIpv6($value, $message = '')
+ * @method static void nullOrEmail($value, $message = '')
+ * @method static void nullOrUniqueValues($values, $message = '')
+ * @method static void nullOrEq($value, $expect, $message = '')
+ * @method static void nullOrNotEq($value, $expect, $message = '')
+ * @method static void nullOrSame($value, $expect, $message = '')
+ * @method static void nullOrNotSame($value, $expect, $message = '')
+ * @method static void nullOrGreaterThan($value, $limit, $message = '')
+ * @method static void nullOrGreaterThanEq($value, $limit, $message = '')
+ * @method static void nullOrLessThan($value, $limit, $message = '')
+ * @method static void nullOrLessThanEq($value, $limit, $message = '')
+ * @method static void nullOrRange($value, $min, $max, $message = '')
+ * @method static void nullOrOneOf($value, $values, $message = '')
+ * @method static void nullOrContains($value, $subString, $message = '')
+ * @method static void nullOrNotContains($value, $subString, $message = '')
+ * @method static void nullOrNotWhitespaceOnly($value, $message = '')
+ * @method static void nullOrStartsWith($value, $prefix, $message = '')
+ * @method static void nullOrStartsWithLetter($value, $message = '')
+ * @method static void nullOrEndsWith($value, $suffix, $message = '')
+ * @method static void nullOrRegex($value, $pattern, $message = '')
+ * @method static void nullOrNotRegex($value, $pattern, $message = '')
+ * @method static void nullOrUnicodeLetters($value, $message = '')
+ * @method static void nullOrAlpha($value, $message = '')
+ * @method static void nullOrDigits($value, $message = '')
+ * @method static void nullOrAlnum($value, $message = '')
+ * @method static void nullOrLower($value, $message = '')
+ * @method static void nullOrUpper($value, $message = '')
+ * @method static void nullOrLength($value, $length, $message = '')
+ * @method static void nullOrMinLength($value, $min, $message = '')
+ * @method static void nullOrMaxLength($value, $max, $message = '')
+ * @method static void nullOrLengthBetween($value, $min, $max, $message = '')
+ * @method static void nullOrFileExists($value, $message = '')
+ * @method static void nullOrFile($value, $message = '')
+ * @method static void nullOrDirectory($value, $message = '')
+ * @method static void nullOrReadable($value, $message = '')
+ * @method static void nullOrWritable($value, $message = '')
+ * @method static void nullOrClassExists($value, $message = '')
+ * @method static void nullOrSubclassOf($value, $class, $message = '')
+ * @method static void nullOrInterfaceExists($value, $message = '')
+ * @method static void nullOrImplementsInterface($value, $interface, $message = '')
+ * @method static void nullOrPropertyExists($value, $property, $message = '')
+ * @method static void nullOrPropertyNotExists($value, $property, $message = '')
+ * @method static void nullOrMethodExists($value, $method, $message = '')
+ * @method static void nullOrMethodNotExists($value, $method, $message = '')
+ * @method static void nullOrKeyExists($value, $key, $message = '')
+ * @method static void nullOrKeyNotExists($value, $key, $message = '')
+ * @method static void nullOrValidArrayKey($value, $message = '')
+ * @method static void nullOrCount($value, $key, $message = '')
+ * @method static void nullOrMinCount($value, $min, $message = '')
+ * @method static void nullOrMaxCount($value, $max, $message = '')
+ * @method static void nullOrIsList($value, $message = '')
+ * @method static void nullOrIsNonEmptyList($value, $message = '')
+ * @method static void nullOrIsMap($value, $message = '')
+ * @method static void nullOrIsNonEmptyMap($value, $message = '')
+ * @method static void nullOrCountBetween($value, $min, $max, $message = '')
+ * @method static void nullOrUuid($values, $message = '')
+ * @method static void nullOrThrows($expression, $class = 'Exception', $message = '')
+ * @method static void allString($values, $message = '')
+ * @method static void allStringNotEmpty($values, $message = '')
+ * @method static void allInteger($values, $message = '')
+ * @method static void allIntegerish($values, $message = '')
+ * @method static void allFloat($values, $message = '')
+ * @method static void allNumeric($values, $message = '')
+ * @method static void allNatural($values, $message = '')
+ * @method static void allBoolean($values, $message = '')
+ * @method static void allScalar($values, $message = '')
+ * @method static void allObject($values, $message = '')
+ * @method static void allResource($values, $type = null, $message = '')
+ * @method static void allIsCallable($values, $message = '')
+ * @method static void allIsArray($values, $message = '')
+ * @method static void allIsTraversable($values, $message = '')
+ * @method static void allIsArrayAccessible($values, $message = '')
+ * @method static void allIsCountable($values, $message = '')
+ * @method static void allIsIterable($values, $message = '')
+ * @method static void allIsInstanceOf($values, $class, $message = '')
+ * @method static void allNotInstanceOf($values, $class, $message = '')
+ * @method static void allIsInstanceOfAny($values, $classes, $message = '')
+ * @method static void allIsAOf($values, $class, $message = '')
+ * @method static void allIsAnyOf($values, $class, $message = '')
+ * @method static void allIsNotA($values, $class, $message = '')
+ * @method static void allNull($values, $message = '')
+ * @method static void allNotNull($values, $message = '')
+ * @method static void allIsEmpty($values, $message = '')
+ * @method static void allNotEmpty($values, $message = '')
+ * @method static void allTrue($values, $message = '')
+ * @method static void allFalse($values, $message = '')
+ * @method static void allNotFalse($values, $message = '')
+ * @method static void allIp($values, $message = '')
+ * @method static void allIpv4($values, $message = '')
+ * @method static void allIpv6($values, $message = '')
+ * @method static void allEmail($values, $message = '')
+ * @method static void allUniqueValues($values, $message = '')
+ * @method static void allEq($values, $expect, $message = '')
+ * @method static void allNotEq($values, $expect, $message = '')
+ * @method static void allSame($values, $expect, $message = '')
+ * @method static void allNotSame($values, $expect, $message = '')
+ * @method static void allGreaterThan($values, $limit, $message = '')
+ * @method static void allGreaterThanEq($values, $limit, $message = '')
+ * @method static void allLessThan($values, $limit, $message = '')
+ * @method static void allLessThanEq($values, $limit, $message = '')
+ * @method static void allRange($values, $min, $max, $message = '')
+ * @method static void allOneOf($values, $values, $message = '')
+ * @method static void allContains($values, $subString, $message = '')
+ * @method static void allNotContains($values, $subString, $message = '')
+ * @method static void allNotWhitespaceOnly($values, $message = '')
+ * @method static void allStartsWith($values, $prefix, $message = '')
+ * @method static void allStartsWithLetter($values, $message = '')
+ * @method static void allEndsWith($values, $suffix, $message = '')
+ * @method static void allRegex($values, $pattern, $message = '')
+ * @method static void allNotRegex($values, $pattern, $message = '')
+ * @method static void allUnicodeLetters($values, $message = '')
+ * @method static void allAlpha($values, $message = '')
+ * @method static void allDigits($values, $message = '')
+ * @method static void allAlnum($values, $message = '')
+ * @method static void allLower($values, $message = '')
+ * @method static void allUpper($values, $message = '')
+ * @method static void allLength($values, $length, $message = '')
+ * @method static void allMinLength($values, $min, $message = '')
+ * @method static void allMaxLength($values, $max, $message = '')
+ * @method static void allLengthBetween($values, $min, $max, $message = '')
+ * @method static void allFileExists($values, $message = '')
+ * @method static void allFile($values, $message = '')
+ * @method static void allDirectory($values, $message = '')
+ * @method static void allReadable($values, $message = '')
+ * @method static void allWritable($values, $message = '')
+ * @method static void allClassExists($values, $message = '')
+ * @method static void allSubclassOf($values, $class, $message = '')
+ * @method static void allInterfaceExists($values, $message = '')
+ * @method static void allImplementsInterface($values, $interface, $message = '')
+ * @method static void allPropertyExists($values, $property, $message = '')
+ * @method static void allPropertyNotExists($values, $property, $message = '')
+ * @method static void allMethodExists($values, $method, $message = '')
+ * @method static void allMethodNotExists($values, $method, $message = '')
+ * @method static void allKeyExists($values, $key, $message = '')
+ * @method static void allKeyNotExists($values, $key, $message = '')
+ * @method static void allValidArrayKey($values, $message = '')
+ * @method static void allCount($values, $key, $message = '')
+ * @method static void allMinCount($values, $min, $message = '')
+ * @method static void allMaxCount($values, $max, $message = '')
+ * @method static void allCountBetween($values, $min, $max, $message = '')
+ * @method static void allIsList($values, $message = '')
+ * @method static void allIsNonEmptyList($values, $message = '')
+ * @method static void allIsMap($values, $message = '')
+ * @method static void allIsNonEmptyMap($values, $message = '')
+ * @method static void allUuid($values, $message = '')
+ * @method static void allThrows($expressions, $class = 'Exception', $message = '')
  *
  * @since  1.0
  *
@@ -36,7 +209,6 @@ use Traversable;
 class Assert
 {
     /**
-     * @psalm-pure
      * @psalm-assert string $value
      *
      * @param mixed  $value
@@ -55,9 +227,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     * @psalm-assert non-empty-string $value
-     *
      * @param mixed  $value
      * @param string $message
      *
@@ -70,7 +239,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert int $value
      *
      * @param mixed  $value
@@ -89,7 +257,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert numeric $value
      *
      * @param mixed  $value
@@ -108,7 +275,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert float $value
      *
      * @param mixed  $value
@@ -127,7 +293,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert numeric $value
      *
      * @param mixed  $value
@@ -146,7 +311,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert int $value
      *
      * @param mixed  $value
@@ -158,14 +322,13 @@ class Assert
     {
         if (!\is_int($value) || $value < 0) {
             static::reportInvalidArgument(\sprintf(
-                $message ?: 'Expected a non-negative integer. Got: %s',
+                $message ?: 'Expected a non-negative integer. Got %s',
                 static::valueToString($value)
             ));
         }
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert bool $value
      *
      * @param mixed  $value
@@ -184,7 +347,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert scalar $value
      *
      * @param mixed  $value
@@ -203,7 +365,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert object $value
      *
      * @param mixed  $value
@@ -222,7 +383,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert resource $value
      *
      * @param mixed       $value
@@ -250,7 +410,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert callable $value
      *
      * @param mixed  $value
@@ -269,7 +428,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert array $value
      *
      * @param mixed  $value
@@ -288,7 +446,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert iterable $value
      *
      * @deprecated use "isIterable" or "isInstanceOf" instead
@@ -317,9 +474,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     * @psalm-assert array|ArrayAccess $value
-     *
      * @param mixed  $value
      * @param string $message
      *
@@ -336,7 +490,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert countable $value
      *
      * @param mixed  $value
@@ -360,7 +513,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert iterable $value
      *
      * @param mixed  $value
@@ -379,7 +531,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-template ExpectedType of object
      * @psalm-param class-string<ExpectedType> $class
      * @psalm-assert ExpectedType $value
@@ -402,7 +553,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-template ExpectedType of object
      * @psalm-param class-string<ExpectedType> $class
      * @psalm-assert !ExpectedType $value
@@ -425,9 +575,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     * @psalm-param array<class-string> $classes
-     *
      * @param mixed                $value
      * @param array<object|string> $classes
      * @param string               $message
@@ -450,11 +597,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     * @psalm-template ExpectedType of object
-     * @psalm-param class-string<ExpectedType> $class
-     * @psalm-assert ExpectedType|class-string<ExpectedType> $value
-     *
      * @param object|string $value
      * @param string        $class
      * @param string        $message
@@ -475,12 +617,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     * @psalm-template UnexpectedType of object
-     * @psalm-param class-string<UnexpectedType> $class
-     * @psalm-assert !UnexpectedType $value
-     * @psalm-assert !class-string<UnexpectedType> $value
-     *
      * @param object|string $value
      * @param string        $class
      * @param string        $message
@@ -501,9 +637,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     * @psalm-param array<class-string> $classes
-     *
      * @param object|string $value
      * @param string[]      $classes
      * @param string        $message
@@ -528,7 +661,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert empty $value
      *
      * @param mixed  $value
@@ -547,7 +679,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert !empty $value
      *
      * @param mixed  $value
@@ -566,7 +697,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert null $value
      *
      * @param mixed  $value
@@ -585,7 +715,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert !null $value
      *
      * @param mixed  $value
@@ -603,7 +732,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert true $value
      *
      * @param mixed  $value
@@ -622,7 +750,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert false $value
      *
      * @param mixed  $value
@@ -641,7 +768,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert !false $value
      *
      * @param mixed  $value
@@ -700,7 +826,7 @@ class Assert
     {
         if (false === \filter_var($value, \FILTER_VALIDATE_IP, \FILTER_FLAG_IPV6)) {
             static::reportInvalidArgument(\sprintf(
-                $message ?: 'Expected a value to be an IPv6. Got: %s',
+                $message ?: 'Expected a value to be an IPv6. Got %s',
                 static::valueToString($value)
             ));
         }
@@ -716,7 +842,7 @@ class Assert
     {
         if (false === \filter_var($value, FILTER_VALIDATE_EMAIL)) {
             static::reportInvalidArgument(\sprintf(
-                $message ?: 'Expected a value to be a valid e-mail address. Got: %s',
+                $message ?: 'Expected a value to be a valid e-mail address. Got %s',
                 static::valueToString($value)
             ));
         }
@@ -782,8 +908,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
      * @param mixed  $value
      * @param mixed  $expect
      * @param string $message
@@ -802,8 +926,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
      * @param mixed  $value
      * @param mixed  $expect
      * @param string $message
@@ -821,8 +943,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
      * @param mixed  $value
      * @param mixed  $limit
      * @param string $message
@@ -841,8 +961,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
      * @param mixed  $value
      * @param mixed  $limit
      * @param string $message
@@ -861,8 +979,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
      * @param mixed  $value
      * @param mixed  $limit
      * @param string $message
@@ -881,8 +997,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
      * @param mixed  $value
      * @param mixed  $limit
      * @param string $message
@@ -902,8 +1016,6 @@ class Assert
 
     /**
      * Inclusive range, so Assert::(3, 3, 5) passes.
-     *
-     * @psalm-pure
      *
      * @param mixed  $value
      * @param mixed  $min
@@ -925,9 +1037,7 @@ class Assert
     }
 
     /**
-     * A more human-readable alias of Assert::inArray().
-     *
-     * @psalm-pure
+     * Does strict comparison, so Assert::oneOf(3, ['3']) does not pass the assertion.
      *
      * @param mixed  $value
      * @param array  $values
@@ -936,22 +1046,6 @@ class Assert
      * @throws InvalidArgumentException
      */
     public static function oneOf($value, array $values, $message = '')
-    {
-        static::inArray($value, $values, $message);
-    }
-
-    /**
-     * Does strict comparison, so Assert::inArray(3, ['3']) does not pass the assertion.
-     *
-     * @psalm-pure
-     *
-     * @param mixed  $value
-     * @param array  $values
-     * @param string $message
-     *
-     * @throws InvalidArgumentException
-     */
-    public static function inArray($value, array $values, $message = '')
     {
         if (!\in_array($value, $values, true)) {
             static::reportInvalidArgument(\sprintf(
@@ -963,9 +1057,7 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
-     * @param string $value
+     * @param mixed  $value
      * @param string $subString
      * @param string $message
      *
@@ -983,9 +1075,7 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
-     * @param string $value
+     * @param mixed  $value
      * @param string $subString
      * @param string $message
      *
@@ -1003,9 +1093,7 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
-     * @param string $value
+     * @param mixed  $value
      * @param string $message
      *
      * @throws InvalidArgumentException
@@ -1021,9 +1109,7 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
-     * @param string $value
+     * @param mixed  $value
      * @param string $prefix
      * @param string $message
      *
@@ -1041,28 +1127,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
-     * @param string $value
-     * @param string $prefix
-     * @param string $message
-     *
-     * @throws InvalidArgumentException
-     */
-    public static function notStartsWith($value, $prefix, $message = '')
-    {
-        if (0 === \strpos($value, $prefix)) {
-            static::reportInvalidArgument(\sprintf(
-                $message ?: 'Expected a value not to start with %2$s. Got: %s',
-                static::valueToString($value),
-                static::valueToString($prefix)
-            ));
-        }
-    }
-
-    /**
-     * @psalm-pure
-     *
      * @param mixed  $value
      * @param string $message
      *
@@ -1090,9 +1154,7 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
-     * @param string $value
+     * @param mixed  $value
      * @param string $suffix
      * @param string $message
      *
@@ -1110,30 +1172,8 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
-     * @param string $value
-     * @param string $suffix
-     * @param string $message
-     *
-     * @throws InvalidArgumentException
-     */
-    public static function notEndsWith($value, $suffix, $message = '')
-    {
-        if ($suffix === \substr($value, -\strlen($suffix))) {
-            static::reportInvalidArgument(\sprintf(
-                $message ?: 'Expected a value not to end with %2$s. Got: %s',
-                static::valueToString($value),
-                static::valueToString($suffix)
-            ));
-        }
-    }
-
-    /**
-     * @psalm-pure
-     *
-     * @param string $value
-     * @param string $pattern
+     * @param mixed  $value
+     * @param mixed  $pattern
      * @param string $message
      *
      * @throws InvalidArgumentException
@@ -1149,10 +1189,8 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
-     * @param string $value
-     * @param string $pattern
+     * @param mixed  $value
+     * @param mixed  $pattern
      * @param string $message
      *
      * @throws InvalidArgumentException
@@ -1170,8 +1208,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
      * @param mixed  $value
      * @param string $message
      *
@@ -1190,8 +1226,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
      * @param mixed  $value
      * @param string $message
      *
@@ -1215,9 +1249,7 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
-     * @param string $value
+     * @param mixed  $value
      * @param string $message
      *
      * @throws InvalidArgumentException
@@ -1238,9 +1270,7 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
-     * @param string $value
+     * @param mixed  $value
      * @param string $message
      *
      * @throws InvalidArgumentException
@@ -1261,10 +1291,7 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     * @psalm-assert lowercase-string $value
-     *
-     * @param string $value
+     * @param mixed  $value
      * @param string $message
      *
      * @throws InvalidArgumentException
@@ -1285,10 +1312,7 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     * @psalm-assert !lowercase-string $value
-     *
-     * @param string $value
+     * @param mixed  $value
      * @param string $message
      *
      * @throws InvalidArgumentException
@@ -1309,10 +1333,8 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
-     * @param string $value
-     * @param int    $length
+     * @param mixed  $value
+     * @param mixed  $length
      * @param string $message
      *
      * @throws InvalidArgumentException
@@ -1331,11 +1353,9 @@ class Assert
     /**
      * Inclusive min.
      *
-     * @psalm-pure
-     *
-     * @param string    $value
-     * @param int|float $min
-     * @param string    $message
+     * @param mixed  $value
+     * @param mixed  $min
+     * @param string $message
      *
      * @throws InvalidArgumentException
      */
@@ -1353,11 +1373,9 @@ class Assert
     /**
      * Inclusive max.
      *
-     * @psalm-pure
-     *
-     * @param string    $value
-     * @param int|float $max
-     * @param string    $message
+     * @param mixed  $value
+     * @param mixed  $max
+     * @param string $message
      *
      * @throws InvalidArgumentException
      */
@@ -1375,12 +1393,10 @@ class Assert
     /**
      * Inclusive , so Assert::lengthBetween('asd', 3, 5); passes the assertion.
      *
-     * @psalm-pure
-     *
-     * @param string    $value
-     * @param int|float $min
-     * @param int|float $max
-     * @param string    $message
+     * @param mixed  $value
+     * @param mixed  $min
+     * @param mixed  $max
+     * @param string $message
      *
      * @throws InvalidArgumentException
      */
@@ -1455,7 +1471,7 @@ class Assert
     }
 
     /**
-     * @param string $value
+     * @param mixed  $value
      * @param string $message
      *
      * @throws InvalidArgumentException
@@ -1471,7 +1487,7 @@ class Assert
     }
 
     /**
-     * @param string $value
+     * @param mixed  $value
      * @param string $message
      *
      * @throws InvalidArgumentException
@@ -1505,11 +1521,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     * @psalm-template ExpectedType of object
-     * @psalm-param class-string<ExpectedType> $class
-     * @psalm-assert class-string<ExpectedType>|ExpectedType $value
-     *
      * @param mixed         $value
      * @param string|object $class
      * @param string        $message
@@ -1546,11 +1557,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     * @psalm-template ExpectedType of object
-     * @psalm-param class-string<ExpectedType> $interface
-     * @psalm-assert class-string<ExpectedType> $value
-     *
      * @param mixed  $value
      * @param mixed  $interface
      * @param string $message
@@ -1569,9 +1575,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     * @psalm-param class-string|object $classOrObject
-     *
      * @param string|object $classOrObject
      * @param mixed         $property
      * @param string        $message
@@ -1589,9 +1592,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     * @psalm-param class-string|object $classOrObject
-     *
      * @param string|object $classOrObject
      * @param mixed         $property
      * @param string        $message
@@ -1609,9 +1609,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     * @psalm-param class-string|object $classOrObject
-     *
      * @param string|object $classOrObject
      * @param mixed         $method
      * @param string        $message
@@ -1629,9 +1626,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     * @psalm-param class-string|object $classOrObject
-     *
      * @param string|object $classOrObject
      * @param mixed         $method
      * @param string        $message
@@ -1649,8 +1643,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
      * @param array      $array
      * @param string|int $key
      * @param string     $message
@@ -1668,8 +1660,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
      * @param array      $array
      * @param string|int $key
      * @param string     $message
@@ -1689,7 +1679,6 @@ class Assert
     /**
      * Checks if a value is a valid array key (int or string).
      *
-     * @psalm-pure
      * @psalm-assert array-key $value
      *
      * @param mixed  $value
@@ -1710,9 +1699,9 @@ class Assert
     /**
      * Does not check if $array is countable, this can generate a warning on php versions after 7.2.
      *
-     * @param Countable|array $array
-     * @param int             $number
-     * @param string          $message
+     * @param mixed  $array
+     * @param mixed  $number
+     * @param string $message
      *
      * @throws InvalidArgumentException
      */
@@ -1721,20 +1710,16 @@ class Assert
         static::eq(
             \count($array),
             $number,
-            \sprintf(
-                $message ?: 'Expected an array to contain %d elements. Got: %d.',
-                $number,
-                \count($array)
-            )
+            $message ?: \sprintf('Expected an array to contain %d elements. Got: %d.', $number, \count($array))
         );
     }
 
     /**
      * Does not check if $array is countable, this can generate a warning on php versions after 7.2.
      *
-     * @param Countable|array $array
-     * @param int|float       $min
-     * @param string          $message
+     * @param mixed  $array
+     * @param mixed  $min
+     * @param string $message
      *
      * @throws InvalidArgumentException
      */
@@ -1752,9 +1737,9 @@ class Assert
     /**
      * Does not check if $array is countable, this can generate a warning on php versions after 7.2.
      *
-     * @param Countable|array $array
-     * @param int|float       $max
-     * @param string          $message
+     * @param mixed  $array
+     * @param mixed  $max
+     * @param string $message
      *
      * @throws InvalidArgumentException
      */
@@ -1772,10 +1757,10 @@ class Assert
     /**
      * Does not check if $array is countable, this can generate a warning on php versions after 7.2.
      *
-     * @param Countable|array $array
-     * @param int|float       $min
-     * @param int|float       $max
-     * @param string          $message
+     * @param mixed  $array
+     * @param mixed  $min
+     * @param mixed  $max
+     * @param string $message
      *
      * @throws InvalidArgumentException
      */
@@ -1794,7 +1779,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert list $array
      *
      * @param mixed  $array
@@ -1812,7 +1796,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
      * @psalm-assert non-empty-list $array
      *
      * @param mixed  $array
@@ -1827,11 +1810,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     * @psalm-template T
-     * @psalm-param mixed|array<T> $array
-     * @psalm-assert array<string, T> $array
-     *
      * @param mixed  $array
      * @param string $message
      *
@@ -1850,12 +1828,6 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     * @psalm-template T
-     * @psalm-param mixed|array<T> $array
-     * @psalm-assert array<string, T> $array
-     * @psalm-assert !empty $array
-     *
      * @param mixed  $array
      * @param string $message
      *
@@ -1868,9 +1840,7 @@ class Assert
     }
 
     /**
-     * @psalm-pure
-     *
-     * @param string $value
+     * @param mixed  $value
      * @param string $message
      *
      * @throws InvalidArgumentException
@@ -1894,11 +1864,9 @@ class Assert
     }
 
     /**
-     * @psalm-param class-string<Throwable> $class
-     *
-     * @param Closure $expression
-     * @param string  $class
-     * @param string  $message
+     * @param Closure       $expression
+     * @param string|object $class
+     * @param string        $message
      *
      * @throws InvalidArgumentException
      */
@@ -1989,10 +1957,6 @@ class Assert
                 return \get_class($value).': '.self::valueToString($value->__toString());
             }
 
-            if ($value instanceof DateTime || $value instanceof DateTimeImmutable) {
-                return \get_class($value).': '.self::valueToString($value->format('c'));
-            }
-
             return \get_class($value);
         }
 
@@ -2034,8 +1998,6 @@ class Assert
      * @param string $message
      *
      * @throws InvalidArgumentException
-     *
-     * @psalm-pure this method is not supposed to perform side-effects
      */
     protected static function reportInvalidArgument($message)
     {

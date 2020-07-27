@@ -17,7 +17,7 @@ use Psr\Http\Message\StreamInterface;
 class SwooleFileStream implements StreamInterface, FileInterface
 {
     /**
-     * @var int
+     * @var string
      */
     protected $size;
 

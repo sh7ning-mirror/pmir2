@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints\Indices;
@@ -7,41 +8,61 @@ use Elasticsearch\Endpoints\AbstractEndpoint;
 
 /**
  * Class Flush
- * Elasticsearch API name indices.flush
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints\Indices
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class Flush extends AbstractEndpoint
 {
+    protected $synced = false;
 
-    public function getURI(): string
+    public function setSynced($synced)
     {
-        $index = $this->index ?? null;
-
-        if (isset($index)) {
-            return "/$index/_flush";
-        }
-        return "/_flush";
+        $this->synced = $synced;
     }
 
-    public function getParamWhitelist(): array
+    /**
+     * @return string
+     */
+    public function getURI()
     {
-        return [
+        $index = $this->index;
+        $uri   = "/_flush";
+
+        if (isset($index) === true) {
+            $uri = "/$index/_flush";
+        }
+
+        if ($this->synced === true) {
+            $uri .= "/synced";
+        }
+
+        return $uri;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
+    {
+        return array(
             'force',
-            'wait_if_ongoing',
+            'full',
             'ignore_unavailable',
             'allow_no_indices',
-            'expand_wildcards'
-        ];
+            'expand_wildcards',
+            'wait_if_ongoing'
+        );
     }
 
-    public function getMethod(): string
+    /**
+     * @return string
+     */
+    public function getMethod()
     {
-        return 'POST';
+        return isset($this->body) ? 'POST' : 'GET';
     }
 }

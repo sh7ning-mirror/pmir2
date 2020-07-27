@@ -62,7 +62,7 @@ class MainWorkerStartListener implements ListenerInterface
             $producer = $this->container->get(\Hyperf\Amqp\Producer::class);
             $instantiator = $this->container->get(Instantiator::class);
             /**
-             * @var string $producerMessageClass
+             * @var string
              * @var Producer $annotation
              */
             foreach ($producerMessages as $producerMessageClass => $annotation) {

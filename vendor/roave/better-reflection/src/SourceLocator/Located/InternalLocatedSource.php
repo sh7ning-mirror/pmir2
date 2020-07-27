@@ -6,7 +6,8 @@ namespace Roave\BetterReflection\SourceLocator\Located;
 
 class InternalLocatedSource extends LocatedSource
 {
-    private string $extensionName;
+    /** @var string */
+    private $extensionName;
 
     /**
      * {@inheritDoc}

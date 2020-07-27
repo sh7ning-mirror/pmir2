@@ -10,7 +10,8 @@ use phpDocumentor\Reflection\Types\Context;
 
 class ResolveTypes
 {
-    private TypeResolver $typeResolver;
+    /** @var TypeResolver */
+    private $typeResolver;
 
     public function __construct()
     {

@@ -26,9 +26,4 @@ abstract class AbstractAspect implements AroundInterface
      * @var array
      */
     public $annotations = [];
-
-    /**
-     * @var null|int
-     */
-    public $priority;
 }

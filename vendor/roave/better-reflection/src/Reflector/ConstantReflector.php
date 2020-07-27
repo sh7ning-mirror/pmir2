@@ -14,9 +14,11 @@ use function assert;
 
 class ConstantReflector implements Reflector
 {
-    private SourceLocator $sourceLocator;
+    /** @var SourceLocator */
+    private $sourceLocator;
 
-    private ClassReflector $classReflector;
+    /** @var ClassReflector */
+    private $classReflector;
 
     public function __construct(SourceLocator $sourceLocator, ClassReflector $classReflector)
     {
@@ -55,7 +57,7 @@ class ConstantReflector implements Reflector
         /** @var array<int,ReflectionConstant> $allConstants */
         $allConstants = $this->sourceLocator->locateIdentifiersByType(
             $this,
-            new IdentifierType(IdentifierType::IDENTIFIER_CONSTANT),
+            new IdentifierType(IdentifierType::IDENTIFIER_CONSTANT)
         );
 
         return $allConstants;

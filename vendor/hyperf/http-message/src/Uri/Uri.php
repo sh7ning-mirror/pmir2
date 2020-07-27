@@ -334,7 +334,6 @@ class Uri implements UriInterface
         $clone = clone $this;
         $clone->userInfo = $user;
         $clone->validateState();
-        return $this;
     }
 
     /**
@@ -368,8 +367,8 @@ class Uri implements UriInterface
      * A null value provided for the port is equivalent to removing the port
      * information.
      *
-     * @param null|int|string $port the port to use with the new instance; a null value
-     *                              removes the port information
+     * @param null|int $port the port to use with the new instance; a null value
+     *                       removes the port information
      * @throws \InvalidArgumentException for invalid ports
      * @return static a new instance with the specified port
      */
@@ -631,7 +630,7 @@ class Uri implements UriInterface
     }
 
     /**
-     * @param null|int|string $port
+     * @param null|int $port
      * @throws \InvalidArgumentException if the port is invalid
      * @return null|int
      */
@@ -654,7 +653,7 @@ class Uri implements UriInterface
      */
     private function removeDefaultPort()
     {
-        if ($this->port !== null && $this->isDefaultPort()) {
+        if ($this->port !== null && self::isDefaultPort($this)) {
             $this->port = null;
         }
     }

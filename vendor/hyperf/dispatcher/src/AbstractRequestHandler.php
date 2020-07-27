@@ -13,7 +13,6 @@ namespace Hyperf\Dispatcher;
 
 use Hyperf\Dispatcher\Exceptions\InvalidArgumentException;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Server\MiddlewareInterface;
 use function array_unique;
 use function is_string;
 use function sprintf;
@@ -31,7 +30,7 @@ abstract class AbstractRequestHandler
     protected $offset = 0;
 
     /**
-     * @var MiddlewareInterface|object
+     * @var string
      */
     protected $coreHandler;
 
@@ -42,7 +41,7 @@ abstract class AbstractRequestHandler
 
     /**
      * @param array $middlewares All middlewares to dispatch by dispatcher
-     * @param MiddlewareInterface|object $coreHandler The core middleware of dispatcher
+     * @param object $coreHandler The core middleware of dispatcher
      */
     public function __construct(array $middlewares, $coreHandler, ContainerInterface $container)
     {

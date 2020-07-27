@@ -171,8 +171,9 @@ abstract class AbstractPaginator implements PaginatorInterface
      * Add a set of query string values to the paginator.
      *
      * @param null|array|string $key
+     * @return $this
      */
-    public function appends($key, ?string $value = null): self
+    public function appends($key, ?string $value = null)
     {
         if (is_null($key)) {
             return $this;
@@ -190,10 +191,7 @@ abstract class AbstractPaginator implements PaginatorInterface
      */
     public function loadMorph(string $relation, array $relations): self
     {
-        $collection = $this->getCollection();
-        if (method_exists($collection, 'loadMorph')) {
-            $collection->loadMorph($relation, $relations);
-        }
+        $this->getCollection()->loadMorph($relation, $relations);
 
         return $this;
     }

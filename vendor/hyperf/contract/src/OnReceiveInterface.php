@@ -12,12 +12,8 @@ declare(strict_types=1);
 namespace Hyperf\Contract;
 
 use Swoole\Server as SwooleServer;
-use Swoole\Coroutine\Server\Connection;
 
 interface OnReceiveInterface
 {
-    /**
-     * @param SwooleServer|Connection $server
-     */
-    public function onReceive($server, int $fd, int $fromId, string $data): void;
+    public function onReceive(SwooleServer $server, int $fd, int $fromId, string $data): void;
 }

@@ -54,10 +54,6 @@ class TaskExecutor
 
     public function execute(Task $task, float $timeout = 10)
     {
-        if (! $this->server instanceof Server) {
-            throw new TaskExecuteException('The server does not support task.');
-        }
-
         $taskId = $this->server->task($task);
         if ($taskId === false) {
             throw new TaskExecuteException('Task execute failed.');
@@ -67,11 +63,7 @@ class TaskExecutor
 
         if ($result instanceof Exception) {
             $exception = $this->normalizer->denormalize($result->attributes, $result->class);
-            if ($exception instanceof \Throwable) {
-                throw $exception;
-            }
-
-            throw new TaskExecuteException(get_class($exception) . ' is not instance of Throwable.');
+            throw $exception;
         }
 
         return $result;

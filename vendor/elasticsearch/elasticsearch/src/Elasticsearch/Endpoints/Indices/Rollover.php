@@ -1,86 +1,112 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints\Indices;
 
-use Elasticsearch\Common\Exceptions\RuntimeException;
 use Elasticsearch\Endpoints\AbstractEndpoint;
+use Elasticsearch\Common\Exceptions;
 
 /**
  * Class Rollover
- * Elasticsearch API name indices.rollover
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints\Indices
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class Rollover extends AbstractEndpoint
 {
-    protected $alias;
-    protected $new_index;
+    private $alias;
+    private $newIndex;
 
-    public function getURI(): string
+    /**
+     * @param string $alias
+     *
+     * @return $this
+     */
+    public function setAlias($alias)
     {
-        if (isset($this->alias) !== true) {
-            throw new RuntimeException(
-                'alias is required for rollover'
-            );
+        if ($alias === null) {
+            return $this;
         }
-        $alias = $this->alias;
-        $new_index = $this->new_index ?? null;
 
-        if (isset($new_index)) {
-            return "/$alias/_rollover/$new_index";
+        $this->alias = urlencode($alias);
+        return $this;
+    }
+
+    /**
+     * @param string $newIndex
+     *
+     * @return $this
+     */
+    public function setNewIndex($newIndex)
+    {
+        if ($newIndex === null) {
+            return $this;
         }
-        return "/$alias/_rollover";
+
+        $this->newIndex = urlencode($newIndex);
+        return $this;
     }
 
-    public function getParamWhitelist(): array
-    {
-        return [
-            'include_type_name',
-            'timeout',
-            'dry_run',
-            'master_timeout',
-            'wait_for_active_shards'
-        ];
-    }
-
-    public function getMethod(): string
-    {
-        return 'POST';
-    }
-
-    public function setBody($body): Rollover
+    /**
+     * @param array $body
+     *
+     * @throws \Elasticsearch\Common\Exceptions\InvalidArgumentException
+     * @return $this
+     */
+    public function setBody($body)
     {
         if (isset($body) !== true) {
             return $this;
         }
+
         $this->body = $body;
 
         return $this;
     }
 
-    public function setAlias($alias): Rollover
+    /**
+     * @throws \Elasticsearch\Common\Exceptions\RuntimeException
+     * @return string
+     */
+    public function getURI()
     {
-        if (isset($alias) !== true) {
-            return $this;
+        if (isset($this->alias) !== true) {
+            throw new Exceptions\RuntimeException(
+                'alias name is required for Rollover'
+            );
         }
-        $this->alias = $alias;
 
-        return $this;
+        $uri = "/{$this->alias}/_rollover";
+
+        if (isset($this->newIndex) === true) {
+            $uri .= "/{$this->newIndex}";
+        }
+
+        return $uri;
     }
 
-    public function setNewIndex($new_index): Rollover
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
     {
-        if (isset($new_index) !== true) {
-            return $this;
-        }
-        $this->new_index = $new_index;
+        return array(
+            'timeout',
+            'master_timeout',
+            'wait_for_active_shards',
+            'include_type_name'
+        );
+    }
 
-        return $this;
+    /**
+     * @return string
+     */
+    public function getMethod()
+    {
+        return 'POST';
     }
 }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Roave\BetterReflection\SourceLocator\SourceStubber;
 
 use JetBrains\PHPStormStub\PhpStormStubsMap;
-use PhpParser\BuilderFactory;
 use PhpParser\BuilderHelpers;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
@@ -18,7 +17,6 @@ use Roave\BetterReflection\SourceLocator\FileChecker;
 use Roave\BetterReflection\SourceLocator\SourceStubber\Exception\CouldNotFindPhpStormStubs;
 use Roave\BetterReflection\Util\ConstantNodeChecker;
 use Traversable;
-use function array_change_key_case;
 use function array_key_exists;
 use function assert;
 use function constant;
@@ -32,7 +30,6 @@ use function is_string;
 use function sprintf;
 use function str_replace;
 use function strtolower;
-use function strtoupper;
 
 /**
  * @internal
@@ -45,79 +42,55 @@ final class PhpStormStubsSourceStubber implements SourceStubber
         __DIR__ . '/../../../vendor/jetbrains/phpstorm-stubs',
     ];
 
-    private Parser $phpParser;
+    /** @var Parser */
+    private $phpParser;
 
-    private BuilderFactory $builderFactory;
+    /** @var Standard */
+    private $prettyPrinter;
 
-    private Standard $prettyPrinter;
+    /** @var NodeTraverser */
+    private $nodeTraverser;
 
-    private NodeTraverser $nodeTraverser;
+    /** @var string|null */
+    private $stubsDirectory;
 
-    private ?string $stubsDirectory = null;
-
-    private NodeVisitorAbstract $cachingVisitor;
+    /** @var NodeVisitorAbstract */
+    private $cachingVisitor;
 
     /** @var array<string, Node\Stmt\ClassLike> */
-    private array $classNodes = [];
+    private $classNodes = [];
 
     /** @var array<string, Node\Stmt\Function_> */
-    private array $functionNodes = [];
+    private $functionNodes = [];
 
-    /**
-     * `null` means "failed lookup" for constant that is not case insensitive
-     *
-     * @var array<string, Node\Stmt\Const_|Node\Expr\FuncCall|null>
-     */
-    private array $constantNodes = [];
-
-    private static bool $mapsInitialized = false;
-
-    /** @var array<lowercase-string, string> */
-    private static array $classMap;
-
-    /** @var array<lowercase-string, string> */
-    private static array $functionMap;
-
-    /** @var array<lowercase-string, string> */
-    private static array $constantMap;
+    /** @var array<string, Node\Stmt\Const_|Node\Expr\FuncCall> */
+    private $constantNodes = [];
 
     public function __construct(Parser $phpParser)
     {
-        $this->phpParser      = $phpParser;
-        $this->builderFactory = new BuilderFactory();
-        $this->prettyPrinter  = new Standard(self::BUILDER_OPTIONS);
+        $this->phpParser     = $phpParser;
+        $this->prettyPrinter = new Standard(self::BUILDER_OPTIONS);
 
         $this->cachingVisitor = $this->createCachingVisitor();
 
         $this->nodeTraverser = new NodeTraverser();
         $this->nodeTraverser->addVisitor(new NameResolver());
         $this->nodeTraverser->addVisitor($this->cachingVisitor);
-
-        if (self::$mapsInitialized) {
-            return;
-        }
-
-        self::$classMap        = array_change_key_case(PhpStormStubsMap::CLASSES);
-        self::$functionMap     = array_change_key_case(PhpStormStubsMap::FUNCTIONS);
-        self::$constantMap     = array_change_key_case(PhpStormStubsMap::CONSTANTS);
-        self::$mapsInitialized = true;
     }
 
     public function generateClassStub(string $className) : ?StubData
     {
-        $lowercaseClassName = strtolower($className);
-
-        if (! array_key_exists($lowercaseClassName, self::$classMap)) {
+        if (! array_key_exists($className, PhpStormStubsMap::CLASSES)) {
             return null;
         }
 
-        $filePath = self::$classMap[$lowercaseClassName];
+        $filePath = PhpStormStubsMap::CLASSES[$className];
 
-        if (! array_key_exists($lowercaseClassName, $this->classNodes)) {
+        if (! array_key_exists($className, $this->classNodes)) {
             $this->parseFile($filePath);
         }
 
-        $stub = $this->createStub($this->classNodes[$lowercaseClassName]);
+        $stub = $this->createStub($this->classNodes[$className]);
 
         if ($className === Traversable::class) {
             // See https://github.com/JetBrains/phpstorm-stubs/commit/0778a26992c47d7dbee4d0b0bfb7fad4344371b1#diff-575bacb45377d474336c71cbf53c1729
@@ -129,52 +102,37 @@ final class PhpStormStubsSourceStubber implements SourceStubber
 
     public function generateFunctionStub(string $functionName) : ?StubData
     {
-        $lowercaseFunctionName = strtolower($functionName);
-
-        if (! array_key_exists($lowercaseFunctionName, self::$functionMap)) {
+        if (! array_key_exists($functionName, PhpStormStubsMap::FUNCTIONS)) {
             return null;
         }
 
-        $filePath = self::$functionMap[$lowercaseFunctionName];
+        $filePath = PhpStormStubsMap::FUNCTIONS[$functionName];
 
-        if (! array_key_exists($lowercaseFunctionName, $this->functionNodes)) {
+        if (! array_key_exists($functionName, $this->functionNodes)) {
             $this->parseFile($filePath);
         }
 
-        return new StubData($this->createStub($this->functionNodes[$lowercaseFunctionName]), $this->getExtensionFromFilePath($filePath));
+        return new StubData($this->createStub($this->functionNodes[$functionName]), $this->getExtensionFromFilePath($filePath));
     }
 
     public function generateConstantStub(string $constantName) : ?StubData
     {
-        $lowercaseConstantName = strtolower($constantName);
+        // https://github.com/JetBrains/phpstorm-stubs/pull/591
+        if (in_array($constantName, ['TRUE', 'FALSE', 'NULL'], true)) {
+            $constantName = strtolower($constantName);
+        }
 
-        if (! array_key_exists($lowercaseConstantName, self::$constantMap)) {
+        if (! array_key_exists($constantName, PhpStormStubsMap::CONSTANTS)) {
             return null;
         }
 
-        if (array_key_exists($lowercaseConstantName, $this->constantNodes)
-            && $this->constantNodes[$lowercaseConstantName] === null
-        ) {
-            return null;
-        }
+        $filePath = PhpStormStubsMap::CONSTANTS[$constantName];
 
-        $filePath     = self::$constantMap[$lowercaseConstantName];
-        $constantNode = $this->constantNodes[$constantName] ?? $this->constantNodes[$lowercaseConstantName] ?? null;
-
-        if ($constantNode === null) {
+        if (! array_key_exists($constantName, $this->constantNodes)) {
             $this->parseFile($filePath);
-
-            $constantNode = $this->constantNodes[$constantName] ?? $this->constantNodes[$lowercaseConstantName] ?? null;
-
-            if ($constantNode === null) {
-                // Still `null` - the constant is not case-insensitive. Save `null` so we don't parse the file again for the same $constantName
-                $this->constantNodes[$lowercaseConstantName] = null;
-
-                return null;
-            }
         }
 
-        return new StubData($this->createStub($constantNode), $this->getExtensionFromFilePath($filePath));
+        return new StubData($this->createStub($this->constantNodes[$constantName]), $this->getExtensionFromFilePath($filePath));
     }
 
     private function parseFile(string $filePath) : void
@@ -195,8 +153,7 @@ final class PhpStormStubsSourceStubber implements SourceStubber
         foreach ($this->cachingVisitor->getClassNodes() as $className => $classNode) {
             assert(is_string($className));
             assert($classNode instanceof Node\Stmt\ClassLike);
-
-            $this->classNodes[strtolower($className)] = $classNode;
+            $this->classNodes[$className] = $classNode;
         }
 
         /**
@@ -205,8 +162,7 @@ final class PhpStormStubsSourceStubber implements SourceStubber
         foreach ($this->cachingVisitor->getFunctionNodes() as $functionName => $functionNode) {
             assert(is_string($functionName));
             assert($functionNode instanceof Node\Stmt\Function_);
-
-            $this->functionNodes[strtolower($functionName)] = $functionNode;
+            $this->functionNodes[$functionName] = $functionNode;
         }
 
         /**
@@ -219,20 +175,8 @@ final class PhpStormStubsSourceStubber implements SourceStubber
         }
     }
 
-    /**
-     * @param Node\Stmt\ClassLike|Node\Stmt\Function_|Node\Stmt\Const_|Node\Expr\FuncCall $node
-     */
     private function createStub(Node $node) : string
     {
-        $nodeWithNamespaceName = $node instanceof Node\Stmt\Const_ ? $node->consts[0] : $node;
-
-        if (isset($nodeWithNamespaceName->namespacedName)) {
-            $namespaceBuilder = $this->builderFactory->namespace($nodeWithNamespaceName->namespacedName->slice(0, -1));
-            $namespaceBuilder->addStmt($node);
-
-            $node = $namespaceBuilder->getNode();
-        }
-
         return "<?php\n\n" . $this->prettyPrinter->prettyPrint([$node]) . ($node instanceof Node\Expr\FuncCall ? ';' : '') . "\n";
     }
 
@@ -241,18 +185,18 @@ final class PhpStormStubsSourceStubber implements SourceStubber
         return new class() extends NodeVisitorAbstract
         {
             /** @var array<string, Node\Stmt\ClassLike> */
-            private array $classNodes = [];
+            private $classNodes = [];
 
             /** @var array<string, Node\Stmt\Function_> */
-            private array $functionNodes = [];
+            private $functionNodes = [];
 
             /** @var array<string, Node\Stmt\Const_|Node\Expr\FuncCall> */
-            private array $constantNodes = [];
+            private $constantNodes = [];
 
             public function enterNode(Node $node) : ?int
             {
                 if ($node instanceof Node\Stmt\ClassLike) {
-                    $nodeName                    = $node->namespacedName->toString();
+                    $nodeName                    = (string) $node->namespacedName->toString();
                     $this->classNodes[$nodeName] = $node;
 
                     return NodeTraverser::DONT_TRAVERSE_CHILDREN;
@@ -260,7 +204,7 @@ final class PhpStormStubsSourceStubber implements SourceStubber
 
                 if ($node instanceof Node\Stmt\Function_) {
                     /** @psalm-suppress UndefinedPropertyFetch */
-                    $nodeName                       = $node->namespacedName->toString();
+                    $nodeName                       = (string) $node->namespacedName->toString();
                     $this->functionNodes[$nodeName] = $node;
 
                     return NodeTraverser::DONT_TRAVERSE_CHILDREN;
@@ -269,7 +213,7 @@ final class PhpStormStubsSourceStubber implements SourceStubber
                 if ($node instanceof Node\Stmt\Const_) {
                     foreach ($node->consts as $constNode) {
                         /** @psalm-suppress UndefinedPropertyFetch */
-                        $constNodeName                       = $constNode->namespacedName->toString();
+                        $constNodeName                       = (string) $constNode->namespacedName->toString();
                         $this->constantNodes[$constNodeName] = $node;
                     }
 
@@ -287,14 +231,9 @@ final class PhpStormStubsSourceStubber implements SourceStubber
                     assert($nameNode instanceof Node\Scalar\String_);
                     $constantName = $nameNode->value;
 
-                    if (in_array($constantName, ['true', 'false', 'null'], true)) {
-                        $constantName    = strtoupper($constantName);
-                        $nameNode->value = $constantName;
-                    }
-
                     // Some constants has different values on different systems, some are not actual in stubs
                     if (defined($constantName)) {
-                        /** @var scalar|scalar[]|null $constantValue */
+                        /** @psalm-var scalar|scalar[]|null $constantValue */
                         $constantValue        = constant($constantName);
                         $node->args[1]->value = BuilderHelpers::normalizeValue($constantValue);
                     }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints\Cat;
@@ -6,39 +7,46 @@ namespace Elasticsearch\Endpoints\Cat;
 use Elasticsearch\Endpoints\AbstractEndpoint;
 
 /**
- * Class Plugins
- * Elasticsearch API name cat.plugins
- * Generated running $ php util/GenerateEndpoints.php 7.8
+ * Class Health
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints\Cat
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class Plugins extends AbstractEndpoint
 {
-
-    public function getURI(): string
+    /**
+     * @return string
+     */
+    public function getURI()
     {
+        $uri   = "/_cat/plugins";
 
-        return "/_cat/plugins";
+        return $uri;
     }
 
-    public function getParamWhitelist(): array
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
     {
-        return [
-            'format',
+        return array(
             'local',
             'master_timeout',
             'h',
             'help',
+            'v',
             's',
-            'v'
-        ];
+            'format',
+        );
     }
 
-    public function getMethod(): string
+    /**
+     * @return string
+     */
+    public function getMethod()
     {
         return 'GET';
     }

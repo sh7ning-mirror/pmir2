@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints\Indices;
@@ -7,67 +8,85 @@ use Elasticsearch\Endpoints\AbstractEndpoint;
 
 /**
  * Class Stats
- * Elasticsearch API name indices.stats
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints\Indices
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class Stats extends AbstractEndpoint
 {
-    protected $metric;
+    /**
+     * Limit the information returned the specific metrics.
+     *
+     * @var string
+     */
+    private $metric;
 
-    public function getURI(): string
-    {
-        $metric = $this->metric ?? null;
-        $index = $this->index ?? null;
-
-        if (isset($index) && isset($metric)) {
-            return "/$index/_stats/$metric";
-        }
-        if (isset($metric)) {
-            return "/_stats/$metric";
-        }
-        if (isset($index)) {
-            return "/$index/_stats";
-        }
-        return "/_stats";
-    }
-
-    public function getParamWhitelist(): array
-    {
-        return [
-            'completion_fields',
-            'fielddata_fields',
-            'fields',
-            'groups',
-            'level',
-            'types',
-            'include_segment_file_sizes',
-            'include_unloaded_segments',
-            'expand_wildcards',
-            'forbid_closed_indices'
-        ];
-    }
-
-    public function getMethod(): string
-    {
-        return 'GET';
-    }
-
-    public function setMetric($metric): Stats
+    /**
+     * @param string|string[] $metric
+     *
+     * @return $this
+     */
+    public function setMetric($metric)
     {
         if (isset($metric) !== true) {
             return $this;
         }
-        if (is_array($metric) === true) {
+
+        if (is_array($metric)) {
             $metric = implode(",", $metric);
         }
+
         $this->metric = $metric;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getURI()
+    {
+        $index = $this->index;
+        $metric = $this->metric;
+        $uri   = "/_stats";
+
+        if (isset($index) === true && isset($metric) === true) {
+            $uri = "/$index/_stats/$metric";
+        } elseif (isset($index) === true) {
+            $uri = "/$index/_stats";
+        } elseif (isset($metric) === true) {
+            $uri = "/_stats/$metric";
+        }
+
+        return $uri;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
+    {
+        return array(
+            'completion_fields',
+            'fielddata_fields',
+            'fields',
+            'groups',
+            'human',
+            'level',
+            'types',
+            'metric',
+            'include_segment_file_sizes'
+        );
+    }
+
+    /**
+     * @return string
+     */
+    public function getMethod()
+    {
+        return 'GET';
     }
 }

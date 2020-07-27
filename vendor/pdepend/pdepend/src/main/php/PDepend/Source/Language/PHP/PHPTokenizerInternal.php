@@ -43,7 +43,6 @@
 namespace PDepend\Source\Language\PHP;
 
 use PDepend\Source\AST\ASTCompilationUnit;
-use PDepend\Source\Tokenizer\FullTokenizer;
 use PDepend\Source\Tokenizer\Token;
 use PDepend\Source\Tokenizer\Tokenizer;
 use PDepend\Source\Tokenizer\Tokens;
@@ -188,7 +187,7 @@ if (!defined('T_COALESCE_EQUAL')) {
  * @copyright 2008-2017 Manuel Pichler. All rights reserved.
  * @license http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class PHPTokenizerInternal implements FullTokenizer
+class PHPTokenizerInternal implements Tokenizer
 {
     /**
      * Mapping between php internal tokens and php depend tokens.
@@ -662,30 +661,6 @@ class PHPTokenizerInternal implements FullTokenizer
         if (isset($this->tokens[$this->index])) {
             return $this->tokens[$this->index]->type;
         }
-
-        return self::T_EOF;
-    }
-
-    /**
-     * Returns the token type at the given position relatively to the current position.
-     *
-     * @param integer $shift positive or negative to apply to the current index.
-     * @return integer
-     */
-    public function peekAt($shift)
-    {
-        $this->tokenize();
-
-        if ($this->index < -$shift) {
-            return self::T_BOF;
-        }
-
-        $index = $this->index + $shift;
-
-        if (isset($this->tokens[$index])) {
-            return $this->tokens[$index]->type;
-        }
-
         return self::T_EOF;
     }
 

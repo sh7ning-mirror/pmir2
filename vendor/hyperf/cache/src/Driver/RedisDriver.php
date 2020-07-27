@@ -113,7 +113,7 @@ class RedisDriver extends Driver implements KeyCollectorInterface
             return $this->getCacheKey($key);
         }, $keys);
 
-        return (bool) $this->redis->del(...$cacheKeys);
+        return $this->redis->del(...$cacheKeys);
     }
 
     public function has($key)

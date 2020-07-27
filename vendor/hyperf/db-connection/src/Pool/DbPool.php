@@ -39,7 +39,7 @@ class DbPool extends Pool
         $this->config = $config->get($key);
         $options = Arr::get($this->config, 'pool', []);
 
-        $this->frequency = make(Frequency::class, [$this]);
+        $this->frequency = make(Frequency::class);
         parent::__construct($container, $options);
     }
 

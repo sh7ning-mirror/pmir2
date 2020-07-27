@@ -18,6 +18,7 @@ use Hyperf\Cache\Driver\KeyCollectorInterface;
 use Hyperf\Di\Annotation\Aspect;
 use Hyperf\Di\Aop\AbstractAspect;
 use Hyperf\Di\Aop\ProceedingJoinPoint;
+use Psr\Container\ContainerInterface;
 
 /**
  * @Aspect
@@ -31,7 +32,7 @@ class CacheableAspect extends AbstractAspect
     ];
 
     /**
-     * @var CacheManager
+     * @var ContainerInterface
      */
     protected $manager;
 

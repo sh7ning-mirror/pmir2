@@ -201,22 +201,27 @@ class PlayerObject extends AbstractController
         $itemInfo['soul_bound_id'] = $p['id'];
 
         if ($itemInfo['info']['stack_size'] > 1) {
-            foreach ($p['inventory']['items'] as $k => $v) {
+            foreach ($p['inventory']['items'] as $k => $temp) {
 
-                if (empty($v['isset']) || $itemInfo['info']['id'] != $v['info']['id'] || $v['count'] > $v['info']['stack_size']) {
+                if (empty($temp['isset']) || $itemInfo['info']['id'] != $temp['info']['id'] || $temp['count'] >= $temp['info']['stack_size']) {
                     continue;
                 }
 
-                if ($itemInfo['count'] + $v['count'] <= $v['info']['stack_size']) {
+                if ($itemInfo['count'] + $temp['count'] <= $temp['info']['stack_size']) {
 
-                    $this->Bag->setCount($p['inventory'], $k, $v['count'] + $itemInfo['count']);
+                    $inventory = $p['inventory'];
+                    $this->Bag->setCount($inventory, $k, $temp['count'] + $itemInfo['count']);
+                    $p['inventory'] = $inventory;
 
                     $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['info']));
                     return true;
                 }
 
-                $this->Bag->setCount($p['inventory'], $k, $v['count'] + $itemInfo['count']);
-                $itemInfo['count'] -= $v['info']['stack_size'] - $v['count'];
+                $itemInfo['count'] -= $temp['info']['stack_size'] - $temp['count'];
+
+                $inventory = $p['inventory'];
+                $this->Bag->setCount($inventory, $k, $temp['count'] + $itemInfo['count']);
+                $p['inventory'] = $inventory;
             }
         }
 
@@ -243,7 +248,10 @@ class PlayerObject extends AbstractController
                 continue;
             }
 
-            $this->Bag->set($p['id'], $p['inventory'], $i, $itemInfo);
+            $inventory = $p['inventory'];
+            $this->Bag->set($p['id'], $inventory, $i, $itemInfo);
+            $p['inventory'] = $inventory;
+
             $this->enqueueItemInfo($p, $itemInfo['item_id']);
             $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['info']));
             $this->refreshBagWeight($p);
@@ -256,7 +264,10 @@ class PlayerObject extends AbstractController
                 continue;
             }
 
-            $this->Bag->set($p['id'], $p['inventory'], $i, $itemInfo);
+            $inventory = $p['inventory'];
+            $this->Bag->set($p['id'], $inventory, $i, $itemInfo);
+            $p['inventory'] = $inventory;
+
             $this->enqueueItemInfo($p, $itemInfo['item_id']);
             $this->SendMsg->send($p['fd'], $this->MsgFactory->gainedItem($itemInfo['info']));
             $this->refreshBagWeight($p);
@@ -882,7 +893,7 @@ class PlayerObject extends AbstractController
             }
         }
 
-        return [-1, []];
+        return [false, []];
     }
 
     public function callNPC1(&$p, $npc, $key)
@@ -1319,7 +1330,7 @@ class PlayerObject extends AbstractController
         $this->broadcastHealthChange($p);
     }
 
-    public function die(&$p) {
+    function die(&$p) {
         $p['hp']   = 0;
         $p['dead'] = true;
 
@@ -1877,7 +1888,7 @@ class PlayerObject extends AbstractController
 
         $this->SendMsg->send($p['fd'], $this->MsgFactory->gainExperience($amount));
 
-        EchoLog(sprintf('玩家:%s  获取经验: %s  当前经验: %s 当前等级最大经验: %s 当前百分比: %s', $p['name'], $amount, $p['experience'], $p['max_experience'],intval($p['experience']/$p['max_experience'])*100), 'w');
+        EchoLog(sprintf('玩家:%s  获取经验: %s  当前经验: %s 当前等级最大经验: %s 当前百分比: %s', $p['name'], $amount, $p['experience'], $p['max_experience'], intval($p['experience'] / $p['max_experience']) * 100), 'w');
 
         if ($p['experience'] < $p['max_experience']) {
             return;

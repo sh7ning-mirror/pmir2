@@ -49,7 +49,7 @@ abstract class GeneratorCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return int
+     * @return null|bool
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -65,7 +65,7 @@ abstract class GeneratorCommand extends Command
         // code is untouched. Otherwise, we will continue generating this class' files.
         if (($input->getOption('force') === false) && $this->alreadyExists($this->getNameInput())) {
             $output->writeln(sprintf('<fg=red>%s</>', $name . ' already exists!'));
-            return 0;
+            return false;
         }
 
         // Next, we will generate the path to the location where this class' file should get
@@ -252,6 +252,8 @@ abstract class GeneratorCommand extends Command
 
     /**
      * Get the default namespace for the class.
+     *
+     * @param string $rootNamespace
      */
     abstract protected function getDefaultNamespace(): string;
 }

@@ -15,6 +15,7 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\TransferException;
 use Hyperf\Consul\Exception\ClientException;
 use Hyperf\Consul\Exception\ServerException;
+use Hyperf\Contract\StdoutLoggerInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -32,7 +33,7 @@ abstract class Client
     private $clientFactory;
 
     /**
-     * @var LoggerInterface
+     * @var StdoutLoggerInterface
      */
     private $logger;
 

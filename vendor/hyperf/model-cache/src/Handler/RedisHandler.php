@@ -18,20 +18,18 @@ use Hyperf\ModelCache\Redis\HashIncr;
 use Hyperf\ModelCache\Redis\LuaManager;
 use Hyperf\Redis\RedisProxy;
 use Hyperf\Utils\Contracts\Arrayable;
-use Hyperf\Utils\InteractsWithTime;
 use Psr\Container\ContainerInterface;
+use Redis;
 
 class RedisHandler implements HandlerInterface
 {
-    use InteractsWithTime;
-
     /**
      * @var ContainerInterface
      */
     protected $container;
 
     /**
-     * @var RedisProxy
+     * @var Redis
      */
     protected $redis;
 
@@ -52,8 +50,8 @@ class RedisHandler implements HandlerInterface
     public function __construct(ContainerInterface $container, Config $config)
     {
         $this->container = $container;
-        if (! $container->has(RedisProxy::class)) {
-            throw new CacheException(sprintf('Entry[%s] of the container is not exist.', RedisProxy::class));
+        if (! $container->has(Redis::class)) {
+            throw new CacheException(sprintf('Entry[%s] of the container is not exist.', Redis::class));
         }
 
         $this->redis = make(RedisProxy::class, ['pool' => $config->getPool()]);
@@ -89,11 +87,8 @@ class RedisHandler implements HandlerInterface
 
         $data = array_merge($data, [$this->defaultKey => $this->defaultValue]);
         $res = $this->redis->hMSet($key, $data);
-        if ($ttl) {
-            $seconds = $this->secondsUntil($ttl);
-            if ($seconds > 0) {
-                $this->redis->expire($key, $seconds);
-            }
+        if ($ttl && $ttl > 0) {
+            $this->redis->expire($key, $ttl);
         }
 
         return $res;

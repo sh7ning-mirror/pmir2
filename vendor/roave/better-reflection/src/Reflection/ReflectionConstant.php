@@ -14,9 +14,9 @@ use Roave\BetterReflection\Reflection\StringCast\ReflectionConstantStringCast;
 use Roave\BetterReflection\Reflector\Exception\IdentifierNotFound;
 use Roave\BetterReflection\Reflector\Reflector;
 use Roave\BetterReflection\SourceLocator\Located\LocatedSource;
-use Roave\BetterReflection\Util\CalculateReflectionColumn;
+use Roave\BetterReflection\Util\CalculateReflectionColum;
 use Roave\BetterReflection\Util\ConstantNodeChecker;
-use Roave\BetterReflection\Util\GetLastDocComment;
+use Roave\BetterReflection\Util\GetFirstDocComment;
 use function array_slice;
 use function assert;
 use function count;
@@ -26,21 +26,29 @@ use function substr_count;
 
 class ReflectionConstant implements Reflection
 {
-    private Reflector $reflector;
+    /** @var Reflector */
+    private $reflector;
 
     /** @var Node\Stmt\Const_|Node\Expr\FuncCall */
     private $node;
 
-    private LocatedSource $locatedSource;
+    /** @var LocatedSource */
+    private $locatedSource;
 
-    private ?NamespaceNode $declaringNamespace;
+    /** @var NamespaceNode|null */
+    private $declaringNamespace;
 
-    private ?int $positionInNode;
+    /** @var int|null */
+    private $positionInNode;
 
-    /** @var scalar|array<scalar>|null const value */
+    /**
+     * @var bool|int|float|string|array<bool|int|float|string>|null const value
+     * @psalm-var scalar|array<scalar>|null
+     */
     private $value;
 
-    private bool $valueWasCached = false;
+    /** @var bool */
+    private $valueWasCached = false;
 
     private function __construct()
     {
@@ -205,7 +213,9 @@ class ReflectionConstant implements Reflection
     /**
      * Returns constant value
      *
-     * @return scalar|array<scalar>|null
+     * @return bool|int|float|string|array|null
+     *
+     * @psalm-return scalar|array<scalar>|null
      */
     public function getValue()
     {
@@ -221,7 +231,7 @@ class ReflectionConstant implements Reflection
         /** @psalm-suppress UndefinedPropertyFetch */
         $this->value          = (new CompileNodeToValue())->__invoke(
             $valueNode,
-            new CompilerContext($this->reflector, null),
+            new CompilerContext($this->reflector, null)
         );
         $this->valueWasCached = true;
 
@@ -256,12 +266,12 @@ class ReflectionConstant implements Reflection
 
     public function getStartColumn() : int
     {
-        return CalculateReflectionColumn::getStartColumn($this->locatedSource->getSource(), $this->node);
+        return CalculateReflectionColum::getStartColumn($this->locatedSource->getSource(), $this->node);
     }
 
     public function getEndColumn() : int
     {
-        return CalculateReflectionColumn::getEndColumn($this->locatedSource->getSource(), $this->node);
+        return CalculateReflectionColum::getEndColumn($this->locatedSource->getSource(), $this->node);
     }
 
     /**
@@ -269,7 +279,7 @@ class ReflectionConstant implements Reflection
      */
     public function getDocComment() : string
     {
-        return GetLastDocComment::forNode($this->node);
+        return GetFirstDocComment::forNode($this->node);
     }
 
     public function __toString() : string

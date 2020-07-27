@@ -15,7 +15,6 @@ use Hyperf\ExceptionHandler\ExceptionHandlerDispatcher;
 use Hyperf\HttpMessage\Server\Request as Psr7Request;
 use Hyperf\HttpMessage\Server\Response as Psr7Response;
 use Hyperf\HttpServer\Contract\CoreMiddlewareInterface;
-use Hyperf\HttpServer\ResponseEmitter;
 use Hyperf\HttpServer\Server;
 use Hyperf\JsonRpc\Exception\Handler\HttpExceptionHandler;
 use Hyperf\Rpc\Context as RpcContext;
@@ -51,10 +50,9 @@ class HttpServer extends Server
         ContainerInterface $container,
         RequestDispatcher $dispatcher,
         ExceptionHandlerDispatcher $exceptionHandlerDispatcher,
-        ResponseEmitter $responseEmitter,
         ProtocolManager $protocolManager
     ) {
-        parent::__construct($container, $dispatcher, $exceptionHandlerDispatcher, $responseEmitter);
+        parent::__construct($container, $dispatcher, $exceptionHandlerDispatcher);
         $this->protocol = new Protocol($container, $protocolManager, 'jsonrpc-http');
         $this->packer = $this->protocol->getPacker();
         $this->responseBuilder = make(ResponseBuilder::class, [
@@ -79,7 +77,7 @@ class HttpServer extends Server
     {
         // Initialize PSR-7 Request and Response objects.
         $psr7Request = Psr7Request::loadFromSwooleRequest($request);
-        Context::set(ResponseInterface::class, $psr7Response = new Psr7Response());
+        Context::set(ResponseInterface::class, $psr7Response = new Psr7Response($response));
         if (! $this->isHealthCheck($psr7Request)) {
             if (strpos($psr7Request->getHeaderLine('content-type'), 'application/json') === false) {
                 $psr7Response = $this->responseBuilder->buildErrorResponse($psr7Request, ResponseBuilder::PARSE_ERROR);

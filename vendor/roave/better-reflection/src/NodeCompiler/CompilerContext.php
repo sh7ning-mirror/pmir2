@@ -10,9 +10,11 @@ use RuntimeException;
 
 class CompilerContext
 {
-    private Reflector $reflector;
+    /** @var Reflector */
+    private $reflector;
 
-    private ?ReflectionClass $self;
+    /** @var ReflectionClass|null */
+    private $self;
 
     public function __construct(Reflector $reflector, ?ReflectionClass $self)
     {

@@ -14,12 +14,10 @@ namespace Hyperf\Guzzle;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Promise\FulfilledPromise;
-use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\RequestOptions;
 use GuzzleHttp\TransferStats;
 use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\StreamInterface;
 use Swoole\Coroutine;
 use Swoole\Coroutine\Http\Client;
 use function GuzzleHttp\is_host_in_noproxy;
@@ -181,15 +179,10 @@ class CoroutineHandler
             $client->headers['set-cookie'] = $client->set_cookie_headers;
         }
 
-        $body = $client->body;
-        if (isset($options['sink']) && is_string($options['sink'])) {
-            $body = $this->createSink($body, $options['sink']);
-        }
-
-        $response = new Psr7\Response(
+        $response = new \GuzzleHttp\Psr7\Response(
             $client->statusCode,
             isset($client->headers) ? $client->headers : [],
-            $body
+            $client->body
         );
 
         if ($callback = $options[RequestOptions::ON_STATS] ?? null) {
@@ -205,26 +198,6 @@ class CoroutineHandler
         }
 
         return $response;
-    }
-
-    protected function createStream(string $body): StreamInterface
-    {
-        return Psr7\stream_for($body);
-    }
-
-    protected function createSink(string $body, string $sink)
-    {
-        if (! empty($options['stream'])) {
-            return $body;
-        }
-
-        $stream = fopen($sink, 'w+');
-        if ($body !== '') {
-            fwrite($stream, $body);
-            fseek($stream, 0);
-        }
-
-        return $stream;
     }
 
     protected function checkStatusCode(Client $client, $request)

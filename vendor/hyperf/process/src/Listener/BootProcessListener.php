@@ -18,7 +18,6 @@ use Hyperf\Event\Contract\ListenerInterface;
 use Hyperf\Framework\Event\BeforeMainServerStart;
 use Hyperf\Process\Annotation\Process;
 use Hyperf\Process\ProcessManager;
-use Hyperf\Server\Event\MainCoroutineServerStart;
 use Psr\Container\ContainerInterface;
 
 class BootProcessListener implements ListenerInterface
@@ -46,7 +45,6 @@ class BootProcessListener implements ListenerInterface
     {
         return [
             BeforeMainServerStart::class,
-            MainCoroutineServerStart::class,
         ];
     }
 
@@ -80,13 +78,13 @@ class BootProcessListener implements ListenerInterface
                 $instance = $process;
             }
             if ($instance instanceof ProcessInterface) {
-                $instance->isEnable($server) && $instance->bind($server);
+                $instance->isEnable() && $instance->bind($server);
             }
         }
     }
 
     private function getAnnotationProcesses()
     {
-        return AnnotationCollector::getClassesByAnnotation(Process::class);
+        return AnnotationCollector::getClassByAnnotation(Process::class);
     }
 }

@@ -10,7 +10,6 @@ use phpDocumentor\Reflection\Type;
 use PhpParser\Comment\Doc;
 use PhpParser\Node;
 use PhpParser\Node\Expr\Yield_ as YieldNode;
-use PhpParser\Node\Expr\YieldFrom as YieldFromNode;
 use PhpParser\Node\NullableType;
 use PhpParser\Node\Param as ParamNode;
 use PhpParser\Node\Stmt\Namespace_ as NamespaceNode;
@@ -29,8 +28,8 @@ use Roave\BetterReflection\SourceLocator\Ast\Exception\ParseToAstFailure;
 use Roave\BetterReflection\SourceLocator\Located\LocatedSource;
 use Roave\BetterReflection\SourceLocator\Type\ClosureSourceLocator;
 use Roave\BetterReflection\TypesFinder\FindReturnType;
-use Roave\BetterReflection\Util\CalculateReflectionColumn;
-use Roave\BetterReflection\Util\GetLastDocComment;
+use Roave\BetterReflection\Util\CalculateReflectionColum;
+use Roave\BetterReflection\Util\GetFirstDocComment;
 use Roave\BetterReflection\Util\Visitor\ReturnNodeVisitor;
 use function array_filter;
 use function assert;
@@ -44,16 +43,20 @@ abstract class ReflectionFunctionAbstract
 {
     public const CLOSURE_NAME = '{closure}';
 
-    private ?NamespaceNode $declaringNamespace;
+    /** @var NamespaceNode|null */
+    private $declaringNamespace;
 
-    private LocatedSource $locatedSource;
+    /** @var LocatedSource */
+    private $locatedSource;
 
     /** @var Node\Stmt\ClassMethod|Node\Stmt\Function_|Node\Expr\Closure|null */
     private $node;
 
-    private Reflector $reflector;
+    /** @var Reflector */
+    private $reflector;
 
-    private static ?Parser $parser;
+    /** @var Parser|null */
+    private static $parser;
 
     protected function __construct()
     {
@@ -101,16 +104,16 @@ abstract class ReflectionFunctionAbstract
         $overallOptionalFlag = true;
         $lastParamIndex      = count($this->getNode()->params) - 1;
         for ($i = $lastParamIndex; $i >= 0; $i--) {
-            $param = $this->getNode()->params[$i];
+            $hasDefault = ($this->getNode()->params[$i]->default !== null);
 
-            // When we find the first parameter that does not have a default or is not variadic,
+            // When we find the first parameter that does not have a default,
             // flip the flag as all params for this are no longer optional
             // EVEN if they have a default value
-            if ($param->default === null && ! $param->variadic) {
+            if (! $hasDefault) {
                 $overallOptionalFlag = false;
             }
 
-            $param->isOptional = $overallOptionalFlag;
+            $this->getNode()->params[$i]->isOptional = $overallOptionalFlag;
         }
     }
 
@@ -183,7 +186,7 @@ abstract class ReflectionFunctionAbstract
             $this->getParameters(),
             static function (ReflectionParameter $p) : bool {
                 return ! $p->isOptional();
-            },
+            }
         ));
     }
 
@@ -191,7 +194,9 @@ abstract class ReflectionFunctionAbstract
      * Get an array list of the parameters for this method signature, as an
      * array of ReflectionParameter instances.
      *
-     * @return list<ReflectionParameter>
+     * @return ReflectionParameter[]
+     *
+     * @psalm-return list<ReflectionParameter>
      */
     public function getParameters() : array
     {
@@ -205,7 +210,7 @@ abstract class ReflectionFunctionAbstract
                 $paramNode,
                 $this->declaringNamespace,
                 $this,
-                $paramIndex,
+                $paramIndex
             );
         }
 
@@ -229,7 +234,7 @@ abstract class ReflectionFunctionAbstract
 
     public function getDocComment() : string
     {
-        return GetLastDocComment::forNode($this->getNode());
+        return GetFirstDocComment::forNode($this->getNode());
     }
 
     public function setDocCommentFromString(string $string) : void
@@ -314,10 +319,6 @@ abstract class ReflectionFunctionAbstract
             return true;
         }
 
-        if ($node instanceof YieldFromNode) {
-            return true;
-        }
-
         foreach ($node->getSubNodeNames() as $nodeName) {
             $nodeProperty = $node->$nodeName;
 
@@ -370,12 +371,12 @@ abstract class ReflectionFunctionAbstract
 
     public function getStartColumn() : int
     {
-        return CalculateReflectionColumn::getStartColumn($this->locatedSource->getSource(), $this->getNode());
+        return CalculateReflectionColum::getStartColumn($this->locatedSource->getSource(), $this->getNode());
     }
 
     public function getEndColumn() : int
     {
-        return CalculateReflectionColumn::getEndColumn($this->locatedSource->getSource(), $this->getNode());
+        return CalculateReflectionColum::getEndColumn($this->locatedSource->getSource(), $this->getNode());
     }
 
     /**
@@ -502,7 +503,7 @@ abstract class ReflectionFunctionAbstract
     {
         $closureReflection = (new ClosureSourceLocator($newBody, $this->loadStaticParser()))->locateIdentifier(
             $this->reflector,
-            new Identifier(self::CLOSURE_NAME, new IdentifierType(IdentifierType::IDENTIFIER_FUNCTION)),
+            new Identifier(self::CLOSURE_NAME, new IdentifierType(IdentifierType::IDENTIFIER_FUNCTION))
         );
         assert($closureReflection instanceof self);
 

@@ -50,9 +50,6 @@ class Builder
         return $this->passive;
     }
 
-    /**
-     * @return static
-     */
     public function setPassive(bool $passive): self
     {
         $this->passive = $passive;
@@ -64,9 +61,6 @@ class Builder
         return $this->durable;
     }
 
-    /**
-     * @return static
-     */
     public function setDurable(bool $durable): self
     {
         $this->durable = $durable;
@@ -78,9 +72,6 @@ class Builder
         return $this->autoDelete;
     }
 
-    /**
-     * @return static
-     */
     public function setAutoDelete(bool $autoDelete): self
     {
         $this->autoDelete = $autoDelete;
@@ -92,9 +83,6 @@ class Builder
         return $this->nowait;
     }
 
-    /**
-     * @return static
-     */
     public function setNowait(bool $nowait): self
     {
         $this->nowait = $nowait;
@@ -111,7 +99,6 @@ class Builder
 
     /**
      * @param AMQPTable|array $arguments
-     * @return static
      */
     public function setArguments($arguments): self
     {
@@ -129,7 +116,6 @@ class Builder
 
     /**
      * @param null|int $ticket
-     * @return static
      */
     public function setTicket($ticket): self
     {

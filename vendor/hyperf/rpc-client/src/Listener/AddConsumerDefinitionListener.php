@@ -58,12 +58,11 @@ class AddConsumerDefinitionListener implements ListenerInterface
                 if (! interface_exists($serviceClass)) {
                     continue;
                 }
-
-                $proxyClass = $serviceFactory->createProxy($serviceClass);
-
                 $definitions->addDefinition(
                     $consumer['id'] ?? $serviceClass,
-                    function (ContainerInterface $container) use ($consumer, $serviceClass, $proxyClass) {
+                    function (ContainerInterface $container) use ($serviceFactory, $consumer, $serviceClass) {
+                        $proxyClass = $serviceFactory->createProxy($serviceClass);
+
                         return new $proxyClass(
                             $container,
                             $consumer['name'],

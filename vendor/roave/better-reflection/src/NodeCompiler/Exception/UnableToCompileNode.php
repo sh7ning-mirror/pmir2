@@ -15,20 +15,13 @@ use function sprintf;
 
 class UnableToCompileNode extends LogicException
 {
-    private ?string $constantName = null;
-
-    public function constantName() : ?string
-    {
-        return $this->constantName;
-    }
-
     public static function forUnRecognizedExpressionInContext(Node\Expr $expression, CompilerContext $context) : self
     {
         return new self(sprintf(
             'Unable to compile expression in %s: unrecognized node type %s at line %d',
             self::compilerContextToContextDescription($context),
             get_class($expression),
-            $expression->getLine(),
+            $expression->getLine()
         ));
     }
 
@@ -44,7 +37,7 @@ class UnableToCompileNode extends LogicException
             $targetClass->getName(),
             $constantFetch->name->name,
             self::compilerContextToContextDescription($fetchContext),
-            $constantFetch->getLine(),
+            $constantFetch->getLine()
         ));
     }
 
@@ -52,18 +45,12 @@ class UnableToCompileNode extends LogicException
         CompilerContext $fetchContext,
         Node\Expr\ConstFetch $constantFetch
     ) : self {
-        $constantName = reset($constantFetch->name->parts);
-
-        $exception = new self(sprintf(
+        return new self(sprintf(
             'Could not locate constant "%s" while evaluating expression in %s at line %s',
-            $constantName,
+            reset($constantFetch->name->parts),
             self::compilerContextToContextDescription($fetchContext),
-            $constantFetch->getLine(),
+            $constantFetch->getLine()
         ));
-
-        $exception->constantName = $constantName;
-
-        return $exception;
     }
 
     private static function compilerContextToContextDescription(CompilerContext $fetchContext) : string

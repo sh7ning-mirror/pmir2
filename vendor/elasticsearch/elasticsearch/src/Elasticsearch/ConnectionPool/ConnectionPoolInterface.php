@@ -17,7 +17,15 @@ use Elasticsearch\Connections\ConnectionInterface;
  */
 interface ConnectionPoolInterface
 {
-    public function nextConnection(bool $force = false): ConnectionInterface;
+    /**
+     * @param bool $force
+     *
+     * @return ConnectionInterface
+     */
+    public function nextConnection($force = false);
 
-    public function scheduleCheck(): void;
+    /**
+     * @return void
+     */
+    public function scheduleCheck();
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints\Cluster;
@@ -7,46 +8,54 @@ use Elasticsearch\Endpoints\AbstractEndpoint;
 
 /**
  * Class Health
- * Elasticsearch API name cluster.health
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints\Cluster
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class Health extends AbstractEndpoint
 {
-
-    public function getURI(): string
+    /**
+     * @return string
+     */
+    public function getURI()
     {
-        $index = $this->index ?? null;
+        $index = $this->index;
+        $uri   = "/_cluster/health";
 
-        if (isset($index)) {
-            return "/_cluster/health/$index";
+        if (isset($index) === true) {
+            $uri = "/_cluster/health/$index";
         }
-        return "/_cluster/health";
+
+        return $uri;
     }
 
-    public function getParamWhitelist(): array
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
     {
-        return [
-            'expand_wildcards',
+        return array(
             'level',
             'local',
             'master_timeout',
             'timeout',
             'wait_for_active_shards',
             'wait_for_nodes',
+            'wait_for_relocating_shards',
+            'wait_for_status',
             'wait_for_events',
             'wait_for_no_relocating_shards',
             'wait_for_no_initializing_shards',
-            'wait_for_status'
-        ];
+        );
     }
 
-    public function getMethod(): string
+    /**
+     * @return string
+     */
+    public function getMethod()
     {
         return 'GET';
     }

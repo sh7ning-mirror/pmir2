@@ -20,17 +20,24 @@ use Roave\BetterReflection\SourceLocator\Located\LocatedSource;
 use Roave\BetterReflection\SourceLocator\Type\AnonymousClassObjectSourceLocator;
 use function array_merge;
 use function get_class;
+use function is_object;
 use function strpos;
 
 class ReflectionObject extends ReflectionClass
 {
-    private ReflectionClass $reflectionClass;
+    /** @var ReflectionClass */
+    private $reflectionClass;
 
-    private object $object;
+    /** @var object */
+    private $object;
 
-    private Reflector $reflector;
+    /** @var Reflector */
+    private $reflector;
 
-    private function __construct(Reflector $reflector, ReflectionClass $reflectionClass, object $object)
+    /**
+     * @param object $object
+     */
+    private function __construct(Reflector $reflector, ReflectionClass $reflectionClass, $object)
     {
         $this->reflector       = $reflector;
         $this->reflectionClass = $reflectionClass;
@@ -40,17 +47,26 @@ class ReflectionObject extends ReflectionClass
     /**
      * Pass an instance of an object to this method to reflect it
      *
+     * @param object $object
+     *
      * @throws ReflectionException
+     * @throws InvalidArgumentException
      * @throws IdentifierNotFound
+     *
+     * @psalm-suppress DocblockTypeContradiction
      */
-    public static function createFromInstance(object $object) : ReflectionClass
+    public static function createFromInstance($object) : ReflectionClass
     {
+        if (! is_object($object)) {
+            throw new InvalidArgumentException('Can only create from an instance of an object');
+        }
+
         $className = get_class($object);
 
         if (strpos($className, ReflectionClass::ANONYMOUS_CLASS_NAME_PREFIX) === 0) {
             $reflector = new ClassReflector(new AnonymousClassObjectSourceLocator(
                 $object,
-                (new BetterReflection())->phpParser(),
+                (new BetterReflection())->phpParser()
             ));
         } else {
             $reflector = (new BetterReflection())->classReflector();
@@ -64,7 +80,9 @@ class ReflectionObject extends ReflectionClass
      *
      * @see ReflectionClass::getProperties() for the usage of $filter
      *
-     * @return array<string, ReflectionProperty>
+     * @return ReflectionProperty[]
+     *
+     * @psalm-return array<string, ReflectionProperty>
      */
     private function getRuntimeProperties(?int $filter = null) : array
     {
@@ -96,7 +114,7 @@ class ReflectionObject extends ReflectionClass
                     : null,
                 $this,
                 $this,
-                false,
+                false
             );
 
             if ($filter !== null && ! ($filter & $runtimeProperty->getModifiers())) {
@@ -114,8 +132,10 @@ class ReflectionObject extends ReflectionClass
      *
      * Note that we don't copy across DocBlock, protected, private or static
      * because runtime properties can't have these attributes.
+     *
+     * @param object $instance
      */
-    private function createPropertyNodeFromReflection(CoreReflectionProperty $property, object $instance) : PropertyNode
+    private function createPropertyNodeFromReflection(CoreReflectionProperty $property, $instance) : PropertyNode
     {
         $builder = new PropertyNodeBuilder($property->getName());
         $builder->setDefault($property->getValue($instance));
@@ -240,7 +260,7 @@ class ReflectionObject extends ReflectionClass
     {
         return array_merge(
             $this->reflectionClass->getProperties($filter),
-            $this->getRuntimeProperties($filter),
+            $this->getRuntimeProperties($filter)
         );
     }
 
@@ -251,7 +271,7 @@ class ReflectionObject extends ReflectionClass
     {
         return array_merge(
             $this->reflectionClass->getImmediateProperties($filter),
-            $this->getRuntimeProperties($filter),
+            $this->getRuntimeProperties($filter)
         );
     }
 

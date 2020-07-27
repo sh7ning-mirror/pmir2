@@ -25,8 +25,6 @@ class AmqpConnectionPool extends Pool
 
     protected $config;
 
-    protected $class = Connection::class;
-
     public function __construct(ContainerInterface $container, string $name)
     {
         $this->name = $name;
@@ -39,7 +37,7 @@ class AmqpConnectionPool extends Pool
         $this->config = $config->get($key);
         $options = Arr::get($this->config, 'pool', []);
 
-        $this->frequency = make(Frequency::class, [$this]);
+        $this->frequency = make(Frequency::class);
 
         parent::__construct($container, $options);
     }
@@ -49,14 +47,8 @@ class AmqpConnectionPool extends Pool
         return $this->name;
     }
 
-    public function setClass(string $class): self
-    {
-        $this->class = $class;
-        return $this;
-    }
-
     protected function createConnection(): ConnectionInterface
     {
-        return make($this->class, [$this->container, $this, $this->config]);
+        return new Connection($this->container, $this, $this->config);
     }
 }

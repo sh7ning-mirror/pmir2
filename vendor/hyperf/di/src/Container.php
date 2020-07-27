@@ -44,17 +44,25 @@ class Container implements HyperfContainerInterface
     private $definitionResolver;
 
     /**
+     * @TODO Extract ProxyFactory to a Interface.
+     * @var ProxyFactory
+     */
+    private $proxyFactory;
+
+    /**
      * Container constructor.
      */
     public function __construct(Definition\DefinitionSourceInterface $definitionSource)
     {
         $this->definitionSource = $definitionSource;
         $this->definitionResolver = new ResolverDispatcher($this);
+        $this->proxyFactory = new ProxyFactory();
         // Auto-register the container.
         $this->resolvedEntries = [
             self::class => $this,
             PsrContainerInterface::class => $this,
             HyperfContainerInterface::class => $this,
+            ProxyFactory::class => $this->proxyFactory,
         ];
     }
 
@@ -124,7 +132,7 @@ class Container implements HyperfContainerInterface
      * `has($name)` returning true does not mean that `get($name)` will not throw an exception.
      * It does however mean that `get($name)` will not throw a `NotFoundExceptionInterface`.
      *
-     * @param mixed|string $name identifier of the entry to look for
+     * @param string $name identifier of the entry to look for
      */
     public function has($name): bool
     {
@@ -146,6 +154,11 @@ class Container implements HyperfContainerInterface
         }
 
         return true;
+    }
+
+    public function getProxyFactory(): ProxyFactory
+    {
+        return $this->proxyFactory;
     }
 
     public function getDefinitionSource(): Definition\DefinitionSourceInterface

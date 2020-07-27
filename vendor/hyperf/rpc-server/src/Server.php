@@ -29,7 +29,6 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
-use Swoole\Coroutine\Server\Connection;
 use Swoole\Server as SwooleServer;
 use Throwable;
 
@@ -102,7 +101,7 @@ abstract class Server implements OnReceiveInterface, MiddlewareInitializerInterf
         $this->exceptionHandlers = $config->get('exceptions.handler.' . $serverName, $this->getDefaultExceptionHandler());
     }
 
-    public function onReceive($server, int $fd, int $fromId, string $data): void
+    public function onReceive(SwooleServer $server, int $fd, int $fromId, string $data): void
     {
         $request = $response = null;
         try {
@@ -147,23 +146,16 @@ abstract class Server implements OnReceiveInterface, MiddlewareInitializerInterf
         ];
     }
 
-    /**
-     * @param SwooleServer|\Swoole\Coroutine\Server\Connection $server
-     */
-    protected function send($server, int $fd, ResponseInterface $response): void
+    protected function send(SwooleServer $server, int $fd, ResponseInterface $response): void
     {
-        if ($server instanceof SwooleServer) {
-            $server->send($fd, (string) $response->getBody());
-        } elseif ($server instanceof Connection) {
-            $server->send((string) $response->getBody());
-        }
+        $server->send($fd, (string) $response->getBody());
     }
 
     abstract protected function createCoreMiddleware(): CoreMiddlewareInterface;
 
     abstract protected function buildRequest(int $fd, int $fromId, string $data): ServerRequestInterface;
 
-    abstract protected function buildResponse(int $fd, $server): ResponseInterface;
+    abstract protected function buildResponse(int $fd, SwooleServer $server): ResponseInterface;
 
     protected function transferToResponse($response): ?ResponseInterface
     {

@@ -2,7 +2,6 @@
 
 namespace ZipkinOpenTracing\Tests\Unit;
 
-use LogicException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
@@ -10,56 +9,67 @@ use Psr\Http\Message\UriInterface;
 final class Request implements RequestInterface
 {
     /**
-     * @var array
+     * @var array $headers
      */
     private $headers;
 
+    /**
+     * @var array $lowerCaseHeaders
+     */
+    private $lowerCaseHeaders;
+
     public function __construct(array $headers = [])
     {
-        foreach ($headers as $key => $value) {
-            $this->headers[strtolower($key)] = [$value];
+        $this->headers = $headers;
+        $keys = \array_keys($headers);
+        $this->lowerCaseHeaders = [];
+        foreach ($keys as $key) {
+            $this->lowerCaseHeaders[strtolower($key)] = $key;
         }
     }
 
-    /**
-     *  @return string[][]
-     */
     public function getHeaders()
     {
         return $this->headers;
     }
 
-    /**
-     * @return bool
-     */
     public function hasHeader($name)
     {
-        foreach ($this->headers as $key => $value) {
-            if ($key === strtolower($name)) {
-                return true;
-            }
-        }
+        $lowerName = strtolower($name);
 
-        return false;
+        return \array_key_exists($lowerName, $this->lowerCaseHeaders);
     }
 
-    /**
-     * @return string[]
-     */
     public function getHeader($name)
     {
-        foreach ($this->headers as $key => $value) {
-            if ($key === strtolower($name)) {
-                return $value;
-            }
-        }
+        $lowerName = strtolower($name);
 
-        return [];
+        if (\array_key_exists($lowerName, $this->lowerCaseHeaders)) {
+            $index = $this->lowerCaseHeaders[$lowerName];
+
+            return [$this->headers[$index]];
+        } else {
+            return [];
+        }
     }
 
     public function withHeader($name, $value)
     {
-        $this->headers[strtolower($name)] = [$value];
+        $this->headers[$name] = $value;
+
+        return $this;
+    }
+
+    public function withAddedHeader($name, $value)
+    {
+        $lowerName = strtolower($name);
+        if (\array_key_exists($lowerName, $this->lowerCaseHeaders)) {
+            $index = $this->lowerCaseHeaders[$lowerName];
+            $this->headers[$index] = [$this->headers[$index], $value];
+        } else {
+            $this->headers[$index] = $value;
+        }
+
         return $this;
     }
 
@@ -67,69 +77,41 @@ final class Request implements RequestInterface
     // parsing of headers
     //
     // phpcs:disable
-    public function withAddedHeader($name, $value)
-    {
-        throw new LogicException('not implemented');
-    }
-
     public function getProtocolVersion()
     {
-        throw new LogicException('not implemented');
     }
-
     public function withProtocolVersion($version)
     {
-        throw new LogicException('not implemented');
     }
-
     public function getHeaderLine($name)
     {
-        throw new LogicException('not implemented');
     }
-
     public function withoutHeader($name)
     {
-        throw new LogicException('not implemented');
     }
-
     public function getBody()
     {
-        throw new LogicException('not implemented');
     }
-
     public function withBody(StreamInterface $body)
     {
-        throw new LogicException('not implemented');
     }
-
     public function getRequestTarget()
     {
-        throw new LogicException('not implemented');
     }
-
     public function withRequestTarget($requestTarget)
     {
-        throw new LogicException('not implemented');
     }
-
     public function getMethod()
     {
-        throw new LogicException('not implemented');
     }
-
     public function withMethod($method)
     {
-        throw new LogicException('not implemented');
     }
-
     public function getUri()
     {
-        throw new LogicException('not implemented');
     }
-
     public function withUri(UriInterface $uri, $preserveHost = false)
     {
-        throw new LogicException('not implemented');
     }
     // phpcs:enable
 }

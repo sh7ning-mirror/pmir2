@@ -1,73 +1,89 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints;
 
-use Elasticsearch\Endpoints\AbstractEndpoint;
+use Elasticsearch\Common\Exceptions;
 
 /**
  * Class Count
- * Elasticsearch API name count
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class Count extends AbstractEndpoint
 {
-
-    public function getURI(): string
+    /**
+     * @param array $body
+     *
+     * @throws \Elasticsearch\Common\Exceptions\InvalidArgumentException
+     * @return $this
+     */
+    public function setBody($body)
     {
-        $index = $this->index ?? null;
-        $type = $this->type ?? null;
-        if (isset($type)) {
-            @trigger_error('Specifying types in urls has been deprecated', E_USER_DEPRECATED);
+        if (isset($body) !== true) {
+            return $this;
         }
 
-        if (isset($index) && isset($type)) {
-            return "/$index/$type/_count";
-        }
-        if (isset($index)) {
-            return "/$index/_count";
-        }
-        return "/_count";
+        $this->body = $body;
+
+        return $this;
     }
 
-    public function getParamWhitelist(): array
+    /**
+     * @return string
+     */
+    public function getURI()
     {
-        return [
+        $index = $this->index;
+        $type = $this->type;
+        $uri   = "/_count";
+
+        if (isset($index) === true && isset($type) === true) {
+            $uri = "/$index/$type/_count";
+        } elseif (isset($type) === true) {
+            $uri = "/_all/$type/_count";
+        } elseif (isset($index) === true) {
+            $uri = "/$index/_count";
+        }
+
+        return $uri;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
+    {
+        return array(
             'ignore_unavailable',
-            'ignore_throttled',
             'allow_no_indices',
             'expand_wildcards',
             'min_score',
             'preference',
             'routing',
+            'source',
             'q',
-            'analyzer',
-            'analyze_wildcard',
-            'default_operator',
             'df',
+            'default_operator',
+            'analyzer',
+            'lowercase_expanded_terms',
+            'analyze_wildcard',
             'lenient',
+            'lowercase_expanded_terms',
             'terminate_after'
-        ];
+        );
     }
 
-    public function getMethod(): string
+    /**
+     * @return string
+     */
+    public function getMethod()
     {
         return isset($this->body) ? 'POST' : 'GET';
-    }
-
-    public function setBody($body): Count
-    {
-        if (isset($body) !== true) {
-            return $this;
-        }
-        $this->body = $body;
-
-        return $this;
     }
 }

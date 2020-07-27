@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints\Cat;
@@ -7,54 +8,65 @@ use Elasticsearch\Endpoints\AbstractEndpoint;
 
 /**
  * Class Templates
- * Elasticsearch API name cat.templates
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints\Cat
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class Templates extends AbstractEndpoint
 {
-    protected $name;
+    private $name;
 
-    public function getURI(): string
+    /**
+     * @param string $name
+     * @return Templates
+     */
+    public function setName($name)
     {
-        $name = $this->name ?? null;
-
-        if (isset($name)) {
-            return "/_cat/templates/$name";
-        }
-        return "/_cat/templates";
+        $this->name = $name;
+        return $this;
     }
 
-    public function getParamWhitelist(): array
+    /**
+     * @return string
+     */
+    public function getURI()
     {
-        return [
+        if (isset($this->name)) {
+            return "/_cat/templates/{$this->name}";
+        } else {
+            return "/_cat/templates";
+        }
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
+    {
+        return array(
             'format',
-            'local',
-            'master_timeout',
+            'node_id',
+            'actions',
+            'detailed',
+            'parent_node',
+            'parent_task',
             'h',
             'help',
+            'v',
             's',
-            'v'
-        ];
+            'local',
+            'master_timeout',
+        );
     }
 
-    public function getMethod(): string
+    /**
+     * @return string
+     */
+    public function getMethod()
     {
         return 'GET';
-    }
-
-    public function setName($name): Templates
-    {
-        if (isset($name) !== true) {
-            return $this;
-        }
-        $this->name = $name;
-
-        return $this;
     }
 }

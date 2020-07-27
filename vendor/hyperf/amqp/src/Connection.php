@@ -31,7 +31,7 @@ class Connection extends BaseConnection implements ConnectionInterface
     protected $pool;
 
     /**
-     * @var null|AbstractConnection
+     * @var AbstractConnection
      */
     protected $connection;
 
@@ -56,14 +56,14 @@ class Connection extends BaseConnection implements ConnectionInterface
     protected $lastHeartbeatTime = 0.0;
 
     /**
-     * @var null|AMQPChannel
+     * @var \PhpAmqpLib\Channel\AMQPChannel
      */
-    protected $channel;
+    private $channel;
 
     /**
-     * @var null|AMQPChannel
+     * @var \PhpAmqpLib\Channel\AMQPChannel
      */
-    protected $confirmChannel;
+    private $confirmChannel;
 
     public function __construct(ContainerInterface $container, AmqpConnectionPool $pool, array $config)
     {

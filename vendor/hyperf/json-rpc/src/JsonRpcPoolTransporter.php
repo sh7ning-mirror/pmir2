@@ -111,10 +111,8 @@ class JsonRpcPoolTransporter implements TransporterInterface
     public function getConnection(): RpcConnection
     {
         $class = spl_object_hash($this) . '.Connection';
-        /** @var RpcConnection $connection */
-        $connection = Context::get($class);
-        if (isset($connection) && $connection->check()) {
-            return $connection;
+        if (Context::has($class)) {
+            return Context::get($class);
         }
 
         $connection = $this->getPool()->get();
@@ -132,7 +130,6 @@ class JsonRpcPoolTransporter implements TransporterInterface
         $config = [
             'connect_timeout' => $this->config['connect_timeout'],
             'settings' => $this->config['settings'],
-            'pool' => $this->config['pool'],
             'node' => function () {
                 return $this->getNode();
             },

@@ -21,13 +21,17 @@ use function str_replace;
 
 final class FileCacheLoader implements LoaderMethodInterface
 {
-    private string $cacheDirectory;
+    /** @var string */
+    private $cacheDirectory;
 
-    private ClassPrinterInterface $classPrinter;
+    /** @var ClassPrinterInterface */
+    private $classPrinter;
 
-    private SignerInterface $signer;
+    /** @var SignerInterface */
+    private $signer;
 
-    private CheckerInterface $checker;
+    /** @var CheckerInterface */
+    private $checker;
 
     public function __construct(
         string $cacheDirectory,
@@ -54,7 +58,7 @@ final class FileCacheLoader implements LoaderMethodInterface
             $code = "<?php\n" . $this->classPrinter->__invoke($classInfo);
             file_put_contents(
                 $filename,
-                str_replace('<?php', "<?php\n// " . $this->signer->sign($code), $code),
+                str_replace('<?php', "<?php\n// " . $this->signer->sign($code), $code)
             );
         }
 
@@ -72,7 +76,7 @@ final class FileCacheLoader implements LoaderMethodInterface
             $cacheDirectory,
             new PhpParserPrinter(),
             new FileContentSigner(new Sha1SumEncoder()),
-            new FileContentChecker(new Sha1SumEncoder()),
+            new FileContentChecker(new Sha1SumEncoder())
         );
     }
 }

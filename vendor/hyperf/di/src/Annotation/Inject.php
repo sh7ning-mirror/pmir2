@@ -11,11 +11,9 @@ declare(strict_types=1);
  */
 namespace Hyperf\Di\Annotation;
 
-use Hyperf\Di\BetterReflectionManager;
-use Hyperf\Di\Exception;
-use Hyperf\Di\TypesFinderManager;
+use Hyperf\Di\ReflectionManager;
 use PhpDocReader\AnnotationException;
-use phpDocumentor\Reflection\Types\Object_;
+use PhpDocReader\PhpDocReader;
 
 /**
  * @Annotation
@@ -38,38 +36,25 @@ class Inject extends AbstractAnnotation
      */
     public $lazy = false;
 
+    /**
+     * @var PhpDocReader
+     */
+    private $docReader;
+
     public function __construct($value = null)
     {
         parent::__construct($value);
+        $this->docReader = make(PhpDocReader::class);
     }
 
     public function collectProperty(string $className, ?string $target): void
     {
         try {
-            $reflectionClass = BetterReflectionManager::reflectClass($className);
-            $properties = $reflectionClass->getImmediateProperties();
-            $reflectionProperty = $properties[$target] ?? null;
-            if (! $reflectionProperty) {
-                $this->value = '';
-                return;
-            }
-            if ($reflectionProperty->hasType()) {
-                $this->value = $reflectionProperty->getType()->getName();
-            } else {
-                $reflectionTypes = TypesFinderManager::getPropertyFinder()->__invoke($reflectionProperty, $reflectionClass->getDeclaringNamespaceAst());
-                if (isset($reflectionTypes[0]) && $reflectionTypes[0] instanceof Object_) {
-                    $this->value = ltrim((string) $reflectionTypes[0], '\\');
-                }
-            }
-
-            if (empty($this->value)) {
-                throw new Exception\AnnotationException("The @Inject value is invalid for {$className}->{$target}");
-            }
-
+            $this->value = $this->docReader->getPropertyClass(ReflectionManager::reflectClass($className)->getProperty($target));
+            AnnotationCollector::collectProperty($className, $target, static::class, $this);
             if ($this->lazy) {
                 $this->value = 'HyperfLazy\\' . $this->value;
             }
-            AnnotationCollector::collectProperty($className, $target, static::class, $this);
         } catch (AnnotationException $e) {
             if ($this->required) {
                 throw $e;

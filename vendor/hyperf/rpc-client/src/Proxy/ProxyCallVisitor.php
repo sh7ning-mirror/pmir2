@@ -39,7 +39,6 @@ class ProxyCallVisitor extends NodeVisitorAbstract
         if ($node instanceof Node\Stmt\Namespace_) {
             $this->namespace = $node->name->toCodeString();
         }
-        return null;
     }
 
     public function leaveNode(Node $node)
@@ -54,7 +53,6 @@ class ProxyCallVisitor extends NodeVisitorAbstract
                 ],
             ]);
         }
-        return null;
     }
 
     public function generateStmts(Interface_ $node): array
@@ -68,18 +66,15 @@ class ProxyCallVisitor extends NodeVisitorAbstract
         return $stmts;
     }
 
-    protected function overrideMethod(Node\FunctionLike $stmt): Node\Stmt\ClassMethod
+    protected function overrideMethod(Node\Stmt\ClassMethod $stmt): Node\Stmt\ClassMethod
     {
-        if (! $stmt instanceof Node\Stmt\ClassMethod) {
-            throw new \InvalidArgumentException('stmt must instanceof Node\Stmt\ClassMethod');
-        }
         $stmt->stmts = value(function () use ($stmt) {
             $methodCall = new Node\Expr\MethodCall(
                 new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), new Node\Identifier('client')),
                 new Node\Identifier('__call'),
                 [
-                    new Node\Arg(new Node\Scalar\MagicConst\Function_()),
-                    new Node\Arg(new Node\Expr\FuncCall(new Node\Name('func_get_args'))),
+                    new Node\Scalar\MagicConst\Function_(),
+                    new Node\Expr\FuncCall(new Node\Name('func_get_args')),
                 ]
             );
             if ($this->shouldReturn($stmt)) {

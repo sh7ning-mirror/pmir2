@@ -27,4 +27,9 @@ interface DefinitionInterface
      * Set the name of the entry in the container.
      */
     public function setName(string $name);
+
+    /**
+     * Determine if the definition need to transfer to a proxy class.
+     */
+    public function isNeedProxy(): bool;
 }

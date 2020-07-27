@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints\Cluster;
@@ -6,33 +7,36 @@ namespace Elasticsearch\Endpoints\Cluster;
 use Elasticsearch\Endpoints\AbstractEndpoint;
 
 /**
- * Class RemoteInfo
- * Elasticsearch API name cluster.remote_info
- * Generated running $ php util/GenerateEndpoints.php 7.8
+ * RemoteInfo Health
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints\Cluster
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class RemoteInfo extends AbstractEndpoint
 {
-
-    public function getURI(): string
+    /**
+     * @return string
+     */
+    public function getURI()
     {
-
         return "/_remote/info";
     }
 
-    public function getParamWhitelist(): array
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
     {
-        return [
-            
-        ];
+        return [];
     }
 
-    public function getMethod(): string
+    /**
+     * @return string
+     */
+    public function getMethod()
     {
         return 'GET';
     }

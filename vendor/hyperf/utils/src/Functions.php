@@ -66,11 +66,11 @@ if (! function_exists('retry')) {
     /**
      * Retry an operation a given number of times.
      *
-     * @param float|int $times
+     * @param int $times
      * @param int $sleep millisecond
      * @throws \Throwable
      */
-    function retry($times, callable $callback, int $sleep = 0)
+    function retry($times, callable $callback, $sleep = 0)
     {
         $backoff = new Backoff($sleep);
         beginning:
@@ -126,7 +126,7 @@ if (! function_exists('data_get')) {
     /**
      * Get an item from an array or object using "dot" notation.
      *
-     * @param null|array|int|string $key
+     * @param array|int|string $key
      * @param null|mixed $default
      * @param mixed $target
      */
@@ -207,7 +207,6 @@ if (! function_exists('data_set')) {
         } else {
             $target = [];
             if ($segments) {
-                $target[$segment] = [];
                 data_set($target[$segment], $segments, $value, $overwrite);
             } elseif ($overwrite) {
                 $target[$segment] = $value;
@@ -280,24 +279,16 @@ if (! function_exists('call')) {
 }
 
 if (! function_exists('go')) {
-    /**
-     * @return bool|int
-     */
     function go(callable $callable)
     {
-        $id = Coroutine::create($callable);
-        return $id > 0 ? $id : false;
+        Coroutine::create($callable);
     }
 }
 
 if (! function_exists('co')) {
-    /**
-     * @return bool|int
-     */
     function co(callable $callable)
     {
-        $id = Coroutine::create($callable);
-        return $id > 0 ? $id : false;
+        Coroutine::create($callable);
     }
 }
 
@@ -421,10 +412,8 @@ if (! function_exists('make')) {
 if (! function_exists('run')) {
     /**
      * Run callable in non-coroutine environment, all hook functions by Swoole only available in the callable.
-     *
-     * @param array|callable $callbacks
      */
-    function run($callbacks, int $flags = SWOOLE_HOOK_ALL): bool
+    function run(callable $callback, int $flags = SWOOLE_HOOK_ALL): bool
     {
         if (Coroutine::inCoroutine()) {
             throw new RuntimeException('Function \'run\' only execute in non-coroutine environment.');
@@ -432,7 +421,7 @@ if (! function_exists('run')) {
 
         \Swoole\Runtime::enableCoroutine(true, $flags);
 
-        $result = \Swoole\Coroutine\Run(...(array) $callbacks);
+        $result = \Swoole\Coroutine\Run($callback);
 
         \Swoole\Runtime::enableCoroutine(false);
         return $result;

@@ -25,8 +25,6 @@ interface MetadataCollectorInterface
      */
     public static function set(string $key, $value): void;
 
-    public static function clear(?string $key = null): void;
-
     /**
      * Serialize the all metadata to a string.
      */

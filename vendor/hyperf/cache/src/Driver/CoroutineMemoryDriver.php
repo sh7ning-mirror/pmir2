@@ -51,8 +51,6 @@ class CoroutineMemoryDriver extends Driver implements KeyCollectorInterface
         foreach ($values as $key => $value) {
             $this->set($key, $values, $ttl);
         }
-
-        return true;
     }
 
     public function deleteMultiple($keys)
@@ -60,8 +58,6 @@ class CoroutineMemoryDriver extends Driver implements KeyCollectorInterface
         foreach ($keys as $key) {
             $this->delete($key);
         }
-
-        return true;
     }
 
     public function has($key)

@@ -54,8 +54,6 @@ class StartServer extends Command
         Runtime::enableCoroutine(true, swoole_hook_flags());
 
         $serverFactory->start();
-
-        return 0;
     }
 
     private function checkEnvironment(OutputInterface $output)

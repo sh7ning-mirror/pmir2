@@ -14,9 +14,11 @@ use function assert;
 
 class FunctionReflector implements Reflector
 {
-    private SourceLocator $sourceLocator;
+    /** @var SourceLocator */
+    private $sourceLocator;
 
-    private ClassReflector $classReflector;
+    /** @var ClassReflector */
+    private $classReflector;
 
     public function __construct(SourceLocator $sourceLocator, ClassReflector $classReflector)
     {
@@ -55,7 +57,7 @@ class FunctionReflector implements Reflector
         /** @var ReflectionFunction[] $allFunctions */
         $allFunctions = $this->sourceLocator->locateIdentifiersByType(
             $this,
-            new IdentifierType(IdentifierType::IDENTIFIER_FUNCTION),
+            new IdentifierType(IdentifierType::IDENTIFIER_FUNCTION)
         );
 
         return $allFunctions;

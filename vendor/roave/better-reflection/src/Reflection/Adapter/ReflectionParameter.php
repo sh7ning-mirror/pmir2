@@ -12,7 +12,8 @@ use function assert;
 
 class ReflectionParameter extends CoreReflectionParameter
 {
-    private BetterReflectionParameter $betterReflectionParameter;
+    /** @var BetterReflectionParameter */
+    private $betterReflectionParameter;
 
     public function __construct(BetterReflectionParameter $betterReflectionParameter)
     {

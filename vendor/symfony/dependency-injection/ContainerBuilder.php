@@ -20,7 +20,6 @@ use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Config\Resource\GlobResource;
 use Symfony\Component\Config\Resource\ReflectionClassResource;
 use Symfony\Component\Config\Resource\ResourceInterface;
-use Symfony\Component\DependencyInjection\Argument\AbstractArgument;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\RewindableGenerator;
 use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
@@ -147,8 +146,8 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
 
         $this->trackResources = interface_exists('Symfony\Component\Config\Resource\ResourceInterface');
         $this->setDefinition('service_container', (new Definition(ContainerInterface::class))->setSynthetic(true)->setPublic(true));
-        $this->setAlias(PsrContainerInterface::class, new Alias('service_container', false))->setDeprecated('symfony/dependency-injection', '5.1', $deprecationMessage = 'The "%alias_id%" autowiring alias is deprecated. Define it explicitly in your app if you want to keep using it.');
-        $this->setAlias(ContainerInterface::class, new Alias('service_container', false))->setDeprecated('symfony/dependency-injection', '5.1', $deprecationMessage);
+        $this->setAlias(PsrContainerInterface::class, new Alias('service_container', false));
+        $this->setAlias(ContainerInterface::class, new Alias('service_container', false));
     }
 
     /**
@@ -568,8 +567,7 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
             $alias = $this->aliasDefinitions[$id];
 
             if ($alias->isDeprecated()) {
-                $deprecation = $alias->getDeprecation($id);
-                trigger_deprecation($deprecation['package'], $deprecation['version'], $deprecation['message']);
+                @trigger_error($alias->getDeprecationMessage($id), E_USER_DEPRECATED);
             }
 
             return $this->doGet((string) $alias, $invalidBehavior, $inlineServices, $isConstructorArgument);
@@ -1038,8 +1036,7 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
         }
 
         if ($definition->isDeprecated()) {
-            $deprecation = $definition->getDeprecation($id);
-            trigger_deprecation($deprecation['package'], $deprecation['version'], $deprecation['message']);
+            @trigger_error($definition->getDeprecationMessage($id), E_USER_DEPRECATED);
         }
 
         if ($tryProxy && $definition->isLazy() && !$tryProxy = !($proxy = $this->proxyInstantiator) || $proxy instanceof RealServiceInstantiator) {
@@ -1082,7 +1079,7 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
                 $r = new \ReflectionClass($factory[0]);
 
                 if (0 < strpos($r->getDocComment(), "\n * @deprecated ")) {
-                    trigger_deprecation('', '', 'The "%s" service relies on the deprecated "%s" factory class. It should either be deprecated or its factory upgraded.', $id, $r->name);
+                    @trigger_error(sprintf('The "%s" service relies on the deprecated "%s" factory class. It should either be deprecated or its factory upgraded.', $id, $r->name), E_USER_DEPRECATED);
                 }
             }
         } else {
@@ -1091,7 +1088,7 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
             $service = null === $r->getConstructor() ? $r->newInstance() : $r->newInstanceArgs($arguments);
 
             if (!$definition->isDeprecated() && 0 < strpos($r->getDocComment(), "\n * @deprecated ")) {
-                trigger_deprecation('', '', 'The "%s" service relies on the deprecated "%s" class. It should either be deprecated or its implementation upgraded.', $id, $r->name);
+                @trigger_error(sprintf('The "%s" service relies on the deprecated "%s" class. It should either be deprecated or its implementation upgraded.', $id, $r->name), E_USER_DEPRECATED);
             }
         }
 
@@ -1133,7 +1130,7 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
             }
 
             if (!\is_callable($callable)) {
-                throw new InvalidArgumentException(sprintf('The configure callable for class "%s" is not a callable.', get_debug_type($service)));
+                throw new InvalidArgumentException(sprintf('The configure callable for class "%s" is not a callable.', \get_class($service)));
             }
 
             $callable($service);
@@ -1218,8 +1215,6 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
             $value = $this->getParameter((string) $value);
         } elseif ($value instanceof Expression) {
             $value = $this->getExpressionLanguage()->evaluate($value, ['container' => $this]);
-        } elseif ($value instanceof AbstractArgument) {
-            throw new RuntimeException($value->getTextWithContext());
         }
 
         return $value;
@@ -1392,7 +1387,7 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
                         $completed = true;
                     } else {
                         if (!\is_string($resolved) && !is_numeric($resolved)) {
-                            throw new RuntimeException(sprintf('A string value must be composed of strings and/or numbers, but found parameter "env(%s)" of type "%s" inside string value "%s".', $env, get_debug_type($resolved), $this->resolveEnvPlaceholders($value)));
+                            throw new RuntimeException(sprintf('A string value must be composed of strings and/or numbers, but found parameter "env(%s)" of type "%s" inside string value "%s".', $env, \gettype($resolved), $this->resolveEnvPlaceholders($value)));
                         }
                         $value = str_ireplace($placeholder, $resolved, $value);
                     }

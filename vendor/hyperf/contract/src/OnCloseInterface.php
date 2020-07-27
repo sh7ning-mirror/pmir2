@@ -11,13 +11,9 @@ declare(strict_types=1);
  */
 namespace Hyperf\Contract;
 
-use Swoole\Http\Response;
 use Swoole\Server;
 
 interface OnCloseInterface
 {
-    /**
-     * @param Response|Server $server
-     */
-    public function onClose($server, int $fd, int $reactorId): void;
+    public function onClose(Server $server, int $fd, int $reactorId): void;
 }

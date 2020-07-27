@@ -11,6 +11,7 @@ declare(strict_types=1);
  */
 namespace Hyperf\Devtool\Describe;
 
+use Hyperf\Command\Annotation\Command;
 use Hyperf\Command\Command as HyperfCommand;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\HttpServer\MiddlewareManager;
@@ -24,6 +25,9 @@ use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * @Command
+ */
 class RoutesCommand extends HyperfCommand
 {
     /**
@@ -54,6 +58,8 @@ class RoutesCommand extends HyperfCommand
             $this->analyzeRouter($server, $router, $path),
             $this->output
         );
+
+        $this->output->success('success.');
     }
 
     protected function configure()
@@ -92,23 +98,18 @@ class RoutesCommand extends HyperfCommand
         }
         if (is_array($handler->callback)) {
             $action = $handler->callback[0] . '::' . $handler->callback[1];
-        } elseif (is_string($handler->callback)) {
-            $action = $handler->callback;
-        } elseif (is_callable($handler->callback)) {
-            $action = 'Closure';
         } else {
-            $action = (string) $handler->callback;
+            $action = $handler->callback;
         }
-        $unique = "{$serverName}|{$action}";
-        if (isset($data[$unique])) {
-            $data[$unique]['method'][] = $method;
+        if (isset($data[$uri])) {
+            $data[$uri]['method'][] = $method;
         } else {
             // method,uri,name,action,middleware
             $registedMiddlewares = MiddlewareManager::get($serverName, $uri, $method);
             $middlewares = $this->config->get('middlewares.' . $serverName, []);
 
             $middlewares = array_merge($middlewares, $registedMiddlewares);
-            $data[$unique] = [
+            $data[$uri] = [
                 'server' => $serverName,
                 'method' => [$method],
                 'uri' => $uri,

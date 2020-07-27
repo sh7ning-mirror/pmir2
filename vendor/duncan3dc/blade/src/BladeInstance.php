@@ -14,7 +14,6 @@ use Illuminate\View\Factory;
 use Illuminate\View\FileViewFinder;
 
 use function is_dir;
-use function method_exists;
 use function mkdir;
 
 /**
@@ -209,12 +208,9 @@ class BladeInstance implements BladeInterface
     /** @inheritDoc */
     public function component(string $path, string $alias = null): BladeInterface
     {
-        $compiler = $this->getCompiler();
-        if (method_exists($compiler, "aliasComponent")) {
-            $compiler->aliasComponent($path, $alias);
-        } else {
-            $compiler->component($path, $alias);
-        }
+        $this
+            ->getCompiler()
+            ->component($path, $alias);
 
         return $this;
     }

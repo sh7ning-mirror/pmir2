@@ -77,7 +77,7 @@ class PropertyPath implements \IteratorAggregate, PropertyPathInterface
             return;
         }
         if (!\is_string($propertyPath)) {
-            throw new InvalidArgumentException(sprintf('The property path constructor needs a string or an instance of "Symfony\Component\PropertyAccess\PropertyPath". Got: "%s".', get_debug_type($propertyPath)));
+            throw new InvalidArgumentException(sprintf('The property path constructor needs a string or an instance of "Symfony\Component\PropertyAccess\PropertyPath". Got: "%s".', \is_object($propertyPath) ? \get_class($propertyPath) : \gettype($propertyPath)));
         }
 
         if ('' === $propertyPath) {
@@ -170,7 +170,7 @@ class PropertyPath implements \IteratorAggregate, PropertyPathInterface
     /**
      * {@inheritdoc}
      */
-    public function getElement(int $index)
+    public function getElement($index)
     {
         if (!isset($this->elements[$index])) {
             throw new OutOfBoundsException(sprintf('The index "%s" is not within the property path.', $index));
@@ -182,7 +182,7 @@ class PropertyPath implements \IteratorAggregate, PropertyPathInterface
     /**
      * {@inheritdoc}
      */
-    public function isProperty(int $index)
+    public function isProperty($index)
     {
         if (!isset($this->isIndex[$index])) {
             throw new OutOfBoundsException(sprintf('The index "%s" is not within the property path.', $index));
@@ -194,7 +194,7 @@ class PropertyPath implements \IteratorAggregate, PropertyPathInterface
     /**
      * {@inheritdoc}
      */
-    public function isIndex(int $index)
+    public function isIndex($index)
     {
         if (!isset($this->isIndex[$index])) {
             throw new OutOfBoundsException(sprintf('The index "%s" is not within the property path.', $index));

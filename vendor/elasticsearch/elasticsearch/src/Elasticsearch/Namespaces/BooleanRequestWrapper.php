@@ -24,6 +24,8 @@ trait BooleanRequestWrapper
     /**
      * Perform Request
      *
+     * @param  AbstractEndpoint $endpoint The Endpoint to perform this request against
+     *
      * @throws Missing404Exception
      * @throws RoutingMissingException
      */

@@ -5,31 +5,26 @@ declare(strict_types=1);
 namespace Roave\BetterReflection\SourceLocator\Ast\Parser;
 
 use PhpParser\ErrorHandler;
-use PhpParser\JsonDecoder;
+use PhpParser\Node;
 use PhpParser\Parser;
 use function array_key_exists;
 use function hash;
-use function json_encode;
 use function strlen;
-use const JSON_PARTIAL_OUTPUT_ON_ERROR;
-use const JSON_PRESERVE_ZERO_FRACTION;
 
 /**
  * @internal
  */
 final class MemoizingParser implements Parser
 {
-    /** @var string[] indexed by source hash */
-    private array $sourceHashToAst = [];
+    /** @var Node\Stmt[][]|null[] indexed by source hash */
+    private $sourceHashToAst = [];
 
-    private Parser $wrappedParser;
-
-    private JsonDecoder $jsonDecoder;
+    /** @var Parser */
+    private $wrappedParser;
 
     public function __construct(Parser $wrappedParser)
     {
         $this->wrappedParser = $wrappedParser;
-        $this->jsonDecoder   = new JsonDecoder();
     }
 
     /**
@@ -44,12 +39,9 @@ final class MemoizingParser implements Parser
         $hash = hash('sha256', $code) . ':' . strlen($code);
 
         if (array_key_exists($hash, $this->sourceHashToAst)) {
-            return $this->jsonDecoder->decode($this->sourceHashToAst[$hash]);
+            return $this->sourceHashToAst[$hash];
         }
 
-        $ast                          = $this->wrappedParser->parse($code, $errorHandler);
-        $this->sourceHashToAst[$hash] = json_encode($ast, JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION);
-
-        return $ast;
+        return $this->sourceHashToAst[$hash] = $this->wrappedParser->parse($code, $errorHandler);
     }
 }

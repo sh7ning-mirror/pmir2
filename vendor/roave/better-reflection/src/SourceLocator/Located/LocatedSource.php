@@ -16,9 +16,11 @@ use Roave\BetterReflection\Util\FileHelper;
  */
 class LocatedSource
 {
-    private string $source;
+    /** @var string */
+    private $source;
 
-    private ?string $filename;
+    /** @var string|null */
+    private $filename;
 
     /**
      * @throws InvalidArgumentException

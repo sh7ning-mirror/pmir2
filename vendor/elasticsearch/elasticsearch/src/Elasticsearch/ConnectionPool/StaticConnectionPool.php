@@ -7,7 +7,6 @@ namespace Elasticsearch\ConnectionPool;
 use Elasticsearch\Common\Exceptions\NoNodesAvailableException;
 use Elasticsearch\ConnectionPool\Selectors\SelectorInterface;
 use Elasticsearch\Connections\Connection;
-use Elasticsearch\Connections\ConnectionInterface;
 use Elasticsearch\Connections\ConnectionFactoryInterface;
 
 class StaticConnectionPool extends AbstractConnectionPool implements ConnectionPoolInterface
@@ -31,15 +30,19 @@ class StaticConnectionPool extends AbstractConnectionPool implements ConnectionP
         $this->scheduleCheck();
     }
 
-    public function nextConnection(bool $force = false): ConnectionInterface
+    /**
+     * @param bool $force
+     *
+     * @return Connection
+     * @throws \Elasticsearch\Common\Exceptions\NoNodesAvailableException
+     */
+    public function nextConnection($force = false)
     {
-        $skipped = [];
+        $skipped = array();
 
         $total = count($this->connections);
         while ($total--) {
-            /**
- * @var Connection $connection
-*/
+            /** @var Connection $connection */
             $connection = $this->selector->select($this->connections);
             if ($connection->isAlive() === true) {
                 return $connection;
@@ -64,14 +67,19 @@ class StaticConnectionPool extends AbstractConnectionPool implements ConnectionP
         throw new NoNodesAvailableException("No alive nodes found in your cluster");
     }
 
-    public function scheduleCheck(): void
+    public function scheduleCheck()
     {
         foreach ($this->connections as $connection) {
             $connection->markDead();
         }
     }
 
-    private function readyToRevive(Connection $connection): bool
+    /**
+     * @param Connection $connection
+     *
+     * @return bool
+     */
+    private function readyToRevive(Connection $connection)
     {
         $timeout = min(
             $this->pingTimeout * pow(2, $connection->getPingFailures()),

@@ -28,15 +28,20 @@ use function count;
  */
 final class FindReflectionsInTree
 {
-    private AstConversionStrategy $astConversionStrategy;
+    /** @var AstConversionStrategy */
+    private $astConversionStrategy;
 
-    private FunctionReflector $functionReflector;
-
-    /** @var Closure(): FunctionReflector */
-    private Closure $functionReflectorGetter;
+    /** @var FunctionReflector */
+    private $functionReflector;
 
     /**
-     * @param Closure(): FunctionReflector $functionReflectorGetter
+     * @var Closure
+     * @psalm-var Closure(): FunctionReflector
+     */
+    private $functionReflectorGetter;
+
+    /**
+     * @psalm-param Closure(): FunctionReflector $functionReflectorGetter
      */
     public function __construct(AstConversionStrategy $astConversionStrategy, Closure $functionReflectorGetter)
     {
@@ -61,19 +66,25 @@ final class FindReflectionsInTree
             extends NodeVisitorAbstract
         {
             /** @var Reflection[] */
-            private array $reflections = [];
+            private $reflections = [];
 
-            private Reflector $reflector;
+            /** @var Reflector */
+            private $reflector;
 
-            private IdentifierType $identifierType;
+            /** @var IdentifierType */
+            private $identifierType;
 
-            private LocatedSource $locatedSource;
+            /** @var LocatedSource */
+            private $locatedSource;
 
-            private AstConversionStrategy $astConversionStrategy;
+            /** @var AstConversionStrategy */
+            private $astConversionStrategy;
 
-            private ?Namespace_ $currentNamespace = null;
+            /** @var Namespace_|null */
+            private $currentNamespace;
 
-            private FunctionReflector $functionReflector;
+            /** @var FunctionReflector */
+            private $functionReflector;
 
             public function __construct(
                 Reflector $reflector,

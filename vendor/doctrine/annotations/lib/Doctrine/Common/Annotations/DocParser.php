@@ -490,11 +490,10 @@ final class DocParser
                 'attributes'    => 'Doctrine\Common\Annotations\Annotation\Attributes'
             ]);
 
-            // Make sure that annotations from metadata are loaded
-            class_exists(Enum::class);
-            class_exists(Target::class);
-            class_exists(Attribute::class);
-            class_exists(Attributes::class);
+            AnnotationRegistry::registerFile(__DIR__ . '/Annotation/Enum.php');
+            AnnotationRegistry::registerFile(__DIR__ . '/Annotation/Target.php');
+            AnnotationRegistry::registerFile(__DIR__ . '/Annotation/Attribute.php');
+            AnnotationRegistry::registerFile(__DIR__ . '/Annotation/Attributes.php');
         }
 
         $class      = new \ReflectionClass($name);

@@ -25,12 +25,14 @@ use const PATHINFO_EXTENSION;
  */
 class FileIteratorSourceLocator implements SourceLocator
 {
-    private ?AggregateSourceLocator $aggregateSourceLocator = null;
+    /** @var AggregateSourceLocator|null */
+    private $aggregateSourceLocator;
 
     /** @var Iterator|SplFileInfo[] */
-    private Iterator $fileSystemIterator;
+    private $fileSystemIterator;
 
-    private Locator $astLocator;
+    /** @var Locator */
+    private $astLocator;
 
     /**
      * @param Iterator|SplFileInfo[] $fileInfoIterator note: only SplFileInfo allowed in this iterator
@@ -62,7 +64,7 @@ class FileIteratorSourceLocator implements SourceLocator
 
                 return new SingleFileSourceLocator($item->getRealPath(), $this->astLocator);
             },
-            iterator_to_array($this->fileSystemIterator),
+            iterator_to_array($this->fileSystemIterator)
         ))));
     }
 

@@ -3,12 +3,8 @@ declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints;
 
-use Elasticsearch\Endpoints\AbstractEndpoint;
-
 /**
  * Class RankEval
- * Elasticsearch API name rank_eval
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints
@@ -18,39 +14,48 @@ use Elasticsearch\Endpoints\AbstractEndpoint;
  */
 class RankEval extends AbstractEndpoint
 {
-
-    public function getURI(): string
-    {
-        $index = $this->index ?? null;
-
-        if (isset($index)) {
-            return "/$index/_rank_eval";
-        }
-        return "/_rank_eval";
-    }
-
-    public function getParamWhitelist(): array
+    /**
+     * @return array
+     */
+    public function getParamWhitelist()
     {
         return [
             'ignore_unavailable',
             'allow_no_indices',
-            'expand_wildcards',
-            'search_type'
+            'expand_wildcards'
         ];
     }
 
-    public function getMethod(): string
+    /**
+     * @return string
+     */
+    public function getURI()
     {
-        return isset($this->body) ? 'POST' : 'GET';
+        $index = $this->index ?? null;
+        if (isset($index)) {
+            return "/$index/_rank_eval";
+        }
+        return '/_rank_eval';
     }
 
-    public function setBody($body): RankEval
+    /**
+     * @return string
+     */
+    public function getMethod()
+    {
+        return 'POST';
+    }
+
+    /**
+     * @param array $body
+     * @return $this
+     */
+    public function setBody($body)
     {
         if (isset($body) !== true) {
             return $this;
         }
         $this->body = $body;
-
         return $this;
     }
 }

@@ -37,10 +37,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "2.0-dev"
-        },
-        "hyperf": {
-            "config": "Hyperf\\Guzzle\\ConfigProvider"
+            "dev-master": "1.1-dev"
         }
     },
     "scripts": {

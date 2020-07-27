@@ -19,8 +19,7 @@ trait Container
     protected static $container = [];
 
     /**
-     * Add a value to container by identifier.
-     * @param mixed $value
+     * {@inheritdoc}
      */
     public static function set(string $id, $value)
     {
@@ -28,9 +27,7 @@ trait Container
     }
 
     /**
-     * Finds an entry of the container by its identifier and returns it,
-     * Retunrs $default when does not exists in the container.
-     * @param null|mixed $default
+     * {@inheritdoc}
      */
     public static function get(string $id, $default = null)
     {
@@ -38,27 +35,18 @@ trait Container
     }
 
     /**
-     * Returns true if the container can return an entry for the given identifier.
-     * Returns false otherwise.
+     * {@inheritdoc}
      */
-    public static function has(string $id): bool
+    public static function has(string $id)
     {
         return isset(static::$container[$id]);
     }
 
     /**
-     * Returns the container.
+     * {@inheritdoc}
      */
     public static function list(): array
     {
         return static::$container;
-    }
-
-    /**
-     * Clear the container.
-     */
-    public static function clear(): void
-    {
-        static::$container = [];
     }
 }

@@ -2,23 +2,25 @@
 
 namespace ZipkinOpenTracing;
 
-use Zipkin\Timestamp;
 use OpenTracing\Formats;
 use OpenTracing\Reference;
-use Zipkin\Propagation\Map;
-use OpenTracing\StartSpanOptions;
-use Zipkin\Tracer as ZipkinTracer;
-use OpenTracing\Tracer as OTTracer;
-use Zipkin\Propagation\TraceContext;
-use Zipkin\Tracing as ZipkinTracing;
-use Zipkin\Propagation\SamplingFlags;
-use Zipkin\Propagation\RequestHeaders;
-use OpenTracing\Exceptions\UnsupportedFormat;
 use OpenTracing\SpanContext as OTSpanContext;
+use OpenTracing\StartSpanOptions;
+use OpenTracing\Tracer as OTTracer;
+use Zipkin\Propagation\Getter;
+use Zipkin\Propagation\Map;
+use Zipkin\Propagation\Propagation as ZipkinPropagation;
+use Zipkin\Propagation\RequestHeaders;
+use Zipkin\Propagation\SamplingFlags;
+use Zipkin\Propagation\Setter;
+use Zipkin\Propagation\TraceContext;
+use Zipkin\Timestamp;
+use Zipkin\Tracer as ZipkinTracer;
+use Zipkin\Tracing as ZipkinTracing;
+use ZipkinOpenTracing\PartialSpanContext as ZipkinOpenPartialTracingContext;
 use ZipkinOpenTracing\Span as ZipkinOpenTracingSpan;
 use ZipkinOpenTracing\NoopSpan as ZipkinOpenTracingNoopSpan;
 use ZipkinOpenTracing\SpanContext as ZipkinOpenTracingContext;
-use ZipkinOpenTracing\PartialSpanContext as ZipkinOpenPartialTracingContext;
 
 final class Tracer implements OTTracer
 {
@@ -28,28 +30,14 @@ final class Tracer implements OTTracer
     private $tracer;
 
     /**
-     * @var callable[]|array
+     * @var ZipkinPropagation
      */
-    private $injectors;
-
-    /**
-     * @var callable[]|array
-     */
-    private $extractors;
+    private $propagation;
 
     public function __construct(ZipkinTracing $tracing)
     {
-        $propagation = $tracing->getPropagation();
-        $this->injectors = [
-            Formats\TEXT_MAP => $propagation->getInjector(new Map()),
-            Formats\HTTP_HEADERS => $propagation->getInjector(new RequestHeaders())
-        ];
-        $this->extractors = [
-            Formats\TEXT_MAP => $propagation->getExtractor(new Map()),
-            Formats\HTTP_HEADERS => $propagation->getExtractor(new RequestHeaders())
-        ];
-
         $this->tracer = $tracing->getTracer();
+        $this->propagation = $tracing->getPropagation();
         $this->scopeManager = new ScopeManager();
     }
 
@@ -149,7 +137,8 @@ final class Tracer implements OTTracer
     public function inject(OTSpanContext $spanContext, $format, &$carrier)
     {
         if ($spanContext instanceof ZipkinOpenTracingContext) {
-            $injector = $this->getInjector($format);
+            $setter = $this->getSetterByFormat($format);
+            $injector = $this->propagation->getInjector($setter);
             return $injector($spanContext->getContext(), $carrier);
         }
 
@@ -165,7 +154,8 @@ final class Tracer implements OTTracer
      */
     public function extract($format, $carrier)
     {
-        $extractor = $this->getExtractor($format);
+        $getter = $this->getGetterByFormat($format);
+        $extractor =  $this->propagation->getExtractor($getter);
         $extractedContext = $extractor($carrier);
 
         if ($extractedContext instanceof TraceContext) {
@@ -192,30 +182,38 @@ final class Tracer implements OTTracer
 
     /**
      * @param string $format
-     * @return callable
-     * @throws UnsupportedFormat
+     * @return Setter
+     * @throws \UnexpectedValueException
      */
-    private function getInjector($format)
+    private function getSetterByFormat($format)
     {
-        if (array_key_exists($format, $this->injectors)) {
-            return $this->injectors[$format];
+        if ($format === Formats\TEXT_MAP) {
+            return new Map();
         }
 
-        throw new UnsupportedFormat(\sprintf('Format %s not implemented', $format));
+        if ($format === Formats\HTTP_HEADERS) {
+            return new RequestHeaders();
+        }
+
+        throw new \UnexpectedValueException(\sprintf('Format %s not implemented', $format));
     }
 
     /**
      * @param string $format
-     * @return callable
-     * @throws UnsupportedFormat
+     * @return Getter
+     * @throws \UnexpectedValueException
      */
-    private function getExtractor($format)
+    private function getGetterByFormat($format)
     {
-        if (array_key_exists($format, $this->extractors)) {
-            return $this->extractors[$format];
+        if ($format === Formats\TEXT_MAP) {
+            return new Map();
         }
 
-        throw new UnsupportedFormat($format);
+        if ($format === Formats\HTTP_HEADERS) {
+            return new RequestHeaders();
+        }
+
+        throw new \UnexpectedValueException(\sprintf('Format %s not implemented', $format));
     }
 
     private function hasParentInOptions(StartSpanOptions $options)

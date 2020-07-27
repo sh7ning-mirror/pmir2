@@ -7,14 +7,13 @@ namespace %NAMESPACE%;
 use Hyperf\Amqp\Result;
 use Hyperf\Amqp\Annotation\Consumer;
 use Hyperf\Amqp\Message\ConsumerMessage;
-use PhpAmqpLib\Message\AMQPMessage;
 
 /**
  * @Consumer(exchange="hyperf", routingKey="hyperf", queue="hyperf", name ="%CLASS%", nums=1)
  */
 class %CLASS% extends ConsumerMessage
 {
-    public function consumeMessage($data, AMQPMessage $message): string
+    public function consume($data): string
     {
         return Result::ACK;
     }

@@ -1,84 +1,109 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints;
 
-use Elasticsearch\Common\Exceptions\InvalidArgumentException;
-use Elasticsearch\Endpoints\AbstractEndpoint;
+use Elasticsearch\Common\Exceptions;
 use Elasticsearch\Serializers\SerializerInterface;
-use Traversable;
+use Elasticsearch\Transport;
 
 /**
  * Class Msearch
- * Elasticsearch API name msearch
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class Msearch extends AbstractEndpoint
 {
-
+    /**
+     * @param SerializerInterface $serializer
+     */
     public function __construct(SerializerInterface $serializer)
     {
         $this->serializer = $serializer;
     }
 
-    public function getURI(): string
-    {
-        $index = $this->index ?? null;
-        $type = $this->type ?? null;
-        if (isset($type)) {
-            @trigger_error('Specifying types in urls has been deprecated', E_USER_DEPRECATED);
-        }
-
-        if (isset($index) && isset($type)) {
-            return "/$index/$type/_msearch";
-        }
-        if (isset($index)) {
-            return "/$index/_msearch";
-        }
-        return "/_msearch";
-    }
-
-    public function getParamWhitelist(): array
-    {
-        return [
-            'search_type',
-            'max_concurrent_searches',
-            'typed_keys',
-            'pre_filter_shard_size',
-            'max_concurrent_shard_requests',
-            'rest_total_hits_as_int',
-            'ccs_minimize_roundtrips'
-        ];
-    }
-
-    public function getMethod(): string
-    {
-        return isset($this->body) ? 'POST' : 'GET';
-    }
-    
-    public function setBody($body): Msearch
+    /**
+     * @param array|string $body
+     *
+     * @throws \Elasticsearch\Common\Exceptions\InvalidArgumentException
+     * @return $this
+     */
+    public function setBody($body)
     {
         if (isset($body) !== true) {
             return $this;
         }
-        if (is_array($body) === true || $body instanceof Traversable) {
+
+        if (is_array($body) === true) {
+            $bulkBody = "";
             foreach ($body as $item) {
-                $this->body .= $this->serializer->serialize($item) . "\n";
+                $bulkBody .= $this->serializer->serialize($item)."\n";
             }
-        } elseif (is_string($body)) {
-            $this->body = $body;
-            if (substr($body, -1) != "\n") {
-                $this->body .= "\n";
-            }
-        } else {
-            throw new InvalidArgumentException("Body must be an array, traversable object or string");
+            $body = $bulkBody;
         }
+
+        $this->body = $body;
+
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getURI()
+    {
+        $index = $this->index;
+        $type = $this->type;
+        $uri   = "/_msearch";
+
+        if (isset($index) === true && isset($type) === true) {
+            $uri = "/$index/$type/_msearch";
+        } elseif (isset($index) === true) {
+            $uri = "/$index/_msearch";
+        } elseif (isset($type) === true) {
+            $uri = "/_all/$type/_msearch";
+        }
+
+        return $uri;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
+    {
+        return array(
+            'search_type',
+            'typed_keys',
+            'max_concurrent_shard_requests',
+            'max_concurrent_searches',
+            'rest_total_hits_as_int'
+        );
+    }
+
+    /**
+     * @return array
+     * @throws \Elasticsearch\Common\Exceptions\RuntimeException
+     */
+    public function getBody()
+    {
+        if (isset($this->body) !== true) {
+            throw new Exceptions\RuntimeException('Body is required for MSearch');
+        }
+
+        return $this->body;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMethod()
+    {
+        return isset($this->body) ? 'POST' : 'GET';
     }
 }

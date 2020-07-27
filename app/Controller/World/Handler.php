@@ -112,7 +112,7 @@ class Handler extends AbstractController
         $this->PlayerObject->stopGame($p);
 
         $p['game_stage'] = $this->Enum::SELECT;
-        
+
         co(function () use ($fd, $p) {
 
             //保存玩家属性

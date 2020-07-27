@@ -1,54 +1,64 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints;
 
-use Elasticsearch\Endpoints\AbstractEndpoint;
-
 /**
  * Class Reindex
- * Elasticsearch API name reindex
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
- * @package  Elasticsearch\Endpoints
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @package  Elasticsearch\Endpoints\Indices
+ * @author   Augustin Husson <husson.augustin@gmail.com>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class Reindex extends AbstractEndpoint
 {
 
-    public function getURI(): string
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
     {
-
-        return "/_reindex";
-    }
-
-    public function getParamWhitelist(): array
-    {
-        return [
+        return array(
+            'slices',
             'refresh',
             'timeout',
-            'wait_for_active_shards',
+            'consistency',
             'wait_for_completion',
             'requests_per_second',
-            'scroll',
-            'slices',
-            'max_docs'
-        ];
+        );
     }
 
-    public function getMethod(): string
+    /**
+     * @return string
+     */
+    public function getURI()
+    {
+        return '/_reindex';
+    }
+
+    /**
+     * @return string
+     */
+    public function getMethod()
     {
         return 'POST';
     }
 
-    public function setBody($body): Reindex
+    /**
+     * @param array $body
+     *
+     * @throws \Elasticsearch\Common\Exceptions\InvalidArgumentException
+     * @return $this
+     */
+    public function setBody($body)
     {
         if (isset($body) !== true) {
             return $this;
         }
+
         $this->body = $body;
 
         return $this;

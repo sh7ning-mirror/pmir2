@@ -59,9 +59,6 @@ class ProviderConfig
 
     protected static function merge(...$arrays): array
     {
-        if (empty($arrays)) {
-            return [];
-        }
         $result = array_merge_recursive(...$arrays);
         if (isset($result['dependencies'])) {
             $dependencies = array_column($arrays, 'dependencies');

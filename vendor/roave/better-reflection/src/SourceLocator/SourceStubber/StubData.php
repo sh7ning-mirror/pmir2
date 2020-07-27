@@ -9,9 +9,11 @@ namespace Roave\BetterReflection\SourceLocator\SourceStubber;
  */
 class StubData
 {
-    private string $stub;
+    /** @var string */
+    private $stub;
 
-    private ?string $extensionName;
+    /** @var string|null */
+    private $extensionName;
 
     public function __construct(string $stub, ?string $extensionName)
     {

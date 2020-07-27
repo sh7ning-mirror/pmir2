@@ -1,47 +1,71 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints;
 
-use Elasticsearch\Endpoints\AbstractEndpoint;
+use Elasticsearch\Common\Exceptions\InvalidArgumentException;
+use Elasticsearch\Common\Exceptions;
 
 /**
  * Class FieldCaps
- * Elasticsearch API name field_caps
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class FieldCaps extends AbstractEndpoint
 {
-
-    public function getURI(): string
+    /**
+     * @param array $body
+     *
+     * @throws \Elasticsearch\Common\Exceptions\InvalidArgumentException
+     * @return $this
+     */
+    public function setBody($body)
     {
-        $index = $this->index ?? null;
-
-        if (isset($index)) {
-            return "/$index/_field_caps";
+        if (isset($body) !== true) {
+            return $this;
         }
-        return "/_field_caps";
+
+        $this->body = $body;
+        return $this;
     }
 
-    public function getParamWhitelist(): array
+    /**
+     * @return string
+     */
+    public function getURI()
     {
-        return [
+        $index = $this->index;
+
+        if (isset($index) === true) {
+            return "/$index/_field_caps";
+        } else {
+            return "/_field_caps";
+        }
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
+    {
+        return array(
             'fields',
             'ignore_unavailable',
             'allow_no_indices',
-            'expand_wildcards',
-            'include_unmapped'
-        ];
+            'expand_wildcards'
+        );
     }
 
-    public function getMethod(): string
+    /**
+     * @return string
+     */
+    public function getMethod()
     {
-        return 'GET';
+        return isset($this->body) ? 'POST' : 'GET';
     }
 }

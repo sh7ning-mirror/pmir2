@@ -42,7 +42,7 @@ class SearchHitIterator implements Iterator, \Countable
     /**
      * @var int
      */
-    protected $count = 0;
+    protected $count;
 
     /**
      * Constructor
@@ -60,7 +60,7 @@ class SearchHitIterator implements Iterator, \Countable
      * @return void
      * @see    Iterator::rewind()
      */
-    public function rewind(): void
+    public function rewind()
     {
         $this->current_key = 0;
         $this->search_responses->rewind();
@@ -87,7 +87,7 @@ class SearchHitIterator implements Iterator, \Countable
      * @return void
      * @see    Iterator::next()
      */
-    public function next(): void
+    public function next()
     {
         $this->current_key++;
         $this->current_hit_index++;
@@ -106,7 +106,7 @@ class SearchHitIterator implements Iterator, \Countable
      * @return bool
      * @see    Iterator::valid()
      */
-    public function valid(): bool
+    public function valid()
     {
         return is_array($this->current_hit_data);
     }
@@ -117,7 +117,7 @@ class SearchHitIterator implements Iterator, \Countable
      * @return array
      * @see    Iterator::current()
      */
-    public function current(): array
+    public function current()
     {
         return $this->current_hit_data;
     }
@@ -128,7 +128,7 @@ class SearchHitIterator implements Iterator, \Countable
      * @return int
      * @see    Iterator::key()
      */
-    public function key(): int
+    public function key()
     {
         return $this->current_key;
     }
@@ -138,7 +138,7 @@ class SearchHitIterator implements Iterator, \Countable
      *
      * @internal
      */
-    private function readPageData(): void
+    private function readPageData()
     {
         if ($this->search_responses->valid()) {
             $current_page = $this->search_responses->current();
@@ -152,8 +152,12 @@ class SearchHitIterator implements Iterator, \Countable
     /**
      * {@inheritDoc}
      */
-    public function count(): int
+    public function count()
     {
+        if ($this->count === null) {
+            $this->rewind();
+        }
+
         return $this->count;
     }
 }

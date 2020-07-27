@@ -17,7 +17,7 @@ use SplPriorityQueue;
 class ListenerProvider implements ListenerProviderInterface
 {
     /**
-     * @var ListenerData[]
+     * @var callable[]
      */
     public $listeners = [];
 

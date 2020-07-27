@@ -34,7 +34,7 @@ class Config
 
     /**
      * The lifetime of model cache.
-     * @var \DateInterval|int
+     * @var int
      */
     protected $ttl = 3600;
 
@@ -126,18 +126,12 @@ class Config
         return $this;
     }
 
-    /**
-     * @return \DateInterval|int
-     */
-    public function getTtl()
+    public function getTtl(): int
     {
         return $this->ttl;
     }
 
-    /**
-     * @param \DateInterval|int $ttl
-     */
-    public function setTtl($ttl): Config
+    public function setTtl(int $ttl): Config
     {
         $this->ttl = $ttl;
         return $this;

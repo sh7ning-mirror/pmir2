@@ -1,67 +1,75 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints;
 
-use Elasticsearch\Common\Exceptions\RuntimeException;
-use Elasticsearch\Endpoints\AbstractEndpoint;
+use Elasticsearch\Common\Exceptions;
 
 /**
  * Class Exists
- * Elasticsearch API name exists
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class Exists extends AbstractEndpoint
 {
-
-    public function getURI(): string
+    /**
+     * @throws \Elasticsearch\Common\Exceptions\RuntimeException
+     * @return string
+     */
+    public function getURI()
     {
         if (isset($this->id) !== true) {
-            throw new RuntimeException(
-                'id is required for exists'
+            throw new Exceptions\RuntimeException(
+                'id is required for Exists'
+            );
+        }
+        if (isset($this->index) !== true) {
+            throw new Exceptions\RuntimeException(
+                'index is required for Exists'
+            );
+        }
+        if (isset($this->type) !== true) {
+            throw new Exceptions\RuntimeException(
+                'type is required for Exists'
             );
         }
         $id = $this->id;
-        if (isset($this->index) !== true) {
-            throw new RuntimeException(
-                'index is required for exists'
-            );
-        }
         $index = $this->index;
-        $type = $this->type ?? null;
-        if (isset($type)) {
-            @trigger_error('Specifying types in urls has been deprecated', E_USER_DEPRECATED);
+        $type = $this->type;
+        $uri   = "/$index/$type/$id";
+
+        if (isset($index) === true && isset($type) === true && isset($id) === true) {
+            $uri = "/$index/$type/$id";
         }
 
-        if (isset($type)) {
-            return "/$index/$type/$id";
-        }
-        return "/$index/_doc/$id";
+        return $uri;
     }
 
-    public function getParamWhitelist(): array
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
     {
-        return [
-            'stored_fields',
+        return array(
+            'parent',
             'preference',
             'realtime',
             'refresh',
             'routing',
-            '_source',
-            '_source_excludes',
-            '_source_includes',
             'version',
-            'version_type'
-        ];
+            'stored_fields'
+        );
     }
 
-    public function getMethod(): string
+    /**
+     * @return string
+     */
+    public function getMethod()
     {
         return 'HEAD';
     }

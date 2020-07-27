@@ -58,10 +58,6 @@ class AnnotationJob extends Job
             }
             $params[$key] = $value;
         }
-
-        $env = $container->get(Environment::class);
-        $env->setAsyncQueue(true);
-
         $class->{$this->method}(...$params);
     }
 }

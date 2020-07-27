@@ -1,56 +1,70 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints\Tasks;
 
-use Elasticsearch\Common\Exceptions\RuntimeException;
+use Elasticsearch\Common\Exceptions;
 use Elasticsearch\Endpoints\AbstractEndpoint;
 
 /**
  * Class Get
- * Elasticsearch API name tasks.get
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints\Tasks
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
 class Get extends AbstractEndpoint
 {
-    protected $task_id;
+    private $taskId;
 
-    public function getURI(): string
+    /**
+     * @param string $taskId
+     *
+     * @throws \Elasticsearch\Common\Exceptions\InvalidArgumentException
+     * @return $this
+     */
+    public function setTaskId($taskId)
     {
-        $task_id = $this->task_id ?? null;
-
-        if (isset($task_id)) {
-            return "/_tasks/$task_id";
-        }
-        throw new RuntimeException('Missing parameter for the endpoint tasks.get');
-    }
-
-    public function getParamWhitelist(): array
-    {
-        return [
-            'wait_for_completion',
-            'timeout'
-        ];
-    }
-
-    public function getMethod(): string
-    {
-        return 'GET';
-    }
-
-    public function setTaskId($task_id): Get
-    {
-        if (isset($task_id) !== true) {
+        if (isset($taskId) !== true) {
             return $this;
         }
-        $this->task_id = $task_id;
+
+        $this->taskId = $taskId;
 
         return $this;
+    }
+
+    /**
+     * @throws \Elasticsearch\Common\Exceptions\RuntimeException
+     * @return string
+     */
+    public function getURI()
+    {
+        if (isset($this->taskId) === true) {
+            return "/_tasks/{$this->taskId}";
+        }
+
+        return "/_tasks";
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
+    {
+        return array(
+            'wait_for_completion'
+        );
+    }
+
+    /**
+     * @return string
+     */
+    public function getMethod()
+    {
+        return 'GET';
     }
 }

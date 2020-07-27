@@ -15,6 +15,7 @@ use InvalidArgumentException;
 use PhpAmqpLib\Exception\AMQPRuntimeException;
 use PhpAmqpLib\Wire\AMQPWriter;
 use PhpAmqpLib\Wire\IO\AbstractIO;
+use Swoole;
 use Swoole\Coroutine\Client;
 
 class SwooleIO extends AbstractIO
@@ -57,12 +58,12 @@ class SwooleIO extends AbstractIO
     protected $heartbeat;
 
     /**
-     * @var null|float
+     * @var float
      */
     protected $lastRead;
 
     /**
-     * @var null|float
+     * @var float
      */
     protected $lastWrite;
 
@@ -84,9 +85,7 @@ class SwooleIO extends AbstractIO
     /** @var int */
     private $initialHeartbeat;
 
-    /**
-     * @var null|Client
-     */
+    /** @var Swoole\Coroutine\Client */
     private $sock;
 
     private $buffer = '';
@@ -182,6 +181,8 @@ class SwooleIO extends AbstractIO
 
             $this->buffer .= $read_buffer;
         } while (true);
+
+        return false;
     }
 
     /**
@@ -235,7 +236,7 @@ class SwooleIO extends AbstractIO
     }
 
     /**
-     * @return null|Client|resource
+     * @return resource
      */
     public function get_socket()
     {

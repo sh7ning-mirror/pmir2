@@ -10,7 +10,7 @@ use Elasticsearch\Common\Exceptions\ElasticsearchException;
  * Class JsonErrorException
  *
  * @category Elasticsearch
- * @package  Elasticsearch\Common\Exceptions\Serializer
+ * @package  Elasticsearch\Common\Exceptions\Curl
  * @author   Bez Hermoso <bezalelhermoso@gmail.com>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
@@ -27,9 +27,6 @@ class JsonErrorException extends \Exception implements ElasticsearchException
      */
     private $result;
 
-    /**
-     * @var string[]
-     */
     private static $messages = array(
         JSON_ERROR_DEPTH => 'The maximum stack depth has been exceeded',
         JSON_ERROR_STATE_MISMATCH => 'Invalid or malformed JSON',

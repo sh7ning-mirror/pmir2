@@ -24,14 +24,15 @@ class IdentifierType
         self::IDENTIFIER_CONSTANT => null,
     ];
 
-    private string $name;
+    /** @var string */
+    private $name;
 
     public function __construct(string $type = self::IDENTIFIER_CLASS)
     {
         if (! array_key_exists($type, self::VALID_TYPES)) {
             throw new InvalidArgumentException(sprintf(
                 '%s is not a valid identifier type',
-                $type,
+                $type
             ));
         }
 

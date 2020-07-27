@@ -11,7 +11,6 @@ declare(strict_types=1);
  */
 namespace Hyperf\Pool;
 
-use Hyperf\Contract\ConnectionInterface;
 use Hyperf\Utils\Coroutine;
 use Swoole\Coroutine\Channel as CoChannel;
 
@@ -36,9 +35,6 @@ class Channel
         $this->queue = new \SplQueue();
     }
 
-    /**
-     * @return ConnectionInterface|false
-     */
     public function pop(float $timeout)
     {
         if ($this->isCoroutine()) {
@@ -47,17 +43,12 @@ class Channel
         return $this->queue->shift();
     }
 
-    /**
-     * @param ConnectionInterface $data
-     * @return bool
-     */
     public function push($data)
     {
         if ($this->isCoroutine()) {
             return $this->channel->push($data);
         }
-        $this->queue->push($data);
-        return true;
+        return $this->queue->push($data);
     }
 
     public function length(): int

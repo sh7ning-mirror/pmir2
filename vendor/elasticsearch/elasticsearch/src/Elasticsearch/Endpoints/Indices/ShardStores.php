@@ -1,45 +1,60 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints\Indices;
 
 use Elasticsearch\Endpoints\AbstractEndpoint;
+use Elasticsearch\Common\Exceptions;
 
 /**
  * Class ShardStores
- * Elasticsearch API name indices.shard_stores
- * Generated running $ php util/GenerateEndpoints.php 7.8
  *
  * @category Elasticsearch
- * @package  Elasticsearch\Endpoints\Indices
- * @author   Enrico Zimuel <enrico.zimuel@elastic.co>
+ * @package Elasticsearch\Endpoints\Indices
+ * @author   Zachary Tong <zach@elastic.co>
  * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
  * @link     http://elastic.co
  */
+
 class ShardStores extends AbstractEndpoint
 {
-
-    public function getURI(): string
+    /**
+     * @throws \Elasticsearch\Common\Exceptions\RuntimeException
+     * @return string
+     */
+    public function getURI()
     {
-        $index = $this->index ?? null;
+        $index = $this->index;
+        $uri   = "/_shard_stores";
 
-        if (isset($index)) {
-            return "/$index/_shard_stores";
+        if (isset($index) === true) {
+            $uri = "/$index/_shard_stores";
         }
-        return "/_shard_stores";
+
+        return $uri;
     }
 
-    public function getParamWhitelist(): array
+
+    /**
+     * @return string[]
+     */
+    public function getParamWhitelist()
     {
-        return [
+        return array(
             'status',
             'ignore_unavailable',
             'allow_no_indices',
-            'expand_wildcards'
-        ];
+            'expand_wildcards',
+            'operation_threading'
+        );
     }
 
-    public function getMethod(): string
+
+    /**
+     * @return string
+     */
+    public function getMethod()
     {
         return 'GET';
     }

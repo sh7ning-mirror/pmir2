@@ -20,11 +20,14 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 class ExceptionNormalizer implements NormalizerInterface, DenormalizerInterface, CacheableSupportsMethodInterface
 {
     /**
-     * @var null|Instantiator
+     * @var Instantiator
      */
     protected $instantiator;
 
-    public function denormalize($data, string $class, string $format = null, array $context = [])
+    /**
+     * {@inheritdoc}
+     */
+    public function denormalize($data, $class, $format = null, array $context = [])
     {
         if (is_string($data)) {
             $ex = unserialize($data);
@@ -64,12 +67,18 @@ class ExceptionNormalizer implements NormalizerInterface, DenormalizerInterface,
         return new \RuntimeException('Bad data data: ' . json_encode($data));
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function supportsDenormalization($data, $type, $format = null)
     {
         return class_exists($type) && is_a($type, \Throwable::class, true);
     }
 
-    public function normalize($object, string $format = null, array $context = [])
+    /**
+     * {@inheritdoc}
+     */
+    public function normalize($object, $format = null, array $context = [])
     {
         if ($object instanceof \Serializable) {
             return serialize($object);
@@ -83,11 +92,17 @@ class ExceptionNormalizer implements NormalizerInterface, DenormalizerInterface,
         ];
     }
 
-    public function supportsNormalization($data, string $format = null)
+    /**
+     * {@inheritdoc}
+     */
+    public function supportsNormalization($data, $format = null)
     {
         return $data instanceof \Throwable;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function hasCacheableSupportsMethod(): bool
     {
         return \get_class($this) === __CLASS__;

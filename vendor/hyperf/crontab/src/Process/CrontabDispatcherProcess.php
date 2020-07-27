@@ -61,15 +61,15 @@ class CrontabDispatcherProcess extends AbstractProcess
         $this->logger = $container->get(StdoutLoggerInterface::class);
     }
 
-    public function bind($server): void
+    public function bind(Server $server): void
     {
         $this->server = $server;
         parent::bind($server);
     }
 
-    public function isEnable($server): bool
+    public function isEnable(): bool
     {
-        return $server instanceof Server && $this->config->get('crontab.enable', false);
+        return $this->config->get('crontab.enable', false);
     }
 
     public function handle(): void
